@@ -1,0 +1,38 @@
+<%= form_with model: [ :admin, user ] do |form| %>
+  <% if user.errors.any? %>
+    <div class="form-errors">
+      <p><%= user.errors.count %>件のエラーがあります。</p>
+      <ul>
+        <% user.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, required: true %>
+  </div>
+
+  <div class="field">
+    <%= form.label :line_uid %>
+    <%= form.text_field :line_uid, required: true, placeholder: "U1234567890abcdef1234567890abcdef" %>
+    <p class="hint">LINEのユーザーID（「U」から始まる33文字）</p>
+  </div>
+
+  <div class="field">
+    <%= form.label :role %>
+    <%= form.select :role, User.roles.keys.map { |role| [ User.human_attribute_name("role.#{role}"), role ] } %>
+  </div>
+
+  <div class="field field-checkbox">
+    <%= form.check_box :active %>
+    <%= form.label :active %>
+  </div>
+
+  <div class="form-actions">
+    <%= form.submit class: "button button-primary" %>
+    <%= link_to "キャンセル", admin_users_path, class: "button button-secondary" %>
+  </div>
+<% end %>

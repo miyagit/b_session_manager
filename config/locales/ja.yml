@@ -1,0 +1,22 @@
+ja:
+  activerecord:
+    models:
+      user: スタッフ
+      admin_user: 管理者アカウント
+    attributes:
+      user:
+        name: 名前
+        line_uid: LINE UID
+        role: 権限
+        active: 有効
+      user/role:
+        staff: スタッフ
+        admin: 管理者
+      admin_user:
+        email: メールアドレス
+        password: パスワード
+        remember_me: ログイン状態を保持する
+  devise:
+    failure:
+      admin_user:
+        unauthenticated: ログインしてください。

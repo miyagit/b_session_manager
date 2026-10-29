@@ -1,0 +1,47 @@
+<% content_for :title, "スタッフ一覧" %>
+
+<div class="page-header">
+  <h1>スタッフ一覧</h1>
+  <%= link_to "新規登録", new_admin_user_path, class: "button button-primary" %>
+</div>
+
+<div class="card card-flush">
+  <% if @users.any? %>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th><%= User.human_attribute_name(:name) %></th>
+            <th><%= User.human_attribute_name(:line_uid) %></th>
+            <th><%= User.human_attribute_name(:role) %></th>
+            <th>状態</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @users.each do |user| %>
+            <tr>
+              <td><%= user.name %></td>
+              <td><code><%= user.line_uid %></code></td>
+              <td><span class="badge badge-<%= user.role %>"><%= User.human_attribute_name("role.#{user.role}") %></span></td>
+              <td>
+                <% if user.active? %>
+                  <span class="badge badge-active">有効</span>
+                <% else %>
+                  <span class="badge badge-inactive">無効</span>
+                <% end %>
+              </td>
+              <td class="actions">
+                <%= link_to "編集", edit_admin_user_path(user), class: "button button-secondary" %>
+                <%= button_to "削除", admin_user_path(user), method: :delete, class: "button button-danger",
+                      form: { onsubmit: "return confirm('このスタッフを削除しますか？')" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="empty">スタッフはまだ登録されていません。</p>
+  <% end %>
+</div>

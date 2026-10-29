@@ -7,3 +7,10 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# Admin account for local development. Create production admins from the console instead.
+if Rails.env.development?
+  AdminUser.find_or_create_by!(email: "admin@example.com") do |admin_user|
+    admin_user.password = "password"
+  end
+end

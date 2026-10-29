@@ -1,0 +1,354 @@
+/*
+ * Styles for the admin screen (app/views/layouts/admin.html.erb).
+ * stylesheet_link_tag :app loads every file in this folder on every page,
+ * so generic class names are scoped under body.admin.
+ */
+
+.admin {
+  --admin-bg: #f5f6f8;
+  --admin-surface: #fff;
+  --admin-text: #1f2328;
+  --admin-muted: #656d76;
+  --admin-border: #d8dee4;
+  --admin-primary: #2563eb;
+  --admin-primary-hover: #1d4ed8;
+  --admin-danger: #cf222e;
+
+  margin: 0;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.admin *,
+.admin *::before,
+.admin *::after {
+  box-sizing: border-box;
+}
+
+.admin h1 {
+  margin: 0 0 16px;
+  font-size: 1.375rem;
+}
+
+/* Header */
+
+.admin-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 12px 24px;
+  background: var(--admin-surface);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-brand {
+  color: var(--admin-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-nav a {
+  color: var(--admin-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-nav a:hover {
+  color: var(--admin-text);
+}
+
+.admin-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.admin-account-email {
+  color: var(--admin-muted);
+  font-size: 0.875rem;
+}
+
+.admin-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* Flash messages */
+
+.admin .flash {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+
+.admin .flash-notice {
+  background: #dafbe1;
+  color: #116329;
+}
+
+.admin .flash-alert {
+  background: #ffebe9;
+  color: #a40e26;
+}
+
+/* Page layout */
+
+.admin .page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin .page-header h1 {
+  margin: 0;
+}
+
+.admin .card {
+  padding: 24px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+}
+
+.admin .card-flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.admin .card-narrow {
+  max-width: 420px;
+  margin: 48px auto;
+}
+
+.admin .empty {
+  margin: 0;
+  padding: 32px 16px;
+  color: var(--admin-muted);
+  text-align: center;
+}
+
+/* Table */
+
+.admin .table-wrapper {
+  overflow-x: auto;
+}
+
+.admin .table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin .table th,
+.admin .table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--admin-border);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin .table th {
+  background: #f6f8fa;
+  color: var(--admin-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.admin .table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin .table .actions {
+  text-align: right;
+}
+
+.admin .actions > * + * {
+  margin-left: 8px;
+}
+
+.admin code {
+  padding: 2px 6px;
+  background: #f0f2f5;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+}
+
+/* Badges */
+
+.admin .badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.admin .badge-admin {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.admin .badge-staff {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.admin .badge-active {
+  background: #dafbe1;
+  color: #116329;
+}
+
+.admin .badge-inactive {
+  background: #eaeef2;
+  color: var(--admin-muted);
+}
+
+/* Buttons */
+
+.admin .button {
+  display: inline-block;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.admin .button-primary {
+  background: var(--admin-primary);
+  color: #fff;
+}
+
+.admin .button-primary:hover {
+  background: var(--admin-primary-hover);
+}
+
+.admin .button-secondary {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin .button-secondary:hover {
+  background: #f3f4f6;
+}
+
+.admin .button-danger {
+  background: var(--admin-surface);
+  border-color: #f5c2c7;
+  color: var(--admin-danger);
+}
+
+.admin .button-danger:hover {
+  background: #ffebe9;
+}
+
+.admin .button-block {
+  display: block;
+  width: 100%;
+}
+
+.admin form.button_to {
+  display: inline-block;
+  margin: 0;
+}
+
+/* Forms */
+
+.admin .field {
+  margin-bottom: 16px;
+}
+
+.admin .field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.admin .field input[type="text"],
+.admin .field input[type="email"],
+.admin .field input[type="password"],
+.admin .field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-surface);
+  color: inherit;
+  font: inherit;
+}
+
+.admin .field input:focus,
+.admin .field select:focus {
+  border-color: var(--admin-primary);
+  outline: 2px solid var(--admin-primary);
+  outline-offset: -1px;
+}
+
+.admin .field .field_with_errors input,
+.admin .field .field_with_errors select {
+  border-color: var(--admin-danger);
+}
+
+.admin .field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin .field-checkbox label {
+  margin: 0;
+  font-weight: normal;
+}
+
+.admin .hint {
+  margin: 4px 0 0;
+  color: var(--admin-muted);
+  font-size: 0.8125rem;
+}
+
+.admin .form-errors {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #ffebe9;
+  border: 1px solid #ffcecb;
+  border-radius: 6px;
+  color: #a40e26;
+}
+
+.admin .form-errors p {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.admin .form-errors ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.admin .form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+  .admin-header {
+    padding: 12px 16px;
+  }
+}

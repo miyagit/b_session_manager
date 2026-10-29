@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title><%= content_for(:title) || "管理画面" %> | B Session Manager</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+
+    <%= stylesheet_link_tag "admin" %>
+  </head>
+
+  <body class="admin">
+    <header class="admin-header">
+      <%= link_to "B Session Manager", admin_root_path, class: "admin-brand" %>
+
+      <% if admin_user_signed_in? %>
+        <nav class="admin-nav">
+          <%= link_to "スタッフ", admin_users_path %>
+        </nav>
+
+        <div class="admin-account">
+          <span class="admin-account-email"><%= current_admin_user.email %></span>
+          <%= button_to "ログアウト", destroy_admin_user_session_path, method: :delete, class: "button button-secondary" %>
+        </div>
+      <% end %>
+    </header>
+
+    <main class="admin-main">
+      <% if notice %>
+        <p class="flash flash-notice"><%= notice %></p>
+      <% end %>
+      <% if alert %>
+        <p class="flash flash-alert"><%= alert %></p>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>
