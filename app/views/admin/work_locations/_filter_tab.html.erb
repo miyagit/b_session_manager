@@ -1,0 +1,6 @@
+<%# locals: (label:, count:, path:, selected:) %>
+<%= link_to path, aria: { current: ("page" if selected) },
+      class: [ "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold", selected ? "border-blue-600 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100" ] do %>
+  <%= label %>
+  <span class="<%= selected ? "text-blue-700" : "text-slate-500" %> text-xs font-normal tabular-nums"><%= count %></span>
+<% end %>

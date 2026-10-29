@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root "users#index"
     resources :users, except: :show
+    resources :work_locations, only: %i[ index new create edit update ]
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

@@ -1,0 +1,64 @@
+<% content_for :title, "稼働場所一覧" %>
+
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold">稼働場所一覧</h1>
+  <%= link_to "新規登録", new_admin_work_location_path, class: "btn btn-primary" %>
+</div>
+
+<nav aria-label="分類で絞り込み" class="flex flex-wrap gap-2">
+  <%= render "filter_tab", label: "すべて", count: @category_counts.values.sum, path: admin_work_locations_path, selected: @category.nil? %>
+  <% WorkLocation.categories.each_key do |category| %>
+    <%= render "filter_tab", label: WorkLocation.human_attribute_name("category.#{category}"), count: @category_counts.fetch(category, 0),
+          path: admin_work_locations_path(category: category), selected: @category == category %>
+  <% end %>
+</nav>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <% if @work_locations.any? %>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-160 text-[13px]">
+        <thead>
+          <tr class="border-b border-slate-200 text-left text-xs text-slate-600">
+            <th scope="col" class="px-4 py-2.5 font-semibold"><%= WorkLocation.human_attribute_name(:name) %></th>
+            <th scope="col" class="px-4 py-2.5 font-semibold"><%= WorkLocation.human_attribute_name(:category) %></th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= WorkLocation.human_attribute_name(:budget_count) %></th>
+            <th scope="col" class="px-4 py-2.5 font-semibold">状態</th>
+            <th scope="col" class="px-4 py-2.5"><span class="sr-only">操作</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @work_locations.each do |work_location| %>
+            <tr>
+              <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= work_location.name %></th>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
+                  <span aria-hidden="true" class="<%= work_location.donki? ? "bg-chart-1" : "bg-chart-2" %> size-1.5 rounded-full"></span>
+                  <%= WorkLocation.human_attribute_name("category.#{work_location.category}") %>
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right whitespace-nowrap tabular-nums">
+                <% if work_location.budget_count %>
+                  <%= work_location.budget_count %>件
+                <% else %>
+                  <span class="text-slate-500">未設定</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3">
+                <% if work_location.active? %>
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-good-bg px-2.5 py-0.5 text-xs font-semibold text-good-text"><span aria-hidden="true" class="size-1.5 rounded-full bg-good"></span>有効</span>
+                <% else %>
+                  <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600"><span aria-hidden="true" class="size-1.5 rounded-full bg-slate-400"></span>無効</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <%= link_to "編集", edit_admin_work_location_path(work_location), class: "btn btn-secondary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="px-4 py-8 text-center text-slate-500">稼働場所はまだ登録されていません。</p>
+  <% end %>
+</div>
