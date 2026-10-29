@@ -16,9 +16,11 @@
   </div>
 
   <div>
-    <%= form.label :line_uid, class: "mb-1 block font-semibold" %>
-    <%= form.text_field :line_uid, required: true, placeholder: "U1234567890abcdef1234567890abcdef", class: "input font-mono" %>
-    <p class="mt-1 text-xs text-slate-500">LINEのユーザーID（「U」から始まる33文字）</p>
+    <%= form.label :line_uid, class: "mb-1 block font-semibold" do %>
+      <%= User.human_attribute_name(:line_uid) %><span class="ml-1.5 text-xs font-normal text-slate-500">任意</span>
+    <% end %>
+    <%= form.text_field :line_uid, placeholder: "U1234567890abcdef1234567890abcdef", class: "input font-mono" %>
+    <p class="mt-1 text-xs text-slate-500">LINEのユーザーID（「U」から始まる33文字）。空欄のままでも登録でき、その場合は「未連携」になります。</p>
   </div>
 
   <div>
