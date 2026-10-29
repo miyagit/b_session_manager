@@ -34,6 +34,9 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
+# Use Tailwind CSS [https://github.com/rails/tailwindcss-rails]
+gem "tailwindcss-rails", "~> 4.7"
+
 # Authentication for the admin screen [https://github.com/heartcombo/devise]
 gem "devise", "~> 5.0"
 

@@ -1,28 +1,26 @@
 <% content_for :title, "ログイン" %>
 
-<div class="card card-narrow">
-  <h1>管理画面ログイン</h1>
+<div class="mx-auto mt-6 w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6">
+  <h1 class="mb-5 text-xl font-bold">管理画面ログイン</h1>
 
-  <%= form_with model: resource, scope: resource_name, url: session_path(resource_name) do |form| %>
-    <div class="field">
-      <%= form.label :email %>
-      <%= form.email_field :email, autofocus: true, autocomplete: "email", required: true %>
+  <%= form_with model: resource, scope: resource_name, url: session_path(resource_name), class: "flex flex-col gap-4" do |form| %>
+    <div>
+      <%= form.label :email, class: "mb-1 block font-semibold" %>
+      <%= form.email_field :email, autofocus: true, autocomplete: "email", required: true, class: "input" %>
     </div>
 
-    <div class="field">
-      <%= form.label :password %>
-      <%= form.password_field :password, autocomplete: "current-password", required: true %>
+    <div>
+      <%= form.label :password, class: "mb-1 block font-semibold" %>
+      <%= form.password_field :password, autocomplete: "current-password", required: true, class: "input" %>
     </div>
 
     <% if devise_mapping.rememberable? %>
-      <div class="field field-checkbox">
-        <%= form.check_box :remember_me %>
+      <div class="flex items-center gap-2">
+        <%= form.check_box :remember_me, class: "size-4 accent-blue-600" %>
         <%= form.label :remember_me %>
       </div>
     <% end %>
 
-    <div class="form-actions">
-      <%= form.submit "ログイン", class: "button button-primary button-block" %>
-    </div>
+    <%= form.submit "ログイン", class: "btn btn-primary mt-2 w-full py-2" %>
   <% end %>
 </div>
