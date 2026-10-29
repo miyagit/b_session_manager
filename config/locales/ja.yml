@@ -3,6 +3,7 @@ ja:
     models:
       user: スタッフ
       admin_user: 管理者アカウント
+      work_location: 稼働場所
     attributes:
       user:
         name: 名前
@@ -16,6 +17,14 @@ ja:
         email: メールアドレス
         password: パスワード
         remember_me: ログイン状態を保持する
+      work_location:
+        name: 稼働場所名
+        category: 分類
+        budget_count: 基本ブース予算
+        active: 有効
+      work_location/category:
+        donki: ドンキホーテ
+        cinema: シネマ
   devise:
     failure:
       admin_user:

@@ -8,6 +8,16 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+# Work locations. Booth budgets aren't decided yet, so budget_count stays nil.
+{
+  donki: %w[ 溝の口 後楽園 大宮東口 町田駅前 高田馬場 吉祥寺 ],
+  cinema: %w[ みなとみらい UC幕張 109湘南 新宿ピカデリー UC豊洲 MOVIX橋本 ]
+}.each do |category, names|
+  names.each do |name|
+    WorkLocation.find_or_create_by!(name: name) { |location| location.category = category }
+  end
+end
+
 # Admin account for local development. Create production admins from the console instead.
 if Rails.env.development?
   AdminUser.find_or_create_by!(email: "admin@example.com") do |admin_user|
