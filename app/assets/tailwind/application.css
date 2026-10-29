@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/*
+ * Colors from the dashboard design.
+ * UI chrome uses Tailwind's slate (text, borders, backgrounds) and blue-600 (buttons, links).
+ * The chart and status colors below were checked for color-blind safety and contrast,
+ * so use these tokens rather than nearby Tailwind colors.
+ */
+@theme {
+  --font-sans: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Segoe UI", Meiryo, sans-serif;
+
+  /* Charts: chart-1 is actuals (and the first series), chart-1-light is forecasts */
+  --color-chart-1: #2a78d6;
+  --color-chart-1-light: #86b6ef;
+  --color-chart-2: #eb6834;
+  --color-chart-3: #1baf7a;
+  --color-chart-4: #eda100;
+  --color-chart-negative: #e34948;
+  --color-chart-track: #cde2fb;
+
+  /* Status: the base color is for icons and marks; labels use -text on -bg */
+  --color-good: #0ca30c;
+  --color-good-text: #006300;
+  --color-good-bg: #e6f4e6;
+  --color-warning: #fab219;
+  --color-warning-text: #7c4a03;
+  --color-warning-bg: #fef3c7;
+  --color-critical: #d03b3b;
+  --color-critical-text: #b42323;
+  --color-critical-bg: #fdecec;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-transparent px-3.5 py-1.5 text-[13px] font-semibold whitespace-nowrap;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+
+  .btn-secondary {
+    @apply border-slate-200 bg-white text-slate-900 hover:bg-slate-100;
+  }
+
+  .btn-danger {
+    @apply border-critical/30 bg-white text-critical hover:bg-critical-bg;
+  }
+
+  .input {
+    @apply block w-full rounded-md border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-2 focus:-outline-offset-1 focus:outline-blue-600;
+  }
+
+  .field_with_errors .input {
+    @apply border-critical;
+  }
+}
