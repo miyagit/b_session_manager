@@ -5,8 +5,4 @@ class User < ApplicationRecord
 
   validates :name, presence: true
   validates :line_uid, uniqueness: true, allow_nil: true
-
-  def line_linked?
-    line_uid.present?
-  end
 end
