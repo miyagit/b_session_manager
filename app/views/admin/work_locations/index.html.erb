@@ -22,7 +22,6 @@
             <th scope="col" class="px-4 py-2.5 font-semibold"><%= WorkLocation.human_attribute_name(:name) %></th>
             <th scope="col" class="px-4 py-2.5 font-semibold"><%= WorkLocation.human_attribute_name(:category) %></th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= WorkLocation.human_attribute_name(:budget_count) %></th>
-            <th scope="col" class="px-4 py-2.5 font-semibold">状態</th>
             <th scope="col" class="px-4 py-2.5"><span class="sr-only">操作</span></th>
           </tr>
         </thead>
@@ -41,13 +40,6 @@
                   <%= work_location.budget_count %>件
                 <% else %>
                   <span class="text-slate-500">未設定</span>
-                <% end %>
-              </td>
-              <td class="px-4 py-3">
-                <% if work_location.active? %>
-                  <span class="inline-flex items-center gap-1.5 rounded-full bg-good-bg px-2.5 py-0.5 text-xs font-semibold text-good-text"><span aria-hidden="true" class="size-1.5 rounded-full bg-good"></span>有効</span>
-                <% else %>
-                  <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600"><span aria-hidden="true" class="size-1.5 rounded-full bg-slate-400"></span>無効</span>
                 <% end %>
               </td>
               <td class="px-4 py-3 text-right">
