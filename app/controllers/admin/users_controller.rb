@@ -47,6 +47,6 @@ class Admin::UsersController < Admin::BaseController
     end
 
     def user_params
-      params.expect(user: [ :name, :line_uid, :role, :active ])
+      params.expect(user: [ :name, :role, :is_active ])
     end
 end

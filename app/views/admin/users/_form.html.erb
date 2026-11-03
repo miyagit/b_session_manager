@@ -16,19 +16,13 @@
   </div>
 
   <div>
-    <%= form.label :line_uid, class: "mb-1 block font-semibold" %>
-    <%= form.text_field :line_uid, required: true, placeholder: "U1234567890abcdef1234567890abcdef", class: "input font-mono" %>
-    <p class="mt-1 text-xs text-slate-500">LINEのユーザーID（「U」から始まる33文字）</p>
-  </div>
-
-  <div>
     <%= form.label :role, class: "mb-1 block font-semibold" %>
     <%= form.select :role, User.roles.keys.map { |role| [ User.human_attribute_name("role.#{role}"), role ] }, {}, class: "input" %>
   </div>
 
   <div class="flex items-center gap-2">
-    <%= form.check_box :active, class: "size-4 accent-blue-600" %>
-    <%= form.label :active %>
+    <%= form.check_box :is_active, class: "size-4 accent-blue-600" %>
+    <%= form.label :is_active %>
   </div>
 
   <div class="flex gap-2 pt-1">

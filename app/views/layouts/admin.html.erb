@@ -23,7 +23,11 @@
 
         <% if admin_user_signed_in? %>
           <nav aria-label="メインメニュー" class="flex gap-1">
-            <%= link_to "スタッフ", admin_users_path, class: "border-b-2 border-blue-600 px-2.5 py-4.5 font-semibold" %>
+            <% { "スタッフ" => [ admin_users_path, "admin/users" ], "稼働場所" => [ admin_work_locations_path, "admin/work_locations" ] }.each do |label, (path, section)| %>
+              <% current = controller_path == section %>
+              <%= link_to label, path, aria: { current: ("page" if current) },
+                    class: [ "border-b-2 px-2.5 py-4.5 font-semibold", current ? "border-blue-600 text-slate-900" : "border-transparent text-slate-500 hover:text-slate-900" ] %>
+            <% end %>
           </nav>
 
           <div class="ml-auto flex items-center gap-3 py-2.5">

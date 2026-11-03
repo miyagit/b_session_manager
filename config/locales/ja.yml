@@ -9,7 +9,7 @@ ja:
         name: 名前
         line_uid: LINE UID
         role: 権限
-        active: 有効
+        is_active: 有効
       user/role:
         staff: スタッフ
         admin: 管理者
@@ -21,7 +21,6 @@ ja:
         name: 稼働場所名
         category: 分類
         budget_count: 基本ブース予算
-        active: 有効
       work_location/category:
         donki: ドンキホーテ
         cinema: シネマ
