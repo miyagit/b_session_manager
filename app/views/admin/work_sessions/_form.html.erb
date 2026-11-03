@@ -1,0 +1,95 @@
+<%= form_with model: [ :admin, work_session ], class: "flex flex-col gap-5" do |form| %>
+  <% if work_session.errors.any? %>
+    <div class="rounded-lg border border-critical/30 bg-critical-bg px-4 py-3 text-critical-text">
+      <p class="font-semibold"><%= work_session.errors.count %>件のエラーがあります。</p>
+      <ul class="mt-1 list-disc pl-5">
+        <% work_session.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <%= form.label :work_date, class: "mb-1 block font-semibold" %>
+      <%= form.date_field :work_date, required: true, class: "input" %>
+    </div>
+
+    <div>
+      <%= form.label :work_location_id, class: "mb-1 block font-semibold" %>
+      <%= form.collection_select :work_location_id, WorkLocation.order(:id), :id, :name, { prompt: "選択してください" }, required: true, class: "input" %>
+    </div>
+
+    <div>
+      <%= form.label :team_name, class: "mb-1 block font-semibold" do %>
+        <%= WorkSession.human_attribute_name(:team_name) %><span class="ml-1.5 text-xs font-normal text-slate-500">任意</span>
+      <% end %>
+      <%= form.text_field :team_name, placeholder: "例：Aチーム", class: "input" %>
+      <p class="mt-1 text-xs text-slate-500">同じ日・同じ場所で複数チームが稼働するときに使います。</p>
+    </div>
+
+    <div>
+      <%= form.label :budget_count, class: "mb-1 block font-semibold" %>
+      <div class="flex items-center gap-2">
+        <%= form.number_field :budget_count, min: 0, step: 1, class: "input text-right tabular-nums" %>
+        <span class="text-slate-600">件</span>
+      </div>
+      <p class="mt-1 text-xs text-slate-500">新規作成で空欄にすると、稼働場所の基本ブース予算が入ります。</p>
+    </div>
+
+    <div class="sm:col-span-2">
+      <%= form.label :line_group_id, class: "mb-1 block font-semibold" do %>
+        <%= WorkSession.human_attribute_name(:line_group_id) %><span class="ml-1.5 text-xs font-normal text-slate-500">任意</span>
+      <% end %>
+      <%= form.text_field :line_group_id, placeholder: "C1234567890abcdef1234567890abcdef", class: "input font-mono" %>
+    </div>
+  </div>
+
+  <fieldset>
+    <legend class="mb-2 font-semibold">スタッフと個人目標</legend>
+    <div class="overflow-hidden rounded-lg border border-slate-200">
+      <table class="w-full text-[13px]">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-xs text-slate-600">
+            <th scope="col" class="px-3 py-2 font-semibold">スタッフ</th>
+            <th scope="col" class="px-3 py-2 font-semibold">個人目標</th>
+            <th scope="col" class="px-3 py-2 font-semibold">登録状態</th>
+            <th scope="col" class="px-3 py-2 font-semibold">外す</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <%= form.fields_for :work_assignments do |assignment_form| %>
+            <% assignment = assignment_form.object %>
+            <tr>
+              <td class="px-3 py-2">
+                <%= assignment_form.collection_select :user_id, User.where(is_active: true).or(User.where(id: assignment.user_id)).order(:name), :id, :name,
+                      { include_blank: "（選択なし）" }, class: "input", aria: { label: "スタッフ" } %>
+              </td>
+              <td class="px-3 py-2">
+                <div class="flex items-center gap-2">
+                  <%= assignment_form.number_field :target_count, min: 0, step: 1, class: "input w-24 text-right tabular-nums", aria: { label: "個人目標" } %>
+                  <span class="text-slate-600">件</span>
+                </div>
+              </td>
+              <td class="px-3 py-2 whitespace-nowrap text-slate-600">
+                <%= assignment.persisted? ? (assignment.confirmed? ? "確認済み" : "未確認") : "—" %>
+              </td>
+              <td class="px-3 py-2">
+                <% if assignment.persisted? %>
+                  <%= assignment_form.check_box :_destroy, class: "size-4 accent-blue-600", aria: { label: "このスタッフを外す" } %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-1 text-xs text-slate-500">スタッフを選んだ行だけが登録されます。人数が足りないときは、保存すると空き行が追加されます。</p>
+  </fieldset>
+
+  <div class="flex gap-2 pt-1">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to "キャンセル", admin_work_sessions_path(date: work_session.work_date), class: "btn btn-secondary" %>
+  </div>
+<% end %>
