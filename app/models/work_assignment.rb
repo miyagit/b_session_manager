@@ -11,4 +11,10 @@ class WorkAssignment < ApplicationRecord
   def confirm!
     update!(status: :confirmed, confirmed_at: Time.current) unless confirmed?
   end
+
+  # The result to count for this staff member: the final report if there is one, otherwise the latest
+  # interim report. Interim counts are cumulative, so earlier slots are never added on top.
+  def effective_result
+    report_results.max_by { |result| [ result.report.final? ? 1 : 0, result.report.report_slot ] }
+  end
 end

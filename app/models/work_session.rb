@@ -13,6 +13,36 @@ class WorkSession < ApplicationRecord
   # The day's budget is a snapshot: it starts from the location's base budget and can then be changed per session.
   before_validation :copy_location_budget, on: :create
 
+  # Preload everything the result calculations below need.
+  scope :with_results, -> { includes(:work_location, :reports, work_assignments: [ :user, { report_results: :report } ]) }
+
+  def display_name
+    [ work_location.name, team_name.presence ].compact.join(" ")
+  end
+
+  # :confirmed once a final report exists, :provisional with only interim reports, :none before any report.
+  def result_status
+    if reports.any?(&:final?) then :confirmed
+    elsif reports.any? then :provisional
+    else :none
+    end
+  end
+
+  def acquired_count
+    work_assignments.sum { |assignment| assignment.effective_result&.acquired_count.to_i }
+  end
+
+  def target_count
+    work_assignments.sum(&:target_count)
+  end
+
+  # Percentage, or nil when it can't be calculated (no budget).
+  def achievement_rate
+    return if budget_count.nil? || budget_count.zero?
+
+    acquired_count * 100.0 / budget_count
+  end
+
   private
     def copy_location_budget
       self.budget_count ||= work_location&.budget_count

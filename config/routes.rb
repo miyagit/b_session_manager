@@ -2,10 +2,12 @@ Rails.application.routes.draw do
   devise_for :admin_users, path: "admin", controllers: { sessions: "admin/sessions" }
 
   namespace :admin do
-    root "users#index"
+    root "dashboards#show"
     resources :users, except: :show
     resources :work_locations, only: %i[ index new create edit update ]
     resources :work_sessions, except: :show
+    resources :reports, only: %i[ index show ]
+    resource :analytics, only: :show
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

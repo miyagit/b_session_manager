@@ -15,7 +15,7 @@
   <%= link_to "今日", admin_work_sessions_path, class: "btn btn-secondary" unless @date == Date.current %>
 </div>
 
-<h2 class="text-lg font-bold"><%= l(@date, format: :long) %>（<%= %w[ 日 月 火 水 木 金 土 ][@date.wday] %>）</h2>
+<h2 class="text-lg font-bold"><%= date_with_wday(@date) %></h2>
 
 <% if @work_sessions.empty? %>
   <p class="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-slate-500">この日の稼働予定はありません。</p>
