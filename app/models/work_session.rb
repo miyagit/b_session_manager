@@ -13,9 +13,6 @@ class WorkSession < ApplicationRecord
   # The day's budget is a snapshot: it starts from the location's base budget and can then be changed per session.
   before_validation :copy_location_budget, on: :create
 
-  # Preload everything the result calculations below need.
-  scope :with_results, -> { includes(:work_location, :reports, work_assignments: [ :user, { report_results: :report } ]) }
-
   def display_name
     [ work_location.name, team_name.presence ].compact.join(" ")
   end

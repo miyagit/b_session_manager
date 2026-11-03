@@ -4,7 +4,9 @@ class Admin::AnalyticsController < Admin::BaseController
     @axis = params[:axis].presence_in(ResultSummary::AXES.keys) || "staff"
     @month = parse_month(params[:month]) || Date.current.beginning_of_month
     range = @axis == "month" ? (@month << 5)..@month.end_of_month : @month..@month.end_of_month
-    @rows = ResultSummary.build(WorkSession.with_results.where(work_date: range), axis: @axis)
+    work_sessions = WorkSession.includes(:work_location, :reports, work_assignments: [ :user, { report_results: :report } ])
+      .where(work_date: range)
+    @rows = ResultSummary.build(work_sessions, axis: @axis)
   end
 
   private
