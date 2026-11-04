@@ -69,7 +69,7 @@ class Admin::WorkSessionsController < Admin::BaseController
     end
 
     def build_blank_assignments
-      blank_rows = @work_session.work_assignments.count { |assignment| assignment.new_record? && assignment.user_id.blank? }
+      blank_rows = @work_session.work_assignments.count { |work_assignment| work_assignment.new_record? && work_assignment.user_id.blank? }
       (BLANK_ASSIGNMENT_ROWS - blank_rows).times { @work_session.work_assignments.build }
     end
 end

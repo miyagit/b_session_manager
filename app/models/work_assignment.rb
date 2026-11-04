@@ -15,6 +15,6 @@ class WorkAssignment < ApplicationRecord
   # The result to count for this staff member: the final report if there is one, otherwise the latest
   # interim report. Interim counts are cumulative, so earlier slots are never added on top.
   def effective_result
-    report_results.max_by { |result| [ result.report.final? ? 1 : 0, result.report.report_slot ] }
+    report_results.max_by { |report_result| [ report_result.report.final? ? 1 : 0, report_result.report.report_slot ] }
   end
 end

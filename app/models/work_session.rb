@@ -26,7 +26,7 @@ class WorkSession < ApplicationRecord
   end
 
   def acquired_count
-    work_assignments.sum { |assignment| assignment.effective_result&.acquired_count.to_i }
+    work_assignments.sum { |work_assignment| work_assignment.effective_result&.acquired_count.to_i }
   end
 
   def target_count

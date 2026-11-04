@@ -10,10 +10,10 @@
 
 <section aria-label="主要指標" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <% today_acquired = @work_sessions.sum(&:acquired_count) %>
-  <% today_budget = @work_sessions.sum { |session| session.budget_count.to_i } %>
+  <% today_budget = @work_sessions.sum { |work_session| work_session.budget_count.to_i } %>
   <% [
        [ "今日の獲得件数", "#{today_acquired}件", "ブース予算 #{today_budget}件・達成率 #{format_rate(today_budget.positive? ? today_acquired * 100.0 / today_budget : nil)}" ],
-       [ "今日の稼働", "#{@work_sessions.size}ブース", "スタッフ #{@work_sessions.sum { |session| session.work_assignments.size }}名" ],
+       [ "今日の稼働", "#{@work_sessions.size}ブース", "スタッフ #{@work_sessions.sum { |work_session| work_session.work_assignments.size }}名" ],
        [ "今月の獲得件数", "#{@month_summary&.acquired.to_i}件", "達成率 #{format_rate(@month_summary&.achievement_rate)}（ブース予算比）" ],
        [ "今月のカード率", format_rate(@month_summary&.card_rate), "カード #{@month_summary&.card.to_i}件" ]
      ].each do |label, value, note| %>
@@ -43,24 +43,24 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 border-t border-slate-100">
-            <% @work_sessions.each do |session| %>
-              <% latest = session.reports.max_by(&:report_slot) %>
+            <% @work_sessions.each do |work_session| %>
+              <% latest_report = work_session.reports.max_by(&:report_slot) %>
               <tr>
-                <th scope="row" class="px-5 py-3 text-left font-semibold whitespace-nowrap"><%= session.display_name %></th>
-                <td class="px-5 py-3 text-right tabular-nums whitespace-nowrap"><%= session.acquired_count %> / <%= session.budget_count || "—" %>件</td>
+                <th scope="row" class="px-5 py-3 text-left font-semibold whitespace-nowrap"><%= work_session.display_name %></th>
+                <td class="px-5 py-3 text-right tabular-nums whitespace-nowrap"><%= work_session.acquired_count %> / <%= work_session.budget_count || "—" %>件</td>
                 <td class="px-5 py-3">
                   <div class="flex items-center gap-2">
                     <div aria-hidden="true" class="h-1.5 flex-1 rounded-full bg-chart-track">
-                      <div class="h-1.5 rounded-full bg-chart-1" style="width: <%= [ session.achievement_rate.to_f, 100 ].min.round %>%"></div>
+                      <div class="h-1.5 rounded-full bg-chart-1" style="width: <%= [ work_session.achievement_rate.to_f, 100 ].min.round %>%"></div>
                     </div>
-                    <span class="w-14 text-right tabular-nums"><%= format_rate(session.achievement_rate) %></span>
+                    <span class="w-14 text-right tabular-nums"><%= format_rate(work_session.achievement_rate) %></span>
                   </div>
                 </td>
                 <td class="px-5 py-3 whitespace-nowrap">
-                  <%= result_status_badge(session.result_status) %>
-                  <% if latest %><span class="ml-1 text-xs text-slate-500"><%= latest.report_slot %>時</span><% end %>
+                  <%= result_status_badge(work_session.result_status) %>
+                  <% if latest_report %><span class="ml-1 text-xs text-slate-500"><%= latest_report.report_slot %>時</span><% end %>
                 </td>
-                <td class="px-5 py-3"><%= delivery_status_badge(latest&.line_message_delivery) if latest %></td>
+                <td class="px-5 py-3"><%= delivery_status_badge(latest_report&.line_message_delivery) if latest_report %></td>
               </tr>
             <% end %>
           </tbody>
@@ -101,12 +101,12 @@
     <p class="px-5 py-5 text-slate-500">投稿に失敗した報告はありません。</p>
   <% else %>
     <ul class="divide-y divide-slate-100 text-[13px]">
-      <% @failed_deliveries.each do |delivery| %>
-        <% report = delivery.report %>
+      <% @failed_deliveries.each do |line_message_delivery| %>
+        <% report = line_message_delivery.report %>
         <li class="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3">
           <%= status_badge("投稿失敗", :critical) %>
           <%= link_to "#{date_with_wday(report.work_session.work_date)} #{report.work_session.display_name} #{report.report_slot}時", admin_report_path(report), class: "font-semibold text-blue-600 hover:text-blue-700" %>
-          <span class="text-slate-600"><%= delivery.error_message %></span>
+          <span class="text-slate-600"><%= line_message_delivery.error_message %></span>
         </li>
       <% end %>
     </ul>

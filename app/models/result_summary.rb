@@ -9,35 +9,35 @@ class ResultSummary
     def card_rate = acquired.positive? ? card * 100.0 / acquired : nil
   end
 
-  def self.build(sessions, axis:)
+  def self.build(work_sessions, axis:)
     rows = {}
-    sessions.reject { |session| session.result_status == :none }.each do |session|
+    work_sessions.reject { |work_session| work_session.result_status == :none }.each do |work_session|
       if axis == "staff"
-        session.work_assignments.each do |assignment|
-          result = assignment.effective_result
-          add(rows, [ assignment.user_id ], label: assignment.user.name, sort_key: assignment.user.name,
-              acquired: result&.acquired_count.to_i, target: assignment.target_count,
-              approach: result&.approach_count.to_i, card: result&.card_count.to_i, provisional: session.result_status == :provisional)
+        work_session.work_assignments.each do |work_assignment|
+          report_result = work_assignment.effective_result
+          add(rows, [ work_assignment.user_id ], label: work_assignment.user.name, sort_key: work_assignment.user.name,
+              acquired: report_result&.acquired_count.to_i, target: work_assignment.target_count,
+              approach: report_result&.approach_count.to_i, card: report_result&.card_count.to_i, provisional: work_session.result_status == :provisional)
         end
       else
-        key, label, sort_key = session_key(session, axis)
-        results = session.work_assignments.filter_map(&:effective_result)
-        add(rows, key, label: label, sort_key: sort_key, acquired: session.acquired_count, target: session.budget_count.to_i,
-            approach: results.sum { |result| result.approach_count.to_i }, card: results.sum { |result| result.card_count.to_i },
-            provisional: session.result_status == :provisional)
+        key, label, sort_key = work_session_key(work_session, axis)
+        report_results = work_session.work_assignments.filter_map(&:effective_result)
+        add(rows, key, label: label, sort_key: sort_key, acquired: work_session.acquired_count, target: work_session.budget_count.to_i,
+            approach: report_results.sum { |report_result| report_result.approach_count.to_i }, card: report_results.sum { |report_result| report_result.card_count.to_i },
+            provisional: work_session.result_status == :provisional)
       end
     end
     rows = rows.values.sort_by(&:sort_key)
     %w[ day month ].include?(axis) ? rows : rows.sort_by { |row| -row.acquired }
   end
 
-  def self.session_key(session, axis)
-    date = session.work_date
+  def self.work_session_key(work_session, axis)
+    date = work_session.work_date
     case axis
     when "day" then [ [ date ], "#{date.month}/#{date.day}（#{%w[ 日 月 火 水 木 金 土 ][date.wday]}）", date ]
     when "month" then [ [ date.beginning_of_month ], "#{date.year}年#{date.month}月", date.beginning_of_month ]
-    when "location" then [ [ session.work_location_id ], session.work_location.name, session.work_location_id ]
-    when "team" then [ [ session.team_name.to_s ], session.team_name.presence || "（チーム名なし）", session.team_name.to_s ]
+    when "location" then [ [ work_session.work_location_id ], work_session.work_location.name, work_session.work_location_id ]
+    when "team" then [ [ work_session.team_name.to_s ], work_session.team_name.presence || "（チーム名なし）", work_session.team_name.to_s ]
     end
   end
 
@@ -49,5 +49,5 @@ class ResultSummary
     row.card += card
     row.provisional ||= provisional
   end
-  private_class_method :session_key, :add
+  private_class_method :work_session_key, :add
 end

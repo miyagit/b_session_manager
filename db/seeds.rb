@@ -14,7 +14,7 @@
   cinema: %w[ UCみなとみらい UC幕張 109湘南 新宿ピカデリー UC豊洲 MOVIX橋本 ]
 }.each do |category, names|
   names.each do |name|
-    WorkLocation.find_or_create_by!(name: name) { |location| location.category = category }
+    WorkLocation.find_or_create_by!(name: name) { |work_location| work_location.category = category }
   end
 end
 
@@ -37,30 +37,30 @@ if Rails.env.development? && WorkSession.none?
   User.create!(name: "小林") # Added as a friend but not linked to a LINE account yet
   User.create!(name: "加藤", line_uid: format("U%032x", 99), is_active: false)
 
-  locations = WorkLocation.order(:id).to_a
+  work_locations = WorkLocation.order(:id).to_a
   slot_progress = { 13 => 0.3, 16 => 0.55, 19 => 0.8, 22 => 1.0 }
   failures = [ "対象グループに公式アカウントが参加していません", "LINE APIの月間送信上限に達しました" ]
 
   (Date.new(2026, 10, 1)..today.tomorrow).each_with_index do |date, day_index|
-    day_locations = locations.rotate(day_index * 4).first(4)
-    teams = day_locations.map { |location| [ location, nil ] }
-    teams << [ day_locations.first, "Bチーム" ] if date.saturday? || date.sunday? # A second team at a busy weekend booth
+    day_work_locations = work_locations.rotate(day_index * 4).first(4)
+    teams = day_work_locations.map { |work_location| [ work_location, nil ] }
+    teams << [ day_work_locations.first, "Bチーム" ] if date.saturday? || date.sunday? # A second team at a busy weekend booth
     teams[0][1] = "Aチーム" if teams.size > 4
 
     members = staff.rotate(day_index).each_slice(2).to_a
-    teams.each_with_index do |(location, team_name), team_index|
-      session = WorkSession.create!(
-        work_location: location, work_date: date, team_name: team_name, budget_count: 50 + random.rand(7) * 5,
-        line_group_id: format("C%032x", location.id),
+    teams.each_with_index do |(work_location, team_name), team_index|
+      work_session = WorkSession.create!(
+        work_location: work_location, work_date: date, team_name: team_name, budget_count: 50 + random.rand(7) * 5,
+        line_group_id: format("C%032x", work_location.id),
         work_assignments_attributes: members[team_index % members.size].map { |user| { user_id: user.id, target_count: 20 + random.rand(5) * 5 } }
       )
       next if date > today
 
-      session.work_assignments.each do |assignment|
-        assignment.update!(status: :confirmed, confirmed_at: date.in_time_zone.change(hour: 9, min: random.rand(40))) unless date == today && random.rand(4).zero?
+      work_session.work_assignments.each do |work_assignment|
+        work_assignment.update!(status: :confirmed, confirmed_at: date.in_time_zone.change(hour: 9, min: random.rand(40))) unless date == today && random.rand(4).zero?
       end
 
-      finals = session.work_assignments.to_h { |assignment| [ assignment, (assignment.target_count * (0.7 + random.rand * 0.5)).round ] }
+      finals = work_session.work_assignments.to_h { |work_assignment| [ work_assignment, (work_assignment.target_count * (0.7 + random.rand * 0.5)).round ] }
       slots = if date == today then [ 13, 16 ]
       elsif random.rand(12).zero? then [ 13, 16, 19 ] # Final report not submitted yet: counted as provisional
       else slot_progress.keys
@@ -68,12 +68,12 @@ if Rails.env.development? && WorkSession.none?
 
       slots.each do |slot|
         final = slot == 22
-        report = session.reports.create!(
-          submitted_by: session.work_assignments.first.user, report_type: final ? :final : :interim, report_slot: slot,
+        report = work_session.reports.create!(
+          submitted_by: work_session.work_assignments.first.user, report_type: final ? :final : :interim, report_slot: slot,
           reported_at: date.in_time_zone.change(hour: slot, min: random.rand(1..15)),
-          report_results_attributes: finals.map do |assignment, total|
+          report_results_attributes: finals.map do |work_assignment, total|
             acquired = (total * slot_progress[slot]).round
-            { work_assignment: assignment, acquired_count: acquired,
+            { work_assignment: work_assignment, acquired_count: acquired,
               approach_count: (final ? acquired * 3 + random.rand(20) : nil), card_count: (final ? (acquired * (0.3 + random.rand * 0.2)).round : nil) }
           end
         )

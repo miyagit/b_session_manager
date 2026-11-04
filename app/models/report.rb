@@ -14,7 +14,7 @@ class Report < ApplicationRecord
   validates :report_slot, inclusion: { in: SLOTS }, uniqueness: { scope: :work_session_id }
   validates :reported_at, presence: true
   validates :report_results, length: { in: 1..MAX_RESULTS }
-  validate :results_belong_to_session
+  validate :report_results_belong_to_work_session
 
   # Interim counts are cumulative, so the booth total is the sum of this report only (never of earlier slots).
   def booth_acquired_count
@@ -30,8 +30,8 @@ class Report < ApplicationRecord
   end
 
   private
-    def results_belong_to_session
-      return if report_results.all? { |result| result.work_assignment&.work_session_id == work_session_id }
+    def report_results_belong_to_work_session
+      return if report_results.all? { |report_result| report_result.work_assignment&.work_session_id == work_session_id }
 
       errors.add(:report_results, "に、この稼働予定に割り当てられていないスタッフが含まれています")
     end

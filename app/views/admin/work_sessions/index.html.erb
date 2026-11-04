@@ -51,12 +51,12 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 border-t border-slate-100">
-            <% work_session.work_assignments.sort_by(&:id).each do |assignment| %>
+            <% work_session.work_assignments.sort_by(&:id).each do |work_assignment| %>
               <tr>
-                <th scope="row" class="px-5 py-2.5 text-left font-semibold"><%= assignment.user.name %></th>
-                <td class="px-5 py-2.5 text-right tabular-nums"><%= assignment.target_count %>件</td>
+                <th scope="row" class="px-5 py-2.5 text-left font-semibold"><%= work_assignment.user.name %></th>
+                <td class="px-5 py-2.5 text-right tabular-nums"><%= work_assignment.target_count %>件</td>
                 <td class="px-5 py-2.5">
-                  <% if assignment.confirmed? %>
+                  <% if work_assignment.confirmed? %>
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-good-bg px-2.5 py-0.5 text-xs font-semibold text-good-text"><span aria-hidden="true" class="size-1.5 rounded-full bg-good"></span>確認済み</span>
                   <% else %>
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600"><span aria-hidden="true" class="size-1.5 rounded-full bg-slate-400"></span>未確認</span>

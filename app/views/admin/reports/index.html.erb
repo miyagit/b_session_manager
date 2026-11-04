@@ -39,7 +39,7 @@
                 <span class="font-semibold tabular-nums"><%= report.report_slot %>時</span>
                 <%= status_badge(Report.human_attribute_name("report_type.#{report.report_type}"), report.final? ? :good : :warning) %>
               </td>
-              <td class="px-4 py-3 text-slate-700"><%= report.report_results.map { |result| "#{result.work_assignment.user.name} #{result.acquired_count}件" }.join("、") %></td>
+              <td class="px-4 py-3 text-slate-700"><%= report.report_results.map { |report_result| "#{report_result.work_assignment.user.name} #{report_result.acquired_count}件" }.join("、") %></td>
               <td class="px-4 py-3 text-right font-semibold tabular-nums"><%= report.booth_acquired_count %>件</td>
               <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report.achievement_rate) %></td>
               <td class="px-4 py-3 whitespace-nowrap text-slate-600"><%= report.submitted_by.name %>・<%= l(report.reported_at, format: "%H:%M") %></td>

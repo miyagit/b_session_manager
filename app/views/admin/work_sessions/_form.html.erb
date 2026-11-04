@@ -59,25 +59,25 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <%= form.fields_for :work_assignments do |assignment_form| %>
-            <% assignment = assignment_form.object %>
+          <%= form.fields_for :work_assignments do |work_assignment_form| %>
+            <% work_assignment = work_assignment_form.object %>
             <tr>
               <td class="px-3 py-2">
-                <%= assignment_form.collection_select :user_id, User.where(is_active: true).or(User.where(id: assignment.user_id)).order(:name), :id, :name,
+                <%= work_assignment_form.collection_select :user_id, User.where(is_active: true).or(User.where(id: work_assignment.user_id)).order(:name), :id, :name,
                       { include_blank: "（選択なし）" }, class: "input", aria: { label: "スタッフ" } %>
               </td>
               <td class="px-3 py-2">
                 <div class="flex items-center gap-2">
-                  <%= assignment_form.number_field :target_count, min: 0, step: 1, class: "input w-24 text-right tabular-nums", aria: { label: "個人目標" } %>
+                  <%= work_assignment_form.number_field :target_count, min: 0, step: 1, class: "input w-24 text-right tabular-nums", aria: { label: "個人目標" } %>
                   <span class="text-slate-600">件</span>
                 </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap text-slate-600">
-                <%= assignment.persisted? ? (assignment.confirmed? ? "確認済み" : "未確認") : "—" %>
+                <%= work_assignment.persisted? ? (work_assignment.confirmed? ? "確認済み" : "未確認") : "—" %>
               </td>
               <td class="px-3 py-2">
-                <% if assignment.persisted? %>
-                  <%= assignment_form.check_box :_destroy, class: "size-4 accent-blue-600", aria: { label: "このスタッフを外す" } %>
+                <% if work_assignment.persisted? %>
+                  <%= work_assignment_form.check_box :_destroy, class: "size-4 accent-blue-600", aria: { label: "このスタッフを外す" } %>
                 <% end %>
               </td>
             </tr>
