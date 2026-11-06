@@ -7,6 +7,11 @@ Rails.application.routes.draw do
     resources :work_locations, only: %i[ index new create edit update ]
   end
 
+  # LINE Messaging API の Webhook URL (/api/linebot/callback)
+  namespace :api do
+    post "linebot/callback", to: "linebot#callback"
+  end
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
