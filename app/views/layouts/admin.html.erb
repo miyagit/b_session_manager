@@ -23,7 +23,14 @@
 
         <% if admin_user_signed_in? %>
           <nav aria-label="メインメニュー" class="flex gap-1">
-            <% { "スタッフ" => [ admin_users_path, "admin/users" ], "稼働場所" => [ admin_work_locations_path, "admin/work_locations" ] }.each do |label, (path, section)| %>
+            <% {
+                 "ダッシュボード" => [ admin_root_path, "admin/dashboards" ],
+                 "稼働予定" => [ admin_work_sessions_path, "admin/work_sessions" ],
+                 "実績" => [ admin_reports_path, "admin/reports" ],
+                 "分析" => [ admin_analytics_path, "admin/analytics" ],
+                 "スタッフ" => [ admin_users_path, "admin/users" ],
+                 "稼働場所" => [ admin_work_locations_path, "admin/work_locations" ]
+               }.each do |label, (path, section)| %>
               <% current = controller_path == section %>
               <%= link_to label, path, aria: { current: ("page" if current) },
                     class: [ "border-b-2 px-2.5 py-4.5 font-semibold", current ? "border-blue-600 text-slate-900" : "border-transparent text-slate-500 hover:text-slate-900" ] %>

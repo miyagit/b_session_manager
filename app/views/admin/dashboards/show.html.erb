@@ -1,0 +1,114 @@
+<% content_for :title, "ダッシュボード" %>
+
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">ダッシュボード</h1>
+    <p class="mt-1 text-[13px] text-slate-600"><%= date_with_wday(@date) %>の稼働状況</p>
+  </div>
+  <%= link_to "稼働予定を見る", admin_work_sessions_path(date: @date), class: "btn btn-secondary" %>
+</div>
+
+<section aria-label="主要指標" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <% today_acquired = @work_sessions.sum(&:acquired_count) %>
+  <% today_budget = @work_sessions.sum { |work_session| work_session.budget_count.to_i } %>
+  <% [
+       [ "今日の獲得件数", "#{today_acquired}件", "ブース予算 #{today_budget}件・達成率 #{format_rate(today_budget.positive? ? today_acquired * 100.0 / today_budget : nil)}" ],
+       [ "今日の稼働", "#{@work_sessions.size}ブース", "スタッフ #{@work_sessions.sum { |work_session| work_session.work_assignments.size }}名" ],
+       [ "今月の獲得件数", "#{@month_summary&.acquired.to_i}件", "達成率 #{format_rate(@month_summary&.achievement_rate)}（ブース予算比）" ],
+       [ "今月のカード率", format_rate(@month_summary&.card_rate), "カード #{@month_summary&.card.to_i}件" ]
+     ].each do |label, value, note| %>
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <h2 class="text-[13px] font-semibold text-slate-600"><%= label %></h2>
+      <p class="mt-1 text-[28px] font-semibold leading-tight"><%= value %></p>
+      <p class="mt-1 text-xs text-slate-500"><%= note %></p>
+    </div>
+  <% end %>
+</section>
+
+<div class="grid gap-4 lg:grid-cols-3">
+  <section class="rounded-xl border border-slate-200 bg-white lg:col-span-2">
+    <h2 class="border-b border-slate-200 px-5 py-3.5 text-base font-bold">今日のブース別実績</h2>
+    <% if @work_sessions.empty? %>
+      <p class="px-5 py-8 text-center text-slate-500">今日の稼働予定はありません。</p>
+    <% else %>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-160 text-[13px]">
+          <thead>
+            <tr class="text-left text-xs text-slate-600">
+              <th scope="col" class="px-5 py-2.5 font-semibold">ブース</th>
+              <th scope="col" class="px-5 py-2.5 text-right font-semibold">獲得 / 予算</th>
+              <th scope="col" class="w-40 px-5 py-2.5 font-semibold">達成率</th>
+              <th scope="col" class="px-5 py-2.5 font-semibold">報告</th>
+              <th scope="col" class="px-5 py-2.5 font-semibold">LINE投稿</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 border-t border-slate-100">
+            <% @work_sessions.each do |work_session| %>
+              <% latest_report = work_session.reports.max_by(&:report_slot) %>
+              <tr>
+                <th scope="row" class="px-5 py-3 text-left font-semibold whitespace-nowrap"><%= work_session.display_name %></th>
+                <td class="px-5 py-3 text-right tabular-nums whitespace-nowrap"><%= work_session.acquired_count %> / <%= work_session.budget_count || "—" %>件</td>
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-2">
+                    <div aria-hidden="true" class="h-1.5 flex-1 rounded-full bg-chart-track">
+                      <div class="h-1.5 rounded-full bg-chart-1" style="width: <%= [ work_session.achievement_rate.to_f, 100 ].min.round %>%"></div>
+                    </div>
+                    <span class="w-14 text-right tabular-nums"><%= format_rate(work_session.achievement_rate) %></span>
+                  </div>
+                </td>
+                <td class="px-5 py-3 whitespace-nowrap">
+                  <%= result_status_badge(work_session.result_status) %>
+                  <% if latest_report %><span class="ml-1 text-xs text-slate-500"><%= latest_report.report_slot %>時</span><% end %>
+                </td>
+                <td class="px-5 py-3"><%= delivery_status_badge(latest_report&.line_message_delivery) if latest_report %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white">
+    <h2 class="border-b border-slate-200 px-5 py-3.5 text-base font-bold">今日のスタッフ別獲得</h2>
+    <% if @staff_rows.empty? %>
+      <p class="px-5 py-8 text-center text-slate-500">まだ報告がありません。</p>
+    <% else %>
+      <ol class="divide-y divide-slate-100">
+        <% max = @staff_rows.map(&:acquired).max.to_i %>
+        <% @staff_rows.each do |row| %>
+          <li class="px-5 py-2.5">
+            <div class="flex items-baseline justify-between text-[13px]">
+              <span class="font-semibold"><%= row.label %></span>
+              <span class="tabular-nums"><%= row.acquired %>件<span class="ml-1 text-xs text-slate-500">/ 目標<%= row.target %></span></span>
+            </div>
+            <div aria-hidden="true" class="mt-1 h-1.5 rounded-full bg-slate-100">
+              <div class="h-1.5 rounded-full bg-chart-1" style="width: <%= max.positive? ? (row.acquired * 100 / max) : 0 %>%"></div>
+            </div>
+          </li>
+        <% end %>
+      </ol>
+    <% end %>
+  </section>
+</div>
+
+<section class="rounded-xl border border-slate-200 bg-white">
+  <div class="flex items-center justify-between border-b border-slate-200 px-5 py-3.5">
+    <h2 class="text-base font-bold">LINE投稿の失敗</h2>
+    <%= link_to "実績一覧へ", admin_reports_path, class: "text-[13px] font-semibold text-blue-600 hover:text-blue-700" %>
+  </div>
+  <% if @failed_deliveries.empty? %>
+    <p class="px-5 py-5 text-slate-500">投稿に失敗した報告はありません。</p>
+  <% else %>
+    <ul class="divide-y divide-slate-100 text-[13px]">
+      <% @failed_deliveries.each do |line_message_delivery| %>
+        <% report = line_message_delivery.report %>
+        <li class="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3">
+          <%= status_badge("投稿失敗", :critical) %>
+          <%= link_to "#{date_with_wday(report.work_session.work_date)} #{report.work_session.display_name} #{report.report_slot}時", admin_report_path(report), class: "font-semibold text-blue-600 hover:text-blue-700" %>
+          <span class="text-slate-600"><%= line_message_delivery.error_message %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>
