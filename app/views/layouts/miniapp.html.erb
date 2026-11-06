@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title><%= content_for(:title) || "おみくじ" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#b7282e">
+    <meta name="application-name" content="おみくじ">
+    <meta name="robots" content="noindex">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "tailwind" %>
+
+    <%# LIFF SDK（LINE ミニアプリの JavaScript SDK） %>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <%= javascript_include_tag "miniapp", defer: true %>
+  </head>
+
+  <body class="min-h-dvh bg-omikuji-cream font-sans text-omikuji-ink antialiased">
+    <%= yield %>
+  </body>
+</html>

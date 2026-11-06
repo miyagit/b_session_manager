@@ -18,7 +18,12 @@ gem "devise", "~> 5.0"
 gem "rails-i18n", "~> 8.1"
 gem "devise-i18n", "~> 1.16"
 
+# LINE Messaging API SDK
+gem "line-bot-api", "~> 2.11"
+
 group :development, :test do
+  # Load LINE channel credentials from .env
+  gem "dotenv-rails"
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem 'pry-rails'
   gem "bundler-audit", require: false
