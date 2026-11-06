@@ -1,6 +1,11 @@
 # おみくじを引くためのクラス（DB は使わない）
 class Omikuji
-  Result = Data.define(:name, :weight, :message)
+  Result = Data.define(:name, :weight, :message) do
+    # LINE のトークに流す文面
+    def to_text
+      "🎋 おみくじの結果 🎋\n\n【#{name}】\n\n#{message}"
+    end
+  end
 
   RESULTS = [
     Result.new(name: "大吉", weight: 10, message: "最高の一日になりそう！思い切ってチャレンジしよう✨"),
@@ -25,9 +30,8 @@ class Omikuji
     RESULTS.last
   end
 
-  # LINE に返信する文面を組み立てる
+  # Bot の返信に使う文面を組み立てる
   def self.fortune_text(random: Random.new)
-    result = draw(random: random)
-    "🎋 おみくじの結果 🎋\n\n【#{result.name}】\n\n#{result.message}"
+    draw(random: random).to_text
   end
 end
