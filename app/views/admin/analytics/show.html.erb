@@ -19,7 +19,7 @@
 <p class="text-[13px] text-slate-600">
   <%= @axis == "month" ? "#{(@month << 5).year}年#{(@month << 5).month}月〜#{@month.year}年#{@month.month}月" : "#{@month.year}年#{@month.month}月" %>の集計です。
   最終報告がある日は確定値、ない日は最新の中間報告を暫定値として使います。
-  <%= staff_axis ? "スタッフ別は本人の獲得件数の合計です。" : "達成率はブース予算に対する割合です。" %>
+  達成率は<%= staff_axis ? "個人目標" : "ブース予算" %>に対する割合です。
 </p>
 
 <% if @rows.any? %>
@@ -27,9 +27,7 @@
   <section class="rounded-xl border border-slate-200 bg-white p-5" aria-label="獲得件数のグラフ">
     <div class="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
       <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="size-2.5 rounded-sm bg-chart-1"></span>獲得件数</span>
-      <% unless staff_axis %>
-        <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="h-0.5 w-3.5 bg-slate-700"></span>ブース予算</span>
-      <% end %>
+      <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="h-0.5 w-3.5 bg-slate-700"></span><%= staff_axis ? "目標" : "ブース予算" %></span>
     </div>
     <div class="flex flex-col gap-2">
       <% scale = [ max, @rows.map(&:target).max ].max.nonzero? || 1 %>
@@ -59,10 +57,8 @@
           <tr class="border-b border-slate-200 text-left text-xs text-slate-600">
             <th scope="col" class="px-4 py-2.5 font-semibold"><%= ResultSummary::AXES[@axis].delete_suffix("別") %></th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">獲得件数</th>
-            <% unless staff_axis %>
-              <th scope="col" class="px-4 py-2.5 text-right font-semibold">ブース予算</th>
-              <th scope="col" class="px-4 py-2.5 text-right font-semibold">達成率</th>
-            <% end %>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= staff_axis ? "目標件数" : "ブース予算" %></th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">達成率</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">アプローチ</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">カード</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">カード率</th>
@@ -74,10 +70,8 @@
             <tr>
               <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= row.label %></th>
               <td class="px-4 py-3 text-right font-semibold tabular-nums"><%= row.acquired %>件</td>
-              <% unless staff_axis %>
-                <td class="px-4 py-3 text-right tabular-nums"><%= row.target %>件</td>
-                <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(row.achievement_rate) %></td>
-              <% end %>
+              <td class="px-4 py-3 text-right tabular-nums"><%= row.target %>件</td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(row.achievement_rate) %></td>
               <td class="px-4 py-3 text-right tabular-nums"><%= row.approach %>件</td>
               <td class="px-4 py-3 text-right tabular-nums"><%= row.card %>件</td>
               <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(row.card_rate) %></td>

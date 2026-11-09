@@ -19,9 +19,9 @@ if Rails.env.development?
   end
 end
 
-# Demo data for local development: staff, booth budgets, reports and LINE deliveries from Oct 1 to today.
-# Runs only once (skipped when any report exists); reset with `bin/rails db:seed:replant`.
-if Rails.env.development? && Report.none?
+# Demo data for local development: staff, budgets, work sessions with shifts, reports and LINE deliveries
+# from Oct 1 to tomorrow. Runs only once (skipped when any work session exists); reset with `bin/rails db:seed:replant`.
+if Rails.env.development? && WorkSession.none?
   random = Random.new(20261103)
   today = Date.current
 
@@ -36,30 +36,45 @@ if Rails.env.development? && Report.none?
     work_location.update!(budget_count: work_location.budget_count || 50 + random.rand(7) * 5, line_group_id: work_location.line_group_id || format("C%032x", work_location.id))
   end
 
-  slot_progress = { 13 => 0.3, 16 => 0.55, 19 => 0.8, 22 => 1.0 }
+  shift_hours = { "first_half" => [ "10:00", "16:00" ], "second_half" => [ "16:00", "22:00" ], "full_day" => [ "10:00", "22:00" ] }
+  slot_progress = { 13 => 0.3, 16 => 0.55, 19 => 0.8 }
   failures = [ "対象グループに公式アカウントが参加していません", "LINE APIの月間送信上限に達しました" ]
 
-  (Date.new(2026, 10, 1)..today).each_with_index do |date, day_index|
+  (Date.new(2026, 10, 1)..today.tomorrow).each_with_index do |date, day_index|
     day_work_locations = work_locations.rotate(day_index * 4).first(4)
     members = staff.rotate(day_index).each_slice(2).to_a
 
     day_work_locations.each_with_index do |work_location, booth_index|
       booth_staff = members[booth_index % members.size]
-      finals = booth_staff.to_h { |user| [ user, 15 + random.rand(20) ] }
+      work_session = WorkSession.create!(
+        work_location: work_location, work_date: date, budget_count: 50 + random.rand(7) * 5,
+        shifts_attributes: booth_staff.each_with_index.map do |user, index|
+          target = 20 + random.rand(5) * 5
+          { user_id: user.id, shift_type: index.zero? ? "full_day" : %w[ first_half second_half ].sample(random: random),
+            target_acquired_count: target, target_approach_count: target * 8 }
+        end
+      )
+      next if date > today
+
+      finals = work_session.shifts.to_h { |shift| [ shift, (shift.target_acquired_count * (0.7 + random.rand * 0.5)).round ] }
       slots = if date == today then [ 13, 16 ]
       elsif random.rand(12).zero? then [ 13, 16, 19 ] # Final report not submitted yet: counted as provisional
-      else slot_progress.keys
+      else [ 13, 16, 19, :final ]
       end
+      reporter = booth_staff.first
+
+      work_session.reports.create!(submitted_by: reporter, report_type: :start, created_at: date.in_time_zone.change(hour: 9, min: 30 + random.rand(25)))
 
       slots.each do |slot|
-        final = slot == 22
-        report = Report.create!(
-          work_location: work_location, work_date: date, submitted_by: booth_staff.first, report_type: final ? :final : :interim, report_slot: slot,
-          reported_at: date.in_time_zone.change(hour: slot, min: random.rand(1..15)),
-          report_results_attributes: finals.map do |user, total|
-            acquired = (total * slot_progress[slot]).round
-            { user: user, acquired_count: acquired,
-              approach_count: (final ? acquired * 3 + random.rand(20) : nil), card_count: (final ? (acquired * (0.3 + random.rand * 0.2)).round : nil) }
+        final = slot == :final
+        report = work_session.reports.create!(
+          submitted_by: reporter, report_type: final ? :final : :interim, report_slot: (slot unless final),
+          created_at: date.in_time_zone.change(hour: final ? 22 : slot, min: random.rand(1..15)),
+          report_results_attributes: finals.map do |shift, total|
+            acquired = final ? total : (total * slot_progress[slot]).round
+            result = { user: shift.user, acquired_count: acquired, approach_count: acquired * 7 + random.rand(30) }
+            result.merge!(card_count: (acquired * (0.3 + random.rand * 0.2)).round, started_at: shift_hours[shift.shift_type][0], ended_at: shift_hours[shift.shift_type][1]) if final
+            result
           end
         )
 
@@ -68,7 +83,7 @@ if Rails.env.development? && Report.none?
         elsif random.rand(25).zero?
           report.create_line_message_delivery!(status: :failed, error_message: failures.sample(random: random))
         else
-          report.create_line_message_delivery!(status: :sent, sent_at: report.reported_at + 5.seconds, message_id: format("%018d", report.id))
+          report.create_line_message_delivery!(status: :sent, sent_at: report.created_at + 5.seconds, message_id: format("%018d", report.id))
         end
       end
     end

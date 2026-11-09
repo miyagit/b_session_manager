@@ -1,7 +1,7 @@
 <% content_for :title, "実績報告" %>
 
-<% if @work_location %>
-  <%= render "form", report: @report, work_location: @work_location, registered_reports: @registered_reports, result_rows: @result_rows %>
+<% if @work_session %>
+  <%= render "form", report: @report, work_session: @work_session, result_rows: @result_rows, work_sessions: @work_sessions %>
 <% else %>
-  <%= render "work_location_picker", work_locations: @work_locations, booth_days: @booth_days %>
+  <%= render "work_session_picker", work_sessions: @work_sessions %>
 <% end %>

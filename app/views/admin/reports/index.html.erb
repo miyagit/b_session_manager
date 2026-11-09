@@ -27,7 +27,7 @@
           <tr class="border-b border-slate-200 text-left text-xs text-slate-600">
             <th scope="col" class="px-4 py-2.5 font-semibold">ブース</th>
             <th scope="col" class="px-4 py-2.5 font-semibold">報告</th>
-            <th scope="col" class="px-4 py-2.5 font-semibold">スタッフ別獲得（累計）</th>
+            <th scope="col" class="px-4 py-2.5 font-semibold">スタッフ別</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">ブース合計</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">達成率</th>
             <th scope="col" class="px-4 py-2.5 font-semibold">報告者・日時</th>
@@ -37,15 +37,18 @@
         <tbody class="divide-y divide-slate-100">
           <% @reports.each do |report| %>
             <tr>
-              <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= link_to report.work_location.name, admin_report_path(report), class: "text-blue-600 hover:text-blue-700" %></th>
-              <td class="px-4 py-3 whitespace-nowrap">
-                <span class="font-semibold tabular-nums"><%= report.report_slot %>時</span>
-                <%= status_badge(Report.human_attribute_name("report_type.#{report.report_type}"), report.final? ? :good : :warning) %>
+              <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= link_to report.work_session.work_location.name, admin_report_path(report), class: "text-blue-600 hover:text-blue-700" %></th>
+              <td class="px-4 py-3 whitespace-nowrap"><%= report_badge(report) %></td>
+              <td class="px-4 py-3 text-slate-700">
+                <% if report.start? %>
+                  <%= report.work_session.shifts.sort_by(&:id).map { |shift| "#{shift.user.name} 目標#{shift.target_acquired_count}件" }.join("、") %>
+                <% else %>
+                  <%= report.report_results.map { |report_result| "#{report_result.user.name} #{report_result.acquired_count}件" }.join("、") %>
+                <% end %>
               </td>
-              <td class="px-4 py-3 text-slate-700"><%= report.report_results.map { |report_result| "#{report_result.user.name} #{report_result.acquired_count}件" }.join("、") %></td>
-              <td class="px-4 py-3 text-right font-semibold tabular-nums"><%= report.booth_acquired_count %>件</td>
-              <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report.achievement_rate) %></td>
-              <td class="px-4 py-3 whitespace-nowrap text-slate-600"><%= report.submitted_by.name %>・<%= l(report.reported_at, format: "%H:%M") %></td>
+              <td class="px-4 py-3 text-right font-semibold tabular-nums"><%= report.start? ? "—" : "#{report.booth_acquired_count}件" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= report.start? ? "—" : format_rate(report.achievement_rate) %></td>
+              <td class="px-4 py-3 whitespace-nowrap text-slate-600"><%= report.submitted_by.name %>・<%= l(report.created_at, format: "%H:%M") %></td>
               <td class="px-4 py-3"><%= delivery_status_badge(report.line_message_delivery) %></td>
             </tr>
           <% end %>

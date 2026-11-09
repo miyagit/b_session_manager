@@ -4,8 +4,10 @@ class CreateReportResults < ActiveRecord::Migration[8.1]
       t.references :report, null: false, foreign_key: true
       t.references :user, null: false, foreign_key: true
       t.integer :acquired_count, null: false
-      t.integer :approach_count
-      t.integer :card_count
+      t.integer :approach_count, null: false
+      t.integer :card_count # final reports only
+      t.time :started_at    # final reports only: hours actually worked
+      t.time :ended_at
 
       t.timestamps
     end

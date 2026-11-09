@@ -1,103 +1,46 @@
-<%# locals: (report:, result_rows:) %>
-<% staff_options = User.where(is_active: true).or(User.where(id: result_rows.map(&:user_id).compact)).order(:name).to_a %>
+<%# locals: (report:, work_session:, result_rows:) %>
+<% assigned_users = work_session.shifts.sort_by(&:id).map(&:user) %>
+<% other_users = User.where(is_active: true).where.not(id: assigned_users.map(&:id)).order(:name) %>
+<% reporter_groups = [ [ "この稼働予定のスタッフ", assigned_users.map { |user| [ user.name, user.id ] } ],
+                       [ "その他のスタッフ", other_users.map { |user| [ user.name, user.id ] } ] ].reject { |_, options| options.empty? } %>
 
-<%= form_with model: [ :admin, report ], class: "flex flex-col gap-5" do |form| %>
-  <% if report.errors.any? %>
-    <div class="rounded-lg border border-critical/30 bg-critical-bg px-4 py-3 text-critical-text">
-      <p class="font-semibold"><%= report.errors.count %>件のエラーがあります。</p>
-      <ul class="mt-1 list-disc pl-5">
-        <% report.errors.each do |error| %>
-          <li><%= error.full_message %></li>
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">実績の登録</h1>
+    <p class="mt-1 text-[13px] text-slate-600"><%= date_with_wday(work_session.work_date) %>・<%= work_session.work_location.name %></p>
+  </div>
+  <%= link_to "別の稼働予定を選ぶ", new_admin_report_path(date: work_session.work_date), class: "btn btn-secondary" %>
+</div>
+
+<div class="flex max-w-lg flex-col gap-5">
+  <section aria-label="稼働予定の概要" class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+    <%= render "reports/session_summary", work_session: work_session %>
+  </section>
+
+  <%= form_with model: [ :admin, report ], class: "report-form flex flex-col gap-5" do |form| %>
+    <%= form.hidden_field :work_session_id %>
+    <%= render "reports/form_errors", report: report, work_session: work_session %>
+
+    <div class="rounded-xl border border-slate-200 bg-white p-4">
+      <%= form.label :submitted_by_id, class: "mb-1 block font-semibold" %>
+      <%= form.select :submitted_by_id, grouped_options_for_select(reporter_groups, report.submitted_by_id), { prompt: "選択してください" }, required: true, class: "input text-base" %>
+    </div>
+
+    <%= render "reports/choice_fields", form: form, work_session: work_session, slot_hint: "同じ稼働予定に同じ時刻の途中報告は1件だけ登録できます。" %>
+
+    <fieldset>
+      <legend class="mb-2 font-semibold">スタッフ別</legend>
+      <div class="flex flex-col gap-3">
+        <%= form.fields_for :report_results, result_rows do |result_form| %>
+          <%= render "reports/staff_fields", result_form: result_form, shift: work_session.shift_for(result_form.object.user_id) %>
         <% end %>
-      </ul>
+      </div>
+      <p class="mt-1.5 text-xs text-slate-500">開始報告では目標を確認・修正します。途中・最終報告では獲得件数を入力したスタッフだけが登録され、最終報告はカード数と勤務時間も必要です。</p>
+    </fieldset>
+
+    <div class="flex flex-col gap-2 pt-1">
+      <%= form.submit class: "btn btn-primary w-full py-3 text-base" %>
+      <%= link_to "キャンセル", admin_reports_path(date: work_session.work_date), class: "btn btn-secondary w-full py-3 text-base" %>
     </div>
   <% end %>
-
-  <div class="grid gap-5 sm:grid-cols-2">
-    <div>
-      <%= form.label :work_date, class: "mb-1 block font-semibold" %>
-      <%= form.date_field :work_date, required: true, class: "input" %>
-    </div>
-
-    <div>
-      <%= form.label :work_location_id, class: "mb-1 block font-semibold" %>
-      <%= form.collection_select :work_location_id, WorkLocation.order(:id), :id, :name, { prompt: "選択してください" }, required: true, class: "input" %>
-    </div>
-
-    <fieldset>
-      <legend class="mb-1 font-semibold"><%= Report.human_attribute_name(:report_type) %></legend>
-      <div class="flex flex-wrap gap-x-5 gap-y-2 py-2">
-        <% Report.report_types.each_key do |report_type| %>
-          <label class="inline-flex items-center gap-2">
-            <%= form.radio_button :report_type, report_type, class: "size-4 accent-blue-600" %>
-            <%= Report.human_attribute_name("report_type.#{report_type}") %>
-          </label>
-        <% end %>
-      </div>
-      <p class="mt-1 text-xs text-slate-500">中間報告の獲得件数はその時点までの累計です。最終報告でその日の実績が確定します。</p>
-    </fieldset>
-
-    <fieldset>
-      <legend class="mb-1 font-semibold"><%= Report.human_attribute_name(:report_slot) %></legend>
-      <div class="flex flex-wrap gap-x-5 gap-y-2 py-2">
-        <% Report::SLOTS.each do |slot| %>
-          <label class="inline-flex items-center gap-2">
-            <%= form.radio_button :report_slot, slot, class: "size-4 accent-blue-600" %>
-            <%= slot %>時
-          </label>
-        <% end %>
-      </div>
-      <p class="mt-1 text-xs text-slate-500">同じ稼働場所・稼働日に同じ時刻の報告は1件だけ登録できます。</p>
-    </fieldset>
-
-    <div>
-      <%= form.label :submitted_by_id, class: "mb-1 block font-semibold" %>
-      <%= form.collection_select :submitted_by_id, staff_options, :id, :name, { prompt: "選択してください" }, required: true, class: "input" %>
-    </div>
-
-    <div>
-      <%= form.label :reported_at, class: "mb-1 block font-semibold" %>
-      <%= form.datetime_local_field :reported_at, include_seconds: false, required: true, class: "input" %>
-    </div>
-  </div>
-
-  <fieldset>
-    <legend class="mb-2 font-semibold"><%= Report.human_attribute_name(:report_results) %></legend>
-    <div class="overflow-x-auto rounded-lg border border-slate-200">
-      <table class="w-full min-w-150 text-[13px]">
-        <thead class="bg-slate-50">
-          <tr class="text-left text-xs text-slate-600">
-            <th scope="col" class="px-3 py-2 font-semibold">スタッフ</th>
-            <th scope="col" class="px-3 py-2 font-semibold"><%= ReportResult.human_attribute_name(:acquired_count) %></th>
-            <th scope="col" class="px-3 py-2 font-semibold"><%= ReportResult.human_attribute_name(:approach_count) %><span class="ml-1.5 font-normal text-slate-500">任意</span></th>
-            <th scope="col" class="px-3 py-2 font-semibold"><%= ReportResult.human_attribute_name(:card_count) %><span class="ml-1.5 font-normal text-slate-500">任意</span></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <%= form.fields_for :report_results, result_rows do |result_form| %>
-            <% row_label = "#{result_form.index + 1}人目" %>
-            <tr>
-              <td class="px-3 py-2">
-                <%= result_form.collection_select :user_id, staff_options, :id, :name, { include_blank: "（選択なし）" }, class: "input min-w-32", aria: { label: "#{row_label}のスタッフ" } %>
-              </td>
-              <% { acquired_count: "の獲得件数", approach_count: "のアプローチ数", card_count: "のカード数" }.each do |attribute, suffix| %>
-                <td class="px-3 py-2">
-                  <div class="flex items-center gap-2">
-                    <%= result_form.number_field attribute, min: 0, step: 1, class: "input w-24 text-right tabular-nums", aria: { label: "#{row_label}#{suffix}" } %>
-                    <span class="text-slate-600">件</span>
-                  </div>
-                </td>
-              <% end %>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-    <p class="mt-1 text-xs text-slate-500">獲得件数を入力した行だけが登録されます（1回の報告につき最大<%= Report::MAX_RESULTS %>名）。アプローチ数とカード数は分かる場合だけ入力してください。</p>
-  </fieldset>
-
-  <div class="flex gap-2 pt-1">
-    <%= form.submit class: "btn btn-primary" %>
-    <%= link_to "キャンセル", admin_reports_path(date: report.work_date || Date.current), class: "btn btn-secondary" %>
-  </div>
-<% end %>
+</div>

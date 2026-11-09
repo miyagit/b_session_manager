@@ -1,100 +1,31 @@
-<%# locals: (report:, work_location:, registered_reports:, result_rows:) %>
-<% colleagues = User.where(is_active: true).where.not(id: current_staff.id).order(:name).to_a %>
-<% choice_classes = "flex min-h-14 cursor-pointer flex-col items-center justify-center rounded-lg border border-slate-200 bg-white px-1 py-2 text-center font-semibold has-checked:border-blue-600 has-checked:bg-blue-50 has-checked:text-blue-700 has-focus-visible:outline-2 has-focus-visible:outline-blue-600 has-disabled:cursor-not-allowed has-disabled:bg-slate-50 has-disabled:text-slate-400" %>
-
+<%# locals: (report:, work_session:, result_rows:, work_sessions:) %>
 <section class="rounded-xl border border-slate-200 bg-white p-4">
   <div class="flex items-start justify-between gap-3">
     <div>
-      <p class="text-xs text-slate-500"><%= date_with_wday(report.work_date) %></p>
-      <h1 class="mt-0.5 text-lg font-bold"><%= work_location.name %></h1>
+      <p class="text-xs text-slate-500"><%= date_with_wday(work_session.work_date) %></p>
+      <h1 class="mt-0.5 text-lg font-bold"><%= work_session.work_location.name %></h1>
     </div>
-    <%= link_to "ブースを変更", new_liff_report_path, class: "btn btn-secondary shrink-0" %>
+    <% if work_sessions.size > 1 %>
+      <%= link_to "ブースを変更", new_liff_report_path, class: "btn btn-secondary shrink-0" %>
+    <% end %>
   </div>
-  <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
-    <dt class="text-slate-500">ブース予算</dt>
-    <dd class="tabular-nums"><%= work_location.budget_count ? "#{work_location.budget_count}件" : "未設定" %></dd>
-    <dt class="text-slate-500">報告済み</dt>
-    <dd class="flex flex-wrap gap-1.5">
-      <% if registered_reports.empty? %>
-        まだありません
-      <% else %>
-        <% registered_reports.each do |registered_report| %>
-          <%= status_badge("#{registered_report.report_slot}時 #{Report.human_attribute_name("report_type.#{registered_report.report_type}")}", registered_report.final? ? :good : :warning) %>
-        <% end %>
-      <% end %>
-    </dd>
-  </dl>
+  <%= render "reports/session_summary", work_session: work_session %>
 </section>
 
-<%= form_with model: report, url: liff_reports_path, class: "flex flex-col gap-5" do |form| %>
-  <%= form.hidden_field :work_location_id %>
+<%= form_with model: report, url: liff_reports_path, class: "report-form flex flex-col gap-5" do |form| %>
+  <%= form.hidden_field :work_session_id %>
+  <%= render "reports/form_errors", report: report, work_session: work_session %>
 
-  <% if report.errors.any? %>
-    <div class="rounded-lg border border-critical/30 bg-critical-bg px-4 py-3 text-critical-text">
-      <p class="font-semibold"><%= report.errors.count %>件のエラーがあります。</p>
-      <ul class="mt-1 list-disc pl-5">
-        <% report.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+  <%= render "reports/choice_fields", form: form, work_session: work_session %>
 
   <fieldset>
-    <legend class="mb-2 font-semibold"><%= Report.human_attribute_name(:report_slot) %></legend>
-    <div class="grid grid-cols-4 gap-2">
-      <% Report::SLOTS.each do |slot| %>
-        <% registered = registered_reports.any? { |registered_report| registered_report.report_slot == slot } %>
-        <label class="<%= choice_classes %>">
-          <%= form.radio_button :report_slot, slot, disabled: registered, class: "sr-only" %>
-          <%= slot %>時
-          <% if registered %><span class="text-[10px] font-normal">報告済み</span><% end %>
-        </label>
-      <% end %>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend class="mb-2 font-semibold"><%= Report.human_attribute_name(:report_type) %></legend>
-    <div class="grid grid-cols-2 gap-2">
-      <% Report.report_types.each_key do |report_type| %>
-        <label class="<%= choice_classes %>">
-          <%= form.radio_button :report_type, report_type, class: "sr-only" %>
-          <%= Report.human_attribute_name("report_type.#{report_type}") %>
-        </label>
-      <% end %>
-    </div>
-    <p class="mt-1.5 text-xs text-slate-500">中間報告はその時点までの累計件数、最終報告はその日の確定件数を入力します。</p>
-  </fieldset>
-
-  <fieldset>
-    <legend class="mb-2 font-semibold">スタッフ別の件数</legend>
+    <legend class="mb-2 font-semibold">スタッフ別</legend>
     <div class="flex flex-col gap-3">
       <%= form.fields_for :report_results, result_rows do |result_form| %>
-        <% own_row = result_form.object.user_id == current_staff.id %>
-        <% row_label = own_row ? current_staff.name : "#{result_form.index + 1}人目" %>
-        <div class="rounded-xl border border-slate-200 bg-white p-4">
-          <% if own_row %>
-            <%= result_form.hidden_field :user_id %>
-            <p class="font-semibold">
-              <%= current_staff.name %>
-              <span class="ml-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">あなた</span>
-            </p>
-          <% else %>
-            <%= result_form.collection_select :user_id, colleagues, :id, :name, { include_blank: "一緒に報告するスタッフを選択" }, class: "input text-base", aria: { label: "#{row_label}のスタッフ" } %>
-          <% end %>
-          <div class="mt-3 grid grid-cols-3 gap-2">
-            <% [ [ :acquired_count, "獲得件数", false ], [ :approach_count, "アプローチ", true ], [ :card_count, "カード", true ] ].each do |attribute, label, optional| %>
-              <label class="block">
-                <span class="text-xs text-slate-600"><%= label %><% if optional %><span class="ml-1 text-slate-400">任意</span><% end %></span>
-                <%= result_form.number_field attribute, min: 0, step: 1, inputmode: "numeric", class: "input mt-1 text-right text-base tabular-nums", aria: { label: "#{row_label}の#{label}" } %>
-              </label>
-            <% end %>
-          </div>
-        </div>
+        <%= render "reports/staff_fields", result_form: result_form, shift: work_session.shift_for(result_form.object.user_id), own: result_form.object.user_id == current_staff.id %>
       <% end %>
     </div>
-    <p class="mt-1.5 text-xs text-slate-500">獲得件数を入力した行だけが報告されます（1回の報告につき最大<%= Report::MAX_RESULTS %>名）。</p>
+    <p class="mt-1.5 text-xs text-slate-500">開始報告では目標を確認・修正します。途中・最終報告では獲得件数を入力したスタッフだけが報告され、最終報告はカード数と勤務時間も必要です。</p>
   </fieldset>
 
   <%= form.submit "報告する", class: "btn btn-primary w-full py-3 text-base" %>

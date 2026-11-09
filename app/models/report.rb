@@ -1,22 +1,26 @@
+# A booth's report filed by a staff member from LINE: the start report (confirms the targets), interim reports
+# at 13, 16 and 19 (cumulative counts) and the final report (counts, cards and hours worked).
+# created_at is the time of the report.
 class Report < ApplicationRecord
-  SLOTS = [ 13, 16, 19, 22 ].freeze
-  MAX_RESULTS = 3
+  INTERIM_SLOTS = [ 13, 16, 19 ].freeze
 
-  belongs_to :work_location
+  belongs_to :work_session
   belongs_to :submitted_by, class_name: "User"
-  has_many :report_results, dependent: :destroy
+  has_many :report_results, dependent: :destroy, inverse_of: :report
   has_one :line_message_delivery, dependent: :destroy
 
-  # Rows without a count are skipped so a form can offer blank staff rows and only save the ones filled in.
+  # Rows without a count are skipped so the form can list every staff member and only save the ones filled in.
   accepts_nested_attributes_for :report_results, reject_if: ->(attributes) { attributes[:acquired_count].blank? }
 
-  enum :report_type, { interim: "interim", final: "final" }, validate: true
+  enum :report_type, { start: "start", interim: "interim", final: "final" }, validate: true
 
-  validates :work_date, presence: true
-  validates :report_slot, inclusion: { in: SLOTS }, uniqueness: { scope: [ :work_location_id, :work_date ] }
-  validates :reported_at, presence: true
-  validates :report_results, length: { in: 1..MAX_RESULTS }
-  validate :report_results_have_distinct_users
+  before_validation :clear_slot_unless_interim
+
+  validates :report_slot, inclusion: { in: INTERIM_SLOTS, message: "を選んでください" }, if: :interim?
+  validates :report_slot, uniqueness: { scope: :work_session_id }, if: -> { interim? && report_slot.present? }
+  validates :report_results, length: { minimum: 1 }, unless: :start?
+  validate :single_start_and_final_report
+  validate :report_results_belong_to_work_session
 
   # Interim counts are cumulative, so the booth total is the sum of this report only (never of earlier slots).
   def booth_acquired_count
@@ -25,14 +29,14 @@ class Report < ApplicationRecord
 
   # Percentage, or nil when it can't be calculated (no budget).
   def achievement_rate
-    budget = work_location.budget_count
+    budget = work_session.budget_count
     return if budget.nil? || budget.zero?
 
     booth_acquired_count * 100.0 / budget
   end
 
-  # One result per staff member, in the given order, for forms that list staff rows.
-  # Results already entered for a staff member are kept so a failed submit shows the typed values.
+  # One result per staff member, in the given order, for forms. Results already entered are kept so a failed
+  # submit shows the typed values.
   def result_rows_for(users)
     entered = report_results.index_by(&:user_id)
     users.map do |user|
@@ -43,8 +47,21 @@ class Report < ApplicationRecord
   end
 
   private
-    def report_results_have_distinct_users
-      user_ids = report_results.map(&:user_id).compact
-      errors.add(:report_results, "に同じスタッフが複数回含まれています") if user_ids.uniq.size != user_ids.size
+    def clear_slot_unless_interim
+      self.report_slot = nil unless interim?
+    end
+
+    def single_start_and_final_report
+      return if interim? || report_type.blank? || work_session.nil?
+      return unless work_session.reports.where(report_type: report_type).where.not(id: id).exists?
+
+      errors.add(:base, "#{Report.human_attribute_name("report_type.#{report_type}")}はすでに登録されています")
+    end
+
+    def report_results_belong_to_work_session
+      return if work_session.nil?
+      return if report_results.all? { |report_result| work_session.shift_for(report_result.user_id) }
+
+      errors.add(:report_results, "に、この稼働予定にシフトがないスタッフが含まれています")
     end
 end

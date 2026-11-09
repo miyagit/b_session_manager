@@ -9,6 +9,8 @@ module ApplicationHelper
 
   BADGE_DOTS = { good: "bg-good", warning: "bg-warning", critical: "bg-critical", info: "bg-blue-600", neutral: "bg-slate-400" }.freeze
 
+  REPORT_TONES = { "start" => :info, "interim" => :warning, "final" => :good }.freeze
+
   # A pill with a colored dot; the label carries the meaning, the color only supports it.
   def status_badge(label, tone)
     tag.span(class: "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold #{BADGE_TONES.fetch(tone)}") do
@@ -31,6 +33,31 @@ module ApplicationHelper
     when "pending" then status_badge("送信待ち", :info)
     else status_badge("未投稿", :neutral)
     end
+  end
+
+  # "開始報告", "13時 途中報告" or "最終報告" as a badge.
+  def report_badge(report)
+    status_badge(report_badge_label(report), REPORT_TONES.fetch(report.report_type))
+  end
+
+  def report_badge_label(report)
+    report.interim? ? "#{report.report_slot}時 途中報告" : Report.human_attribute_name("report_type.#{report.report_type}")
+  end
+
+  # "13時の途中報告", or the report type name, for headings.
+  def report_heading(report)
+    report.interim? ? "#{report.report_slot}時の途中報告" : Report.human_attribute_name("report_type.#{report.report_type}")
+  end
+
+  def shift_type_label(shift)
+    Shift.human_attribute_name("shift_type.#{shift.shift_type}")
+  end
+
+  # "10:00〜16:00", or 未入力 when the hours haven't been reported.
+  def format_hours(report_result)
+    return "未入力" if report_result.started_at.nil? || report_result.ended_at.nil?
+
+    "#{report_result.started_at.strftime("%H:%M")}〜#{report_result.ended_at.strftime("%H:%M")}"
   end
 
   # "97%", or 算出不可 when the denominator is zero.

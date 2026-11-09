@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_many :shifts, dependent: :restrict_with_error
   has_many :report_results, dependent: :restrict_with_error
   has_many :submitted_reports, class_name: "Report", foreign_key: :submitted_by_id, dependent: :restrict_with_error, inverse_of: :submitted_by
 
