@@ -5,7 +5,6 @@ Rails.application.routes.draw do
     root "dashboards#show"
     resources :users, except: :show
     resources :work_locations, only: %i[ index new create edit update ]
-    resources :work_sessions, except: :show
     resources :reports, only: %i[ index show new create ]
     resource :analytics, only: :show
   end

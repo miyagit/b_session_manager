@@ -1,10 +1,10 @@
 class ReportResult < ApplicationRecord
   belongs_to :report
-  belongs_to :work_assignment
+  belongs_to :user
 
   validates :acquired_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :approach_count, :card_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :work_assignment_id, uniqueness: { scope: :report_id }
+  validates :user_id, uniqueness: { scope: :report_id }
 
   # Percentage, or nil when it can't be calculated (nothing acquired or no card count).
   def card_rate

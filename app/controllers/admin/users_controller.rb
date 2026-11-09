@@ -40,7 +40,7 @@ class Admin::UsersController < Admin::BaseController
     if @user.destroy
       redirect_to admin_users_path, notice: "スタッフを削除しました。", status: :see_other
     else
-      redirect_to admin_users_path, alert: "稼働予定や報告があるスタッフは削除できません。無効にしてください。", status: :see_other
+      redirect_to admin_users_path, alert: "報告があるスタッフは削除できません。無効にしてください。", status: :see_other
     end
   end
 

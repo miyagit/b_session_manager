@@ -40,6 +40,6 @@ class Admin::WorkLocationsController < Admin::BaseController
   end
 
   def work_location_params
-    params.expect(work_location: [ :name, :category, :budget_count ])
+    params.expect(work_location: [ :name, :category, :budget_count, :line_group_id ])
   end
 end

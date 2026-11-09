@@ -4,8 +4,6 @@ ja:
       user: スタッフ
       admin_user: 管理者アカウント
       work_location: 稼働場所
-      work_session: 稼働予定
-      work_assignment: スタッフ割り当て
       report: 報告
       report_result: スタッフ別実績
       line_message_delivery: LINE投稿
@@ -15,6 +13,8 @@ ja:
         line_uid: LINE UID
         role: 権限
         is_active: 有効
+        report_results: スタッフ別実績
+        submitted_reports: 報告
       user/role:
         staff: スタッフ
         admin: 管理者
@@ -25,35 +25,16 @@ ja:
       work_location:
         name: 稼働場所名
         category: 分類
-        budget_count: 基本ブース予算
+        budget_count: ブース予算
+        line_group_id: LINE投稿先グループID
+        reports: 報告
       work_location/category:
         donki: ドンキホーテ
         cinema: シネマ
-      work_session:
-        work_date: 稼働日
+      report:
         work_location: 稼働場所
         work_location_id: 稼働場所
-        team_name: チーム名
-        budget_count: 当日のブース予算
-        line_group_id: LINE投稿先グループID
-        work_assignments: スタッフ割り当て
-        reports: 報告
-      work_session/work_assignments:
-        user: スタッフ
-        user_id: スタッフ
-        target_count: 個人目標
-      work_assignment:
-        work_session: 稼働予定
-        user: スタッフ
-        user_id: スタッフ
-        target_count: 個人目標
-        status: 登録状態
-        confirmed_at: 登録確認日時
-      work_assignment/status:
-        unconfirmed: 未確認
-        confirmed: 確認済み
-      report:
-        work_session: 稼働予定
+        work_date: 稼働日
         submitted_by: 報告者
         submitted_by_id: 報告者
         report_type: 報告の種類
@@ -61,8 +42,8 @@ ja:
         reported_at: 報告日時
         report_results: スタッフ別実績
       report/report_results:
-        work_assignment: スタッフ
-        work_assignment_id: スタッフ
+        user: スタッフ
+        user_id: スタッフ
         acquired_count: 獲得件数
         approach_count: アプローチ数
         card_count: カード数
@@ -71,8 +52,8 @@ ja:
         final: 最終報告
       report_result:
         report: 報告
-        work_assignment: スタッフ割り当て
-        work_assignment_id: スタッフ
+        user: スタッフ
+        user_id: スタッフ
         acquired_count: 獲得件数
         approach_count: アプローチ数
         card_count: カード数
