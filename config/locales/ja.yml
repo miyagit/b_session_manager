@@ -4,12 +4,20 @@ ja:
       user: スタッフ
       admin_user: 管理者アカウント
       work_location: 稼働場所
+      work_session: 稼働予定
+      shift: シフト
+      report: 報告
+      report_result: スタッフ別実績
+      line_message_delivery: LINE投稿
     attributes:
       user:
         name: 名前
         line_uid: LINE UID
         role: 権限
         is_active: 有効
+        shifts: シフト
+        report_results: スタッフ別実績
+        submitted_reports: 報告
       user/role:
         staff: スタッフ
         admin: 管理者
@@ -21,9 +29,81 @@ ja:
         name: 稼働場所名
         category: 分類
         budget_count: 基本ブース予算
+        line_group_id: LINE投稿先グループID
+        work_sessions: 稼働予定
       work_location/category:
         donki: ドンキホーテ
         cinema: シネマ
+      work_session:
+        work_date: 稼働日
+        work_location: 稼働場所
+        work_location_id: 稼働場所
+        budget_count: ブース予算
+        shifts: シフト
+        reports: 報告
+      work_session/shifts:
+        user: スタッフ
+        user_id: スタッフ
+        shift_type: シフト区分
+        target_acquired_count: 獲得目標
+        target_approach_count: アプローチ目標
+      shift:
+        work_session: 稼働予定
+        user: スタッフ
+        user_id: スタッフ
+        shift_type: シフト区分
+        target_acquired_count: 獲得目標
+        target_approach_count: アプローチ目標
+      shift/shift_type:
+        first_half: 前半
+        second_half: 後半
+        full_day: 全日
+      report:
+        work_session: 稼働予定
+        work_session_id: 稼働予定
+        submitted_by: 報告者
+        submitted_by_id: 報告者
+        report_type: 報告の種類
+        report_slot: 報告時刻
+        report_results: スタッフ別実績
+      report/report_results:
+        user: スタッフ
+        user_id: スタッフ
+        acquired_count: 獲得件数
+        approach_count: アプローチ数
+        card_count: カード数
+        started_at: 開始時刻
+        ended_at: 終了時刻
+      report/report_type:
+        start: 開始報告
+        interim: 途中報告
+        final: 最終報告
+      report_result:
+        report: 報告
+        user: スタッフ
+        user_id: スタッフ
+        acquired_count: 獲得件数
+        approach_count: アプローチ数
+        card_count: カード数
+        started_at: 開始時刻
+        ended_at: 終了時刻
+      line_message_delivery:
+        report: 報告
+        report_id: 報告
+        status: 投稿状態
+        message_id: LINEメッセージID
+        error_message: エラー内容
+        sent_at: 送信日時
+      line_message_delivery/status:
+        pending: 送信待ち
+        sent: 送信済み
+        failed: 送信失敗
+    errors:
+      models:
+        report:
+          attributes:
+            report_results:
+              too_short: は1名以上の獲得件数を入力してください
   devise:
     failure:
       admin_user:

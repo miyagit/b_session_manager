@@ -1,0 +1,46 @@
+<%# locals: (report:, work_session:, result_rows:) %>
+<% assigned_users = work_session.shifts.sort_by(&:id).map(&:user) %>
+<% other_users = User.where(is_active: true).where.not(id: assigned_users.map(&:id)).order(:name) %>
+<% reporter_groups = [ [ "この稼働予定のスタッフ", assigned_users.map { |user| [ user.name, user.id ] } ],
+                       [ "その他のスタッフ", other_users.map { |user| [ user.name, user.id ] } ] ].reject { |_, options| options.empty? } %>
+
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">実績の登録</h1>
+    <p class="mt-1 text-[13px] text-slate-600"><%= date_with_wday(work_session.work_date) %>・<%= work_session.work_location.name %></p>
+  </div>
+  <%= link_to "別の稼働予定を選ぶ", new_admin_report_path(date: work_session.work_date), class: "btn btn-secondary" %>
+</div>
+
+<div class="flex max-w-lg flex-col gap-5">
+  <section aria-label="稼働予定の概要" class="rounded-xl border border-slate-200 bg-white px-4 py-3">
+    <%= render "reports/session_summary", work_session: work_session %>
+  </section>
+
+  <%= form_with model: [ :admin, report ], class: "report-form flex flex-col gap-5" do |form| %>
+    <%= form.hidden_field :work_session_id %>
+    <%= render "reports/form_errors", report: report, work_session: work_session %>
+
+    <div class="rounded-xl border border-slate-200 bg-white p-4">
+      <%= form.label :submitted_by_id, class: "mb-1 block font-semibold" %>
+      <%= form.select :submitted_by_id, grouped_options_for_select(reporter_groups, report.submitted_by_id), { prompt: "選択してください" }, required: true, class: "input text-base" %>
+    </div>
+
+    <%= render "reports/choice_fields", form: form, work_session: work_session, slot_hint: "同じ稼働予定に同じ時刻の途中報告は1件だけ登録できます。" %>
+
+    <fieldset>
+      <legend class="mb-2 font-semibold">スタッフ別</legend>
+      <div class="flex flex-col gap-3">
+        <%= form.fields_for :report_results, result_rows do |result_form| %>
+          <%= render "reports/staff_fields", result_form: result_form, shift: work_session.shift_for(result_form.object.user_id) %>
+        <% end %>
+      </div>
+      <p class="mt-1.5 text-xs text-slate-500">開始報告では目標を確認・修正します。途中・最終報告では獲得件数を入力したスタッフだけが登録され、最終報告はカード数と勤務時間も必要です。</p>
+    </fieldset>
+
+    <div class="flex flex-col gap-2 pt-1">
+      <%= form.submit class: "btn btn-primary w-full py-3 text-base" %>
+      <%= link_to "キャンセル", admin_reports_path(date: work_session.work_date), class: "btn btn-secondary w-full py-3 text-base" %>
+    </div>
+  <% end %>
+</div>

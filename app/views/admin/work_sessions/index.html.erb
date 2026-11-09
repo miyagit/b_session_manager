@@ -1,0 +1,70 @@
+<% content_for :title, "稼働予定" %>
+
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold">稼働予定</h1>
+  <%= link_to "新規作成", new_admin_work_session_path(date: @date), class: "btn btn-primary" %>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+  <%= link_to "前日", admin_work_sessions_path(date: @date.yesterday), class: "btn btn-secondary" %>
+  <%= form_with url: admin_work_sessions_path, method: :get, class: "flex items-center gap-2" do |form| %>
+    <%= form.date_field :date, value: @date, class: "input w-auto", aria: { label: "稼働日" } %>
+    <%= form.submit "表示", name: nil, class: "btn btn-secondary" %>
+  <% end %>
+  <%= link_to "翌日", admin_work_sessions_path(date: @date.tomorrow), class: "btn btn-secondary" %>
+  <%= link_to "今日", admin_work_sessions_path, class: "btn btn-secondary" unless @date == Date.current %>
+</div>
+
+<h2 class="text-lg font-bold"><%= date_with_wday(@date) %></h2>
+
+<% if @work_sessions.empty? %>
+  <p class="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-slate-500">この日の稼働予定はありません。</p>
+<% end %>
+
+<div class="grid gap-4 md:grid-cols-2">
+  <% @work_sessions.each do |work_session| %>
+    <section class="rounded-xl border border-slate-200 bg-white">
+      <div class="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
+        <div>
+          <h3 class="text-base font-bold"><%= work_session.work_location.name %></h3>
+          <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+            <span><%= WorkLocation.human_attribute_name("category.#{work_session.work_location.category}") %>・ブース予算 <%= work_session.budget_count %>件</span>
+            <%= result_status_badge(work_session.result_status) %>
+            <% if (latest_report = work_session.latest_report) %><span><%= report_badge_label(latest_report) %>まで</span><% end %>
+          </p>
+        </div>
+        <div class="flex shrink-0 gap-2">
+          <% if work_session.shifts.any? %>
+            <%= link_to "実績を登録", new_admin_report_path(work_session_id: work_session), class: "btn btn-secondary" %>
+          <% end %>
+          <%= link_to "編集", edit_admin_work_session_path(work_session), class: "btn btn-secondary" %>
+        </div>
+      </div>
+
+      <% if work_session.shifts.any? %>
+        <table class="w-full text-[13px]">
+          <thead>
+            <tr class="text-left text-xs text-slate-600">
+              <th scope="col" class="px-5 py-2 font-semibold">スタッフ</th>
+              <th scope="col" class="px-5 py-2 font-semibold">シフト</th>
+              <th scope="col" class="px-5 py-2 text-right font-semibold">獲得目標</th>
+              <th scope="col" class="px-5 py-2 text-right font-semibold">アプローチ目標</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 border-t border-slate-100">
+            <% work_session.shifts.sort_by(&:id).each do |shift| %>
+              <tr>
+                <th scope="row" class="px-5 py-2.5 text-left font-semibold"><%= shift.user.name %></th>
+                <td class="px-5 py-2.5"><%= shift_type_label(shift) %></td>
+                <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_acquired_count %>件</td>
+                <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_approach_count %>件</td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="px-5 py-4 text-slate-500">シフトが登録されていません。</p>
+      <% end %>
+    </section>
+  <% end %>
+</div>

@@ -1,0 +1,54 @@
+<%# locals: (date:, work_sessions:) %>
+<div>
+  <h1 class="text-2xl font-bold">実績の登録</h1>
+  <p class="mt-1 text-[13px] text-slate-600">通常はスタッフが LINE から報告します。代わりに登録する稼働予定を選んでください。</p>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+  <%= link_to "前日", new_admin_report_path(date: date.yesterday), class: "btn btn-secondary" %>
+  <%= form_with url: new_admin_report_path, method: :get, class: "flex items-center gap-2" do |form| %>
+    <%= form.date_field :date, value: date, class: "input w-auto", aria: { label: "稼働日" } %>
+    <%= form.submit "表示", name: nil, class: "btn btn-secondary" %>
+  <% end %>
+  <%= link_to "翌日", new_admin_report_path(date: date.tomorrow), class: "btn btn-secondary" %>
+  <%= link_to "今日", new_admin_report_path, class: "btn btn-secondary" unless date == Date.current %>
+</div>
+
+<h2 class="text-lg font-bold"><%= date_with_wday(date) %></h2>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <% if work_sessions.empty? %>
+    <div class="flex flex-col items-center gap-3 px-4 py-8 text-slate-500">
+      <p>この日の稼働予定はありません。</p>
+      <%= link_to "稼働予定を作成", new_admin_work_session_path(date: date), class: "btn btn-secondary" %>
+    </div>
+  <% else %>
+    <ul class="divide-y divide-slate-100">
+      <% work_sessions.each do |work_session| %>
+        <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <div class="min-w-0">
+            <p class="font-semibold"><%= work_session.work_location.name %><span class="ml-2 text-xs font-normal text-slate-500">ブース予算 <%= work_session.budget_count %>件</span></p>
+            <p class="mt-1 text-[13px] text-slate-600">
+              <% if work_session.shifts.any? %>
+                <%= work_session.shifts.sort_by(&:id).map { |shift| "#{shift.user.name}（#{shift_type_label(shift)}）" }.join("、") %>
+              <% else %>
+                シフトが登録されていません
+              <% end %>
+            </p>
+            <p class="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <%= result_status_badge(work_session.result_status) %>
+              <% if (latest_report = work_session.latest_report) %><span class="text-xs text-slate-500"><%= report_badge_label(latest_report) %>まで報告済み</span><% end %>
+            </p>
+          </div>
+          <% if work_session.shifts.empty? %>
+            <%= link_to "シフトを登録する", edit_admin_work_session_path(work_session), class: "btn btn-secondary" %>
+          <% elsif work_session.all_reports_filed? %>
+            <span class="text-[13px] text-slate-500">すべて報告済み</span>
+          <% else %>
+            <%= link_to "この稼働予定で登録", new_admin_report_path(work_session_id: work_session), class: "btn btn-primary" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

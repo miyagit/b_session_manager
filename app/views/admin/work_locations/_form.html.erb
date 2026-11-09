@@ -31,6 +31,14 @@
     <p class="mt-1 text-xs text-slate-500">まだ決まっていない場合は、空欄のままにしてください。</p>
   </div>
 
+  <div>
+    <%= form.label :line_group_id, class: "mb-1 block font-semibold" do %>
+      <%= WorkLocation.human_attribute_name(:line_group_id) %><span class="ml-1.5 text-xs font-normal text-slate-500">任意</span>
+    <% end %>
+    <%= form.text_field :line_group_id, placeholder: "C1234567890abcdef1234567890abcdef", class: "input font-mono" %>
+    <p class="mt-1 text-xs text-slate-500">この稼働場所の報告を投稿するLINEグループです。</p>
+  </div>
+
   <div class="flex gap-2 pt-1">
     <%= form.submit class: "btn btn-primary" %>
     <%= link_to "キャンセル", admin_work_locations_path, class: "btn btn-secondary" %>

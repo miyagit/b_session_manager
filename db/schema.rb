@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_29_135257) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,6 +23,65 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_29_135257) do
     t.index ["email"], name: "index_admin_users_on_email", unique: true
   end
 
+  create_table "line_message_deliveries", force: :cascade do |t|
+    t.bigint "report_id", null: false
+    t.string "status", default: "pending", null: false
+    t.string "message_id"
+    t.text "error_message"
+    t.datetime "sent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["report_id"], name: "index_line_message_deliveries_on_report_id", unique: true
+  end
+
+  create_table "report_results", force: :cascade do |t|
+    t.bigint "report_id", null: false
+    t.bigint "user_id", null: false
+    t.integer "acquired_count", null: false
+    t.integer "approach_count", null: false
+    t.integer "card_count"
+    t.time "started_at"
+    t.time "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["report_id", "user_id"], name: "index_report_results_on_report_id_and_user_id", unique: true
+    t.index ["report_id"], name: "index_report_results_on_report_id"
+    t.index ["user_id"], name: "index_report_results_on_user_id"
+    t.check_constraint "acquired_count >= 0", name: "report_results_acquired_count_non_negative"
+    t.check_constraint "approach_count >= 0", name: "report_results_approach_count_non_negative"
+    t.check_constraint "card_count >= 0", name: "report_results_card_count_non_negative"
+  end
+
+  create_table "reports", force: :cascade do |t|
+    t.bigint "work_session_id", null: false
+    t.bigint "submitted_by_id", null: false
+    t.string "report_type", null: false
+    t.integer "report_slot"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["submitted_by_id"], name: "index_reports_on_submitted_by_id"
+    t.index ["work_session_id", "report_slot"], name: "index_reports_on_work_session_and_interim_slot", unique: true, where: "((report_type)::text = 'interim'::text)"
+    t.index ["work_session_id", "report_type"], name: "index_reports_on_work_session_and_single_type", unique: true, where: "((report_type)::text <> 'interim'::text)"
+    t.index ["work_session_id"], name: "index_reports_on_work_session_id"
+    t.check_constraint "(report_type::text = 'interim'::text) = (report_slot IS NOT NULL)", name: "reports_report_slot_only_for_interim"
+    t.check_constraint "report_slot IS NULL OR (report_slot = ANY (ARRAY[13, 16, 19]))", name: "reports_report_slot_fixed_times"
+  end
+
+  create_table "shifts", force: :cascade do |t|
+    t.bigint "work_session_id", null: false
+    t.bigint "user_id", null: false
+    t.string "shift_type", null: false
+    t.integer "target_acquired_count", null: false
+    t.integer "target_approach_count", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_shifts_on_user_id"
+    t.index ["work_session_id", "user_id"], name: "index_shifts_on_work_session_id_and_user_id", unique: true
+    t.index ["work_session_id"], name: "index_shifts_on_work_session_id"
+    t.check_constraint "target_acquired_count >= 0", name: "shifts_target_acquired_count_non_negative"
+    t.check_constraint "target_approach_count >= 0", name: "shifts_target_approach_count_non_negative"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "line_uid"
@@ -30,6 +89,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_29_135257) do
     t.boolean "is_active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "avatar_url"
     t.index ["line_uid"], name: "index_users_on_line_uid", unique: true
   end
 
@@ -37,8 +97,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_29_135257) do
     t.string "name", null: false
     t.string "category", null: false
     t.integer "budget_count"
+    t.string "line_group_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_work_locations_on_name", unique: true
   end
+
+  create_table "work_sessions", force: :cascade do |t|
+    t.bigint "work_location_id", null: false
+    t.date "work_date", null: false
+    t.integer "budget_count", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["work_date"], name: "index_work_sessions_on_work_date"
+    t.index ["work_location_id", "work_date"], name: "index_work_sessions_on_work_location_id_and_work_date", unique: true
+    t.index ["work_location_id"], name: "index_work_sessions_on_work_location_id"
+    t.check_constraint "budget_count >= 0", name: "work_sessions_budget_count_non_negative"
+  end
+
+  add_foreign_key "line_message_deliveries", "reports"
+  add_foreign_key "report_results", "reports"
+  add_foreign_key "report_results", "users"
+  add_foreign_key "reports", "users", column: "submitted_by_id"
+  add_foreign_key "reports", "work_sessions"
+  add_foreign_key "shifts", "users"
+  add_foreign_key "shifts", "work_sessions"
+  add_foreign_key "work_sessions", "work_locations"
 end

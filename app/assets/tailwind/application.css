@@ -55,3 +55,13 @@
     @apply border-critical;
   }
 }
+
+/*
+ * Report forms: each report type shows only its own fields (.start-only / .interim-only / .final-only / .result-only).
+ * Kept outside the layers so it beats the display utilities (grid) on those elements.
+ */
+.report-form:has(input[name$="[report_type]"][value="start"]:checked) :is(.interim-only, .final-only, .result-only),
+.report-form:has(input[name$="[report_type]"][value="interim"]:checked) :is(.start-only, .final-only),
+.report-form:has(input[name$="[report_type]"][value="final"]:checked) :is(.start-only, .interim-only) {
+  display: none;
+}

@@ -1,0 +1,7 @@
+<% content_for :title, "実績の登録" %>
+
+<% if @work_session %>
+  <%= render "form", report: @report, work_session: @work_session, result_rows: @result_rows %>
+<% else %>
+  <%= render "work_session_picker", date: @date, work_sessions: @work_sessions %>
+<% end %>

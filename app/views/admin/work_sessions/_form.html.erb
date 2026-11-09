@@ -1,0 +1,85 @@
+<%# locals: (work_session:) %>
+<% staff_options = User.where(is_active: true).or(User.where(id: work_session.shifts.map(&:user_id).compact)).order(:name).to_a %>
+
+<%= form_with model: [ :admin, work_session ], class: "flex flex-col gap-5" do |form| %>
+  <% if work_session.errors.any? %>
+    <div class="rounded-lg border border-critical/30 bg-critical-bg px-4 py-3 text-critical-text">
+      <p class="font-semibold"><%= work_session.errors.count %>件のエラーがあります。</p>
+      <ul class="mt-1 list-disc pl-5">
+        <% work_session.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <%= form.label :work_date, class: "mb-1 block font-semibold" %>
+      <%= form.date_field :work_date, required: true, class: "input" %>
+    </div>
+
+    <div>
+      <%= form.label :work_location_id, class: "mb-1 block font-semibold" %>
+      <%= form.collection_select :work_location_id, WorkLocation.order(:id), :id, :name, { prompt: "選択してください" }, required: true, class: "input" %>
+    </div>
+
+    <div>
+      <%= form.label :budget_count, class: "mb-1 block font-semibold" %>
+      <div class="flex items-center gap-2">
+        <%= form.number_field :budget_count, min: 0, step: 1, class: "input text-right tabular-nums" %>
+        <span class="text-slate-600">件</span>
+      </div>
+      <p class="mt-1 text-xs text-slate-500">新規作成で空欄にすると、稼働場所の基本ブース予算が入ります。</p>
+    </div>
+  </div>
+
+  <fieldset>
+    <legend class="mb-2 font-semibold">シフト</legend>
+    <div class="overflow-x-auto rounded-lg border border-slate-200">
+      <table class="w-full min-w-160 text-[13px]">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-xs text-slate-600">
+            <th scope="col" class="px-3 py-2 font-semibold">スタッフ</th>
+            <th scope="col" class="px-3 py-2 font-semibold">シフト区分</th>
+            <th scope="col" class="px-3 py-2 font-semibold">獲得目標</th>
+            <th scope="col" class="px-3 py-2 font-semibold">アプローチ目標</th>
+            <th scope="col" class="px-3 py-2 font-semibold">外す</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <%= form.fields_for :shifts do |shift_form| %>
+            <% shift = shift_form.object %>
+            <tr>
+              <td class="px-3 py-2">
+                <%= shift_form.collection_select :user_id, staff_options, :id, :name, { include_blank: "（選択なし）" }, class: "input min-w-32", aria: { label: "スタッフ" } %>
+              </td>
+              <td class="px-3 py-2">
+                <%= shift_form.select :shift_type, Shift.shift_types.keys.map { |shift_type| [ Shift.human_attribute_name("shift_type.#{shift_type}"), shift_type ] }, {}, class: "input", aria: { label: "シフト区分" } %>
+              </td>
+              <% { target_acquired_count: "獲得目標", target_approach_count: "アプローチ目標" }.each do |attribute, label| %>
+                <td class="px-3 py-2">
+                  <div class="flex items-center gap-2">
+                    <%= shift_form.number_field attribute, min: 0, step: 1, class: "input w-24 text-right tabular-nums", aria: { label: label } %>
+                    <span class="text-slate-600">件</span>
+                  </div>
+                </td>
+              <% end %>
+              <td class="px-3 py-2">
+                <% if shift.persisted? %>
+                  <%= shift_form.check_box :_destroy, class: "size-4 accent-blue-600", aria: { label: "このスタッフを外す" } %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-1 text-xs text-slate-500">スタッフを選んだ行だけが登録されます。目標は開始報告のときにスタッフ本人が確認・修正できます。人数が足りないときは、保存すると空き行が追加されます。</p>
+  </fieldset>
+
+  <div class="flex gap-2 pt-1">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to "キャンセル", admin_work_sessions_path(date: work_session.work_date), class: "btn btn-secondary" %>
+  </div>
+<% end %>

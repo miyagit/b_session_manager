@@ -6,9 +6,9 @@
 </div>
 
 <nav aria-label="分類で絞り込み" class="flex flex-wrap gap-2">
-  <%= render "filter_tab", label: "すべて", count: @category_counts.values.sum, path: admin_work_locations_path, selected: @category.nil? %>
+  <%= render "admin/shared/filter_tab", label: "すべて", count: @category_counts.values.sum, path: admin_work_locations_path, selected: @category.nil? %>
   <% WorkLocation.categories.each_key do |category| %>
-    <%= render "filter_tab", label: WorkLocation.human_attribute_name("category.#{category}"), count: @category_counts.fetch(category, 0),
+    <%= render "admin/shared/filter_tab", label: WorkLocation.human_attribute_name("category.#{category}"), count: @category_counts.fetch(category, 0),
           path: admin_work_locations_path(category: category), selected: @category == category %>
   <% end %>
 </nav>

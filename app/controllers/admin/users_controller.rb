@@ -37,8 +37,11 @@ class Admin::UsersController < Admin::BaseController
 
   # DELETE /admin/users/1
   def destroy
-    @user.destroy!
-    redirect_to admin_users_path, notice: "スタッフを削除しました。", status: :see_other
+    if @user.destroy
+      redirect_to admin_users_path, notice: "スタッフを削除しました。", status: :see_other
+    else
+      redirect_to admin_users_path, alert: "シフトや報告があるスタッフは削除できません。無効にしてください。", status: :see_other
+    end
   end
 
   private

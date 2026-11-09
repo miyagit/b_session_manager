@@ -1,0 +1,12 @@
+<%# locals: (report:, work_session:) %>
+<% messages = report.errors.full_messages + work_session.shifts.flat_map { |shift| shift.errors.full_messages.map { |message| "#{shift.user.name}: #{message}" } } %>
+<% if messages.any? %>
+  <div class="rounded-lg border border-critical/30 bg-critical-bg px-4 py-3 text-critical-text">
+    <p class="font-semibold"><%= messages.size %>件のエラーがあります。</p>
+    <ul class="mt-1 list-disc pl-5">
+      <% messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

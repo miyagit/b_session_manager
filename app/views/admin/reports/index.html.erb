@@ -1,0 +1,59 @@
+<% content_for :title, "実績一覧" %>
+
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold">実績一覧</h1>
+  <%= link_to "実績を登録", new_admin_report_path(date: @date), class: "btn btn-primary" %>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+  <%= link_to "前日", admin_reports_path(date: @date.yesterday), class: "btn btn-secondary" %>
+  <%= form_with url: admin_reports_path, method: :get, class: "flex items-center gap-2" do |form| %>
+    <%= form.date_field :date, value: @date, class: "input w-auto", aria: { label: "稼働日" } %>
+    <%= form.submit "表示", name: nil, class: "btn btn-secondary" %>
+  <% end %>
+  <%= link_to "翌日", admin_reports_path(date: @date.tomorrow), class: "btn btn-secondary" %>
+  <%= link_to "今日", admin_reports_path, class: "btn btn-secondary" unless @date == Date.current %>
+</div>
+
+<h2 class="text-lg font-bold"><%= date_with_wday(@date) %></h2>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <% if @reports.empty? %>
+    <p class="px-4 py-8 text-center text-slate-500">この日の報告はありません。</p>
+  <% else %>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-200 text-[13px]">
+        <thead>
+          <tr class="border-b border-slate-200 text-left text-xs text-slate-600">
+            <th scope="col" class="px-4 py-2.5 font-semibold">ブース</th>
+            <th scope="col" class="px-4 py-2.5 font-semibold">報告</th>
+            <th scope="col" class="px-4 py-2.5 font-semibold">スタッフ別</th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">ブース合計</th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">達成率</th>
+            <th scope="col" class="px-4 py-2.5 font-semibold">報告者・日時</th>
+            <th scope="col" class="px-4 py-2.5 font-semibold">LINE投稿</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @reports.each do |report| %>
+            <tr>
+              <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= link_to report.work_session.work_location.name, admin_report_path(report), class: "text-blue-600 hover:text-blue-700" %></th>
+              <td class="px-4 py-3 whitespace-nowrap"><%= report_badge(report) %></td>
+              <td class="px-4 py-3 text-slate-700">
+                <% if report.start? %>
+                  <%= report.work_session.shifts.sort_by(&:id).map { |shift| "#{shift.user.name} 目標#{shift.target_acquired_count}件" }.join("、") %>
+                <% else %>
+                  <%= report.report_results.map { |report_result| "#{report_result.user.name} #{report_result.acquired_count}件" }.join("、") %>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-right font-semibold tabular-nums"><%= report.start? ? "—" : "#{report.booth_acquired_count}件" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= report.start? ? "—" : format_rate(report.achievement_rate) %></td>
+              <td class="px-4 py-3 whitespace-nowrap text-slate-600"><%= report.submitted_by.name %>・<%= l(report.created_at, format: "%H:%M") %></td>
+              <td class="px-4 py-3"><%= delivery_status_badge(report.line_message_delivery) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

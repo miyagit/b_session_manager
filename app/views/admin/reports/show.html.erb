@@ -1,0 +1,94 @@
+<% work_session = @report.work_session %>
+<% content_for :title, "報告の詳細" %>
+
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold"><%= work_session.work_location.name %> <%= report_heading(@report) %></h1>
+    <p class="mt-1 text-[13px] text-slate-600"><%= date_with_wday(work_session.work_date) %>・報告者 <%= @report.submitted_by.name %>（<%= l(@report.created_at, format: "%H:%M") %>）</p>
+  </div>
+  <%= link_to "実績一覧に戻る", admin_reports_path(date: work_session.work_date), class: "btn btn-secondary" %>
+</div>
+
+<section aria-label="ブース全体" class="grid gap-4 sm:grid-cols-3">
+  <% cards = if @report.start?
+       [ [ "ブース予算", "#{work_session.budget_count}件" ], [ "獲得目標の合計", "#{work_session.target_acquired_count}件" ], [ "スタッフ", "#{work_session.shifts.size}名" ] ]
+     else
+       [ [ "ブース予算", "#{work_session.budget_count}件" ], [ "ブース獲得件数", "#{@report.booth_acquired_count}件" ], [ "予算達成率", format_rate(@report.achievement_rate) ] ]
+     end %>
+  <% cards.each do |label, value| %>
+    <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <h2 class="text-[13px] font-semibold text-slate-600"><%= label %></h2>
+      <p class="mt-1 text-[28px] font-semibold leading-tight"><%= value %></p>
+    </div>
+  <% end %>
+</section>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-160 text-[13px]">
+      <thead>
+        <tr class="border-b border-slate-200 text-left text-xs text-slate-600">
+          <th scope="col" class="px-4 py-2.5 font-semibold">スタッフ</th>
+          <th scope="col" class="px-4 py-2.5 font-semibold">シフト</th>
+          <% if @report.start? %>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">獲得目標</th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">アプローチ目標</th>
+          <% else %>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= @report.final? ? "獲得件数 / 目標" : "累計獲得 / 目標" %></th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">達成率</th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">アプローチ / 目標</th>
+            <th scope="col" class="px-4 py-2.5 text-right font-semibold">達成率</th>
+            <% if @report.final? %>
+              <th scope="col" class="px-4 py-2.5 text-right font-semibold">カード</th>
+              <th scope="col" class="px-4 py-2.5 text-right font-semibold">カード率</th>
+              <th scope="col" class="px-4 py-2.5 font-semibold">勤務時間</th>
+            <% end %>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% if @report.start? %>
+          <% work_session.shifts.sort_by(&:id).each do |shift| %>
+            <tr>
+              <th scope="row" class="px-4 py-3 text-left font-semibold"><%= shift.user.name %></th>
+              <td class="px-4 py-3"><%= shift_type_label(shift) %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= shift.target_acquired_count %>件</td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= shift.target_approach_count %>件</td>
+            </tr>
+          <% end %>
+        <% else %>
+          <% @report.report_results.each do |report_result| %>
+            <% shift = report_result.shift %>
+            <tr>
+              <th scope="row" class="px-4 py-3 text-left font-semibold"><%= report_result.user.name %></th>
+              <td class="px-4 py-3"><%= shift ? shift_type_label(shift) : "—" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><span class="font-semibold"><%= report_result.acquired_count %>件</span> / <%= shift ? "#{shift.target_acquired_count}件" : "—" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report_result.acquired_rate) %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= report_result.approach_count %>件 / <%= shift ? "#{shift.target_approach_count}件" : "—" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report_result.approach_rate) %></td>
+              <% if @report.final? %>
+                <td class="px-4 py-3 text-right tabular-nums"><%= report_result.card_count %>件</td>
+                <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report_result.card_rate) %></td>
+                <td class="px-4 py-3 whitespace-nowrap tabular-nums"><%= format_hours(report_result) %></td>
+              <% end %>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<section class="rounded-xl border border-slate-200 bg-white p-5">
+  <div class="flex flex-wrap items-center gap-3">
+    <h2 class="text-base font-bold">LINE投稿</h2>
+    <%= delivery_status_badge(@report.line_message_delivery) %>
+  </div>
+  <% if (line_message_delivery = @report.line_message_delivery) %>
+    <dl class="mt-3 grid gap-x-6 gap-y-1 text-[13px] sm:grid-cols-[auto_1fr]">
+      <dt class="text-slate-500">投稿先グループ</dt><dd class="font-mono text-xs"><%= work_session.work_location.line_group_id.presence || "未設定" %></dd>
+      <% if line_message_delivery.sent_at %><dt class="text-slate-500">送信日時</dt><dd><%= l(line_message_delivery.sent_at, format: "%Y/%m/%d %H:%M") %></dd><% end %>
+      <% if line_message_delivery.error_message.present? %><dt class="text-slate-500">エラー内容</dt><dd class="text-critical-text"><%= line_message_delivery.error_message %></dd><% end %>
+    </dl>
+  <% end %>
+</section>
