@@ -28,6 +28,28 @@
   --color-critical: #d03b3b;
   --color-critical-text: #b42323;
   --color-critical-bg: #fdecec;
+
+  /* おみくじミニアプリ（LINE 内で開く画面）の配色とアニメーション */
+  --color-omikuji-red: #b7282e;
+  --color-omikuji-gold: #e0b24a;
+  --color-omikuji-cream: #fff8ec;
+  --color-omikuji-ink: #3b2a1a;
+
+  --animate-omikuji-shake: omikuji-shake 0.8s ease-in-out infinite;
+  --animate-omikuji-pop: omikuji-pop 0.4s ease-out;
+
+  @keyframes omikuji-shake {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-10deg); }
+    40% { transform: rotate(8deg); }
+    60% { transform: rotate(-6deg); }
+    80% { transform: rotate(4deg); }
+  }
+
+  @keyframes omikuji-pop {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+  }
 }
 
 @layer components {
@@ -53,5 +75,14 @@
 
   .field_with_errors .input {
     @apply border-critical;
+  }
+
+  /* おみくじミニアプリのボタン */
+  .btn-omikuji {
+    @apply inline-flex w-full cursor-pointer items-center justify-center rounded-full bg-omikuji-red px-6 py-3.5 text-base font-bold text-white shadow-md transition active:scale-[0.98] disabled:cursor-default disabled:opacity-50;
+  }
+
+  .btn-omikuji-secondary {
+    @apply inline-flex w-full cursor-pointer items-center justify-center rounded-full border-2 border-omikuji-red bg-white px-6 py-3 text-base font-bold text-omikuji-red transition active:scale-[0.98] disabled:cursor-default disabled:opacity-50;
   }
 }

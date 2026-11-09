@@ -1,0 +1,49 @@
+<% content_for :title, "おみくじ" %>
+
+<main id="omikuji-app"
+      data-liff-id="<%= @liff_id %>"
+      data-draw-url="<%= api_omikuji_path %>"
+      data-share-url="<%= api_omikuji_share_path %>"
+      class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+  <header class="flex items-center gap-3">
+    <%= image_tag "/icon.svg", alt: "", class: "size-11 rounded-xl" %>
+    <div>
+      <h1 class="text-xl font-bold">おみくじ</h1>
+      <p class="text-[13px] text-omikuji-ink/70">今日の運勢を占ってみよう</p>
+    </div>
+  </header>
+
+  <section aria-live="polite" class="mt-6 flex flex-1 flex-col items-center justify-center rounded-3xl bg-white px-6 py-10 text-center shadow-sm ring-1 ring-omikuji-gold/40">
+    <%# おみくじ箱のイラスト（public/icon.svg と同じ図柄） %>
+    <div id="omikuji-box" class="h-44 origin-bottom">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="126 46 260 404" class="h-full" aria-hidden="true">
+        <rect x="146" y="190" width="220" height="250" rx="22" fill="#fff8ec" stroke="#d9b57a" stroke-width="4"/>
+        <rect x="146" y="190" width="220" height="44" rx="20" fill="#e0b24a"/>
+        <rect x="146" y="396" width="220" height="44" rx="20" fill="#e0b24a"/>
+        <circle cx="256" cy="318" r="48" fill="#b7282e"/>
+        <circle cx="256" cy="318" r="36" fill="none" stroke="#e0b24a" stroke-width="6"/>
+        <rect x="224" y="200" width="64" height="22" rx="11" fill="#5c3a1e"/>
+        <g transform="rotate(-14 256 212)">
+          <rect x="238" y="66" width="36" height="150" rx="8" fill="#fffdf7" stroke="#d9b57a" stroke-width="3"/>
+          <rect x="238" y="66" width="36" height="40" rx="8" fill="#e0b24a"/>
+        </g>
+      </svg>
+    </div>
+
+    <p id="omikuji-status" class="mt-6 text-base text-omikuji-ink/80">ボタンを押して、今日の運勢を占おう</p>
+
+    <div id="omikuji-result" class="mt-4 hidden w-full">
+      <p class="text-sm font-semibold tracking-[0.3em] text-omikuji-red">今日の運勢</p>
+      <p id="omikuji-result-name" class="mt-1 text-6xl font-bold text-omikuji-red"></p>
+      <p id="omikuji-result-message" class="mt-5 text-base leading-relaxed"></p>
+    </div>
+  </section>
+
+  <div class="mt-6 flex flex-col gap-3">
+    <button id="omikuji-draw" type="button" class="btn-omikuji">おみくじを引く</button>
+    <button id="omikuji-send" type="button" class="btn-omikuji-secondary hidden">結果をトークに送る</button>
+    <button id="omikuji-close" type="button" class="btn-omikuji-secondary hidden">LINE に戻る</button>
+  </div>
+
+  <p id="omikuji-note" class="mt-4 min-h-4 text-center text-xs text-omikuji-ink/60"></p>
+</main>
