@@ -38,7 +38,12 @@
             ・LINE投稿先 <%= work_session.line_group_id.present? ? "設定済み" : "未設定" %>
           </p>
         </div>
-        <%= link_to "編集", edit_admin_work_session_path(work_session), class: "btn btn-secondary" %>
+        <div class="flex shrink-0 gap-2">
+          <% if work_session.work_assignments.any? %>
+            <%= link_to "実績を登録", new_admin_report_path(work_session_id: work_session), class: "btn btn-secondary" %>
+          <% end %>
+          <%= link_to "編集", edit_admin_work_session_path(work_session), class: "btn btn-secondary" %>
+        </div>
       </div>
 
       <% if work_session.work_assignments.any? %>

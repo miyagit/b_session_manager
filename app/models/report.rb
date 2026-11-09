@@ -7,7 +7,8 @@ class Report < ApplicationRecord
   has_many :report_results, dependent: :destroy
   has_one :line_message_delivery, dependent: :destroy
 
-  accepts_nested_attributes_for :report_results
+  # Rows without a count are skipped so a form can list every assigned staff member and only save the ones reported.
+  accepts_nested_attributes_for :report_results, reject_if: ->(attributes) { attributes[:acquired_count].blank? }
 
   enum :report_type, { interim: "interim", final: "final" }, validate: true
 
@@ -27,6 +28,17 @@ class Report < ApplicationRecord
     return if budget.nil? || budget.zero?
 
     booth_acquired_count * 100.0 / budget
+  end
+
+  # One result per assignment, in the given order, for forms that list every assigned staff member.
+  # Results already entered for an assignment are kept so a failed submit shows the typed values.
+  def result_rows_for(work_assignments)
+    entered = report_results.index_by(&:work_assignment_id)
+    work_assignments.map do |work_assignment|
+      report_result = entered[work_assignment.id] || report_results.build
+      report_result.work_assignment = work_assignment
+      report_result
+    end
   end
 
   private

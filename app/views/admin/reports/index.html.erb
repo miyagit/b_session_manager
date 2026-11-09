@@ -1,6 +1,9 @@
 <% content_for :title, "実績一覧" %>
 
-<h1 class="text-2xl font-bold">実績一覧</h1>
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold">実績一覧</h1>
+  <%= link_to "実績を登録", new_admin_report_path(date: @date), class: "btn btn-primary" %>
+</div>
 
 <div class="flex flex-wrap items-center gap-2">
   <%= link_to "前日", admin_reports_path(date: @date.yesterday), class: "btn btn-secondary" %>

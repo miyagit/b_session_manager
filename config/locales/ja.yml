@@ -55,10 +55,17 @@ ja:
       report:
         work_session: 稼働予定
         submitted_by: 報告者
+        submitted_by_id: 報告者
         report_type: 報告の種類
         report_slot: 報告時刻
         reported_at: 報告日時
         report_results: スタッフ別実績
+      report/report_results:
+        work_assignment: スタッフ
+        work_assignment_id: スタッフ
+        acquired_count: 獲得件数
+        approach_count: アプローチ数
+        card_count: カード数
       report/report_type:
         interim: 中間報告
         final: 最終報告
@@ -80,6 +87,13 @@ ja:
         pending: 送信待ち
         sent: 送信済み
         failed: 送信失敗
+    errors:
+      models:
+        report:
+          attributes:
+            report_results:
+              too_short: は1名以上の獲得件数を入力してください
+              too_long: は%{count}名まで登録できます
   devise:
     failure:
       admin_user:

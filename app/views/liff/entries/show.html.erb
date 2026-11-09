@@ -1,0 +1,62 @@
+<% content_for :title, "確認中" %>
+
+<section class="rounded-xl border border-slate-200 bg-white p-6 text-center">
+  <div id="liff-spinner" aria-hidden="true" class="mx-auto size-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
+  <p id="liff-status" role="status" class="mt-4 text-slate-600">LINEアカウントを確認しています…</p>
+</section>
+
+<% if Rails.env.development? %>
+  <section class="rounded-xl border border-dashed border-warning/60 bg-warning-bg/40 p-4">
+    <h2 class="text-[13px] font-bold text-warning-text">開発用ログイン</h2>
+    <p class="mt-1 text-xs text-slate-600">LINEを使わずにスタッフとして開きます。development環境でだけ表示されます。</p>
+    <%= form_with url: liff_session_path, class: "mt-3 flex gap-2" do |form| %>
+      <%= form.collection_select :dev_user_id, User.where(is_active: true).order(:name), :id, :name, { prompt: "スタッフを選択" }, required: true, class: "input", aria: { label: "スタッフ" } %>
+      <%= form.submit "開く", class: "btn btn-primary shrink-0" %>
+    <% end %>
+  </section>
+<% end %>
+
+<script>
+  (async () => {
+    const status = document.getElementById("liff-status");
+    const spinner = document.getElementById("liff-spinner");
+    const fail = (message) => {
+      spinner.hidden = true;
+      status.textContent = message;
+      status.classList.add("text-critical-text");
+    };
+
+    try {
+      await window.liffReady;
+      if (!liff.isLoggedIn()) { liff.login(); return; }
+
+      const response = await fetch(<%= raw liff_session_path.to_json %>, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ id_token: liff.getIDToken() })
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        sessionStorage.removeItem("liffLoginRetried");
+        status.textContent = "報告画面を開いています…";
+        location.replace(data.redirect_to);
+        return;
+      }
+      if (response.status === 401 && !sessionStorage.getItem("liffLoginRetried")) {
+        // The ID token can expire while LINE keeps the login alive; log in again once to get a fresh one.
+        sessionStorage.setItem("liffLoginRetried", "1");
+        liff.logout();
+        liff.login();
+        return;
+      }
+      fail(data.error);
+    } catch (error) {
+      fail(error.message || "LINEの初期化に失敗しました。");
+    }
+  })();
+</script>
