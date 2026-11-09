@@ -30,6 +30,16 @@ class Omikuji
     RESULTS.last
   end
 
+  # 結果を識別する ID（RESULTS の添字）を返す。トークンに入れて持ち回る用
+  def self.id_of(result)
+    RESULTS.index(result)
+  end
+
+  # ID から結果を復元する。範囲外や整数以外なら nil
+  def self.at(id)
+    RESULTS[id] if id.is_a?(Integer) && id >= 0 && id < RESULTS.size
+  end
+
   # Bot の返信に使う文面を組み立てる
   def self.fortune_text(random: Random.new)
     draw(random: random).to_text

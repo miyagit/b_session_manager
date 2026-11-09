@@ -3,6 +3,7 @@
 <main id="omikuji-app"
       data-liff-id="<%= @liff_id %>"
       data-draw-url="<%= api_omikuji_path %>"
+      data-share-url="<%= api_omikuji_share_path %>"
       class="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
   <header class="flex items-center gap-3">
     <%= image_tag "/icon.svg", alt: "", class: "size-11 rounded-xl" %>

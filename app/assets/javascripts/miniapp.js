@@ -1,6 +1,8 @@
 // LINE ミニアプリのおみくじ画面
-// - LIFF を初期化し、LINE アプリ内で開かれたときだけ「結果をトークに送る」を表示する
+// - LIFF を初期化し、ログインできていれば「結果をトークに送る」を表示する
 // - 「おみくじを引く」で POST /api/omikuji を呼び、結果を表示する
+// - 「結果をトークに送る」で ID トークンを添えて POST /api/omikuji/share を呼び、
+//   サーバーが公式アカウントからユーザーのトークにプッシュ送信する
 (() => {
   const app = document.getElementById("omikuji-app");
   if (!app) return;
@@ -21,6 +23,7 @@
 
   let liffReady = false;
   let lastResult = null;
+  let lastToken = null;
 
   // ---- LIFF ----
   async function initLiff() {
@@ -36,34 +39,43 @@
     }
 
     try {
-      await liff.init({ liffId });
+      // 外部ブラウザで開いたときは LINE ログインを自動で行う（ID トークンを取るため）
+      await liff.init({ liffId, withLoginOnExternalBrowser: true });
       liffReady = true;
-      if (!liff.isInClient()) {
-        note.textContent = "LINE アプリで開くと、結果をトークに送れます";
-      }
     } catch (error) {
       console.error("liff.init failed", error);
       note.textContent = "LINE との接続に失敗しました（おみくじは引けます）";
     }
   }
 
-  // トークへの送信は LINE アプリ内で開いたときだけ使える
+  // トークへの送信には LINE ログイン（ID トークン）が必要
   function canSendToChat() {
-    return liffReady && liff.isInClient();
+    return liffReady && liff.isLoggedIn();
+  }
+
+  // ---- API ----
+  async function postJson(url, body) {
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        Accept: "application/json"
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
   }
 
   // ---- おみくじ ----
   async function fetchResult() {
-    const response = await fetch(app.dataset.drawUrl, {
-      method: "POST",
-      headers: { "X-CSRF-Token": csrfToken, Accept: "application/json" }
-    });
+    const response = await postJson(app.dataset.drawUrl);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
   }
 
   function showResult(data) {
     lastResult = data;
+    lastToken = data.token; // この結果を表す署名付きトークン。送信時はこれをサーバーに返す
     resultName.textContent = data.name;
     resultMessage.textContent = data.message;
     status.textContent = "";
@@ -98,18 +110,35 @@
     }
   }
 
+  // ---- トークに送る ----
   async function sendToChat() {
     if (!lastResult || !canSendToChat()) return;
 
+    const idToken = liff.getIDToken();
+    if (!idToken) {
+      note.textContent = "ログイン情報を取得できませんでした。ミニアプリを開き直してください。";
+      return;
+    }
+
     sendButton.disabled = true;
+    note.textContent = "送信しています…";
+
     try {
-      await liff.sendMessages([{ type: "text", text: lastResult.text }]);
-      note.textContent = "結果をトークに送りました 🎉";
+      // 画面に表示した結果そのもの（lastToken）をサーバーに送る。サーバーはこのトークンから結果を復元して送信する
+      const response = await postJson(app.dataset.shareUrl, { id_token: idToken, token: lastToken });
+      if (response.status === 401) {
+        note.textContent = "ログインの有効期限が切れました。ミニアプリを開き直してください。";
+        sendButton.disabled = false;
+        return;
+      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      note.textContent = "公式アカウントから結果をトークに送りました 🎉";
       sendButton.textContent = "送信しました";
-      closeButton.classList.remove("hidden");
+      if (liff.isInClient()) closeButton.classList.remove("hidden");
     } catch (error) {
-      console.error("liff.sendMessages failed", error);
-      note.textContent = "トークに送れませんでした。トーク画面からミニアプリを開くと送れます。";
+      console.error("share failed", error);
+      note.textContent = "トークに送れませんでした。公式アカウントを友だち追加しているか確認してください。";
       sendButton.disabled = false;
     }
   }

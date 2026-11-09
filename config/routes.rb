@@ -14,8 +14,9 @@ Rails.application.routes.draw do
     # LINE Messaging API の Webhook URL (/api/linebot/callback)
     post "linebot/callback", to: "linebot#callback"
 
-    # ミニアプリの画面からおみくじを引く
+    # ミニアプリの画面からおみくじを引く / 結果を公式アカウントからトークに送る
     post "omikuji", to: "omikuji#create"
+    post "omikuji/share", to: "omikuji#share"
   end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

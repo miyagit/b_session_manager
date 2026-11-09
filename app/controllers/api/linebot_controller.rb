@@ -35,24 +35,7 @@ class Api::LinebotController < ApplicationController
     return unless message.is_a?(Line::Bot::V2::Webhook::TextMessageContent)
     return unless message.text.strip == OMIKUJI_TRIGGER
 
-    reply_text(event.reply_token, Omikuji.fortune_text)
-  end
-
-  def reply_text(reply_token, text)
-    message = Line::Bot::V2::MessagingApi::TextMessage.new(text: text)
-    reply_request = Line::Bot::V2::MessagingApi::ReplyMessageRequest.new(
-      reply_token: reply_token,
-      messages: [ message ]
-    )
-
-    _body, status, _headers = client.reply_message_with_http_info(reply_message_request: reply_request)
-    Rails.logger.warn("LINE reply failed (status=#{status})") unless status == 200
-  end
-
-  def client
-    @client ||= Line::Bot::V2::MessagingApi::ApiClient.new(
-      channel_access_token: ENV.fetch("LINE_CHANNEL_TOKEN")
-    )
+    LineMessaging.reply_text(event.reply_token, Omikuji.fortune_text)
   end
 
   def parser
