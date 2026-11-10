@@ -17,6 +17,7 @@
       window.liffReady = (async () => {
         const liffId = <%= raw liff_id.to_json %>;
         if (!liffId) throw new Error("LIFF IDが設定されていません。");
+        if (!/^\d+-\w+$/.test(liffId)) throw new Error("LIFF IDの形式が正しくありません（例: 1234567890-AbCdEfGh）。チャネルIDではなく LIFF ID を設定してください。");
         await liff.init({ liffId });
       })();
       window.liffReady.catch(() => {});

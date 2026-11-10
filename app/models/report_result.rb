@@ -1,20 +1,30 @@
 class ReportResult < ApplicationRecord
-  # Hours worked are plain clock times, so keep them out of time-zone conversion.
-  self.skip_time_zone_conversion_for_attributes = [ :started_at, :ended_at ]
+  # A plain clock time, so keep it out of time-zone conversion.
+  self.skip_time_zone_conversion_for_attributes = [ :ended_at ]
 
   belongs_to :report
   belongs_to :user
 
   validates :acquired_count, :approach_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
-  # The final report also records cards and the hours actually worked.
-  validates :card_count, :started_at, :ended_at, presence: true, if: :final_report?
+  # The final report also records cards; the end time is optional and overrides the shift's fixed end.
+  validates :card_count, presence: true, if: :final_report?
   validates :card_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
   validates :user_id, uniqueness: { scope: :report_id }
   validate :ended_after_started
 
-  # The staff member's shift on this booth day, which carries their targets (nil if they were taken off the booth).
+  # The staff member's shift on this booth day, which carries their targets and hours (nil if taken off the booth).
   def shift
     report.work_session.shift_for(user_id)
+  end
+
+  # "HH:MM" the staff member finished: the reported end time, otherwise the shift's fixed end.
+  def worked_until
+    ended_at ? ended_at.strftime("%H:%M") : shift&.ends_at
+  end
+
+  # "10:00〜21:30", or nil when the staff member has no shift any more.
+  def hours_label
+    shift && "#{shift.starts_at || "開始未定"}〜#{worked_until}"
   end
 
   # Percentages, or nil when they can't be calculated.
@@ -34,8 +44,9 @@ class ReportResult < ApplicationRecord
     end
 
     def ended_after_started
-      return if started_at.nil? || ended_at.nil? || ended_at > started_at
+      starts_at = shift&.starts_at
+      return if ended_at.nil? || starts_at.nil? || ended_at.strftime("%H:%M") > starts_at
 
-      errors.add(:ended_at, "は開始時刻より後にしてください")
+      errors.add(:ended_at, "は開始時刻（#{starts_at}）より後にしてください")
     end
 end

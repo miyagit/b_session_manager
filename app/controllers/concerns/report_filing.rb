@@ -22,29 +22,31 @@ module ReportFiling
         attributes.except(:report_slot, :report_results_attributes)
       when "interim"
         rows = attributes[:report_results_attributes]
-        attributes[:report_results_attributes] = rows.transform_values { |row| row.except(:card_count, :started_at, :ended_at) } if rows
+        attributes[:report_results_attributes] = rows.transform_values { |row| row.except(:card_count, :ended_at) } if rows
         attributes
       else
         attributes.except(:report_slot)
       end
     end
 
-    # The start report confirms the targets: the submitted values are applied to the shifts and saved with the report.
+    # The start report declares the targets (and a full-day start time): the values are applied to the shifts and saved with the report.
     def assign_targets(work_session)
       params.fetch(:shifts, {}).each do |shift_id, attributes|
         shift = work_session.shifts.find { |candidate| candidate.id.to_s == shift_id }
-        shift&.assign_attributes(attributes.permit(:target_acquired_count, :target_approach_count))
+        shift&.assign_attributes(attributes.permit(:target_acquired_count, :target_approach_count, :started_at))
       end
     end
 
+    # The start report saves the targets on the shifts, and every staff member on the booth needs both of them.
     def save_report(report, work_session)
-      shifts_valid = !report.start? || work_session.shifts.map(&:valid?).all?
+      shifts_valid = !report.start? || work_session.shifts.map { |shift| shift.valid?(:start_report) }.all?
       return false unless report.valid? && shifts_valid
 
       Report.transaction do
-        work_session.shifts.each(&:save!) if report.start?
+        work_session.shifts.each { |shift| shift.save!(context: :start_report) } if report.start?
         report.save!
       end
+      LineReportDeliveryJob.perform_later(report) if LineBot.report_group_id
       true
     end
 
@@ -56,6 +58,6 @@ module ReportFiling
 
     def report_params
       params.expect(report: [ :work_session_id, :report_type, :report_slot, :submitted_by_id,
-                              report_results_attributes: [ [ :user_id, :acquired_count, :approach_count, :card_count, :started_at, :ended_at ] ] ])
+                              report_results_attributes: [ [ :user_id, :acquired_count, :approach_count, :card_count, :ended_at ] ] ])
     end
 end

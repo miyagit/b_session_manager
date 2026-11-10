@@ -37,6 +37,7 @@ class Liff::ReportsController < Liff::BaseController
   # GET /liff/reports/1
   def show
     @report = current_staff.submitted_reports.includes(report_results: :user, work_session: [ :work_location, shifts: :user ]).find(params.expect(:id))
+    @line_message = LineReportMessage.build(@report)
   end
 
   private

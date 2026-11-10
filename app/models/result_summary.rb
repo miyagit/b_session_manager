@@ -19,7 +19,7 @@ class ResultSummary
         work_session.shifts.each do |shift|
           result = work_session.effective_result_for(shift.user_id)
           add(rows, [ shift.user_id ], label: shift.user.name, sort_key: shift.user.name, acquired: result&.acquired_count.to_i,
-              target: shift.target_acquired_count, approach: result&.approach_count.to_i, card: result&.card_count.to_i, provisional: provisional)
+              target: shift.target_acquired_count.to_i, approach: result&.approach_count.to_i, card: result&.card_count.to_i, provisional: provisional)
         end
       else
         key, label, sort_key = work_session_key(work_session, axis)

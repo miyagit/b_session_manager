@@ -33,10 +33,9 @@ if Rails.env.development? && WorkSession.none?
 
   work_locations = WorkLocation.order(:id).to_a
   work_locations.each do |work_location|
-    work_location.update!(budget_count: work_location.budget_count || 50 + random.rand(7) * 5, line_group_id: work_location.line_group_id || format("C%032x", work_location.id))
+    work_location.update!(budget_count: work_location.budget_count || 50 + random.rand(7) * 5)
   end
 
-  shift_hours = { "first_half" => [ "10:00", "16:00" ], "second_half" => [ "16:00", "22:00" ], "full_day" => [ "10:00", "22:00" ] }
   slot_progress = { 13 => 0.3, 16 => 0.55, 19 => 0.8 }
   failures = [ "対象グループに公式アカウントが参加していません", "LINE APIの月間送信上限に達しました" ]
 
@@ -50,8 +49,9 @@ if Rails.env.development? && WorkSession.none?
         work_location: work_location, work_date: date, budget_count: 50 + random.rand(7) * 5,
         shifts_attributes: booth_staff.each_with_index.map do |user, index|
           target = 20 + random.rand(5) * 5
-          { user_id: user.id, shift_type: index.zero? ? "full_day" : %w[ first_half second_half ].sample(random: random),
-            target_acquired_count: target, target_approach_count: target * 8 }
+          shift_type = index.zero? ? "full_day" : %w[ first_half second_half ].sample(random: random)
+          { user_id: user.id, shift_type: shift_type, target_acquired_count: target, target_approach_count: target * 8,
+            started_at: (shift_type == "full_day" ? "10:00" : nil) }
         end
       )
       next if date > today
@@ -73,7 +73,7 @@ if Rails.env.development? && WorkSession.none?
           report_results_attributes: finals.map do |shift, total|
             acquired = final ? total : (total * slot_progress[slot]).round
             result = { user: shift.user, acquired_count: acquired, approach_count: acquired * 7 + random.rand(30) }
-            result.merge!(card_count: (acquired * (0.3 + random.rand * 0.2)).round, started_at: shift_hours[shift.shift_type][0], ended_at: shift_hours[shift.shift_type][1]) if final
+            result.merge!(card_count: (acquired * (0.3 + random.rand * 0.2)).round, ended_at: (random.rand(4).zero? ? "21:30" : nil)) if final
             result
           end
         )

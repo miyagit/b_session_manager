@@ -4,7 +4,6 @@ class CreateWorkLocations < ActiveRecord::Migration[8.1]
       t.string :name, null: false
       t.string :category, null: false
       t.integer :budget_count
-      t.string :line_group_id
 
       t.timestamps
     end

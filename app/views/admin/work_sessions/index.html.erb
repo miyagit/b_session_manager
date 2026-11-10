@@ -55,9 +55,9 @@
             <% work_session.shifts.sort_by(&:id).each do |shift| %>
               <tr>
                 <th scope="row" class="px-5 py-2.5 text-left font-semibold"><%= shift.user.name %></th>
-                <td class="px-5 py-2.5"><%= shift_type_label(shift) %></td>
-                <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_acquired_count %>件</td>
-                <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_approach_count %>件</td>
+                <td class="px-5 py-2.5 whitespace-nowrap"><%= shift_type_label(shift) %> <span class="text-slate-500 tabular-nums"><%= shift.hours_label %></span></td>
+                <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_acquired_count ? "#{shift.target_acquired_count}件" : tag.span("未設定", class: "text-slate-400") %></td>
+                <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_approach_count ? "#{shift.target_approach_count}件" : tag.span("未設定", class: "text-slate-400") %></td>
               </tr>
             <% end %>
           </tbody>

@@ -32,8 +32,8 @@
           <span class="text-xs text-slate-500"><%= shift_type_label(shift) %></span>
         </div>
         <dl class="mt-2 grid grid-cols-2 gap-2 text-[13px]">
-          <div><dt class="text-xs text-slate-500">獲得目標</dt><dd class="font-semibold tabular-nums"><%= shift.target_acquired_count %>件</dd></div>
-          <div><dt class="text-xs text-slate-500">アプローチ目標</dt><dd class="font-semibold tabular-nums"><%= shift.target_approach_count %>件</dd></div>
+          <div><dt class="text-xs text-slate-500">獲得目標</dt><dd class="font-semibold tabular-nums"><%= shift.target_acquired_count ? "#{shift.target_acquired_count}件" : "未設定" %></dd></div>
+          <div><dt class="text-xs text-slate-500">アプローチ目標</dt><dd class="font-semibold tabular-nums"><%= shift.target_approach_count ? "#{shift.target_approach_count}件" : "未設定" %></dd></div>
         </dl>
       </div>
     <% end %>
@@ -43,16 +43,16 @@
       <div class="rounded-xl border border-slate-200 bg-white p-4">
         <div class="flex items-baseline justify-between gap-3">
           <span class="font-semibold"><%= report_result.user.name %></span>
-          <span class="text-xs text-slate-500"><%= shift ? shift_type_label(shift) : "" %><%= " #{format_hours(report_result)}" if @report.final? %></span>
+          <span class="text-xs text-slate-500"><%= shift ? shift_type_label(shift) : "" %><%= " #{report_result.hours_label}" if @report.final? && report_result.hours_label %></span>
         </div>
         <dl class="mt-2 grid grid-cols-2 gap-2 text-[13px]">
           <div>
             <dt class="text-xs text-slate-500"><%= @report.final? ? "獲得件数" : "累計獲得" %></dt>
-            <dd class="tabular-nums"><span class="font-semibold"><%= report_result.acquired_count %>件</span><% if shift %> / 目標<%= shift.target_acquired_count %>件（<%= format_rate(report_result.acquired_rate) %>）<% end %></dd>
+            <dd class="tabular-nums"><span class="font-semibold"><%= report_result.acquired_count %>件</span><% if shift&.target_acquired_count %> / 目標<%= shift.target_acquired_count %>件（<%= format_rate(report_result.acquired_rate) %>）<% end %></dd>
           </div>
           <div>
             <dt class="text-xs text-slate-500">アプローチ</dt>
-            <dd class="tabular-nums"><span class="font-semibold"><%= report_result.approach_count %>件</span><% if shift %> / 目標<%= shift.target_approach_count %>件（<%= format_rate(report_result.approach_rate) %>）<% end %></dd>
+            <dd class="tabular-nums"><span class="font-semibold"><%= report_result.approach_count %>件</span><% if shift&.target_approach_count %> / 目標<%= shift.target_approach_count %>件（<%= format_rate(report_result.approach_rate) %>）<% end %></dd>
           </div>
           <% if @report.final? %>
             <div>
@@ -66,12 +66,71 @@
   <% end %>
 </section>
 
+<section class="rounded-xl border border-slate-200 bg-white p-4">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h2 class="text-base font-bold">実績報告グループへの投稿</h2>
+    <%= delivery_status_badge(@report.line_message_delivery) %>
+  </div>
+  <% if @report.line_message_delivery&.sent? %>
+    <p class="mt-2 text-[13px] text-slate-600">この報告はすでに投稿済みです。</p>
+  <% else %>
+    <p class="mt-2 text-[13px] text-slate-600">下のボタンで LINE の送信先選択が開くので、実績報告グループを選んで送信してください。あなたの発言として投稿されます。</p>
+    <button type="button" id="liff-post" hidden class="btn btn-primary mt-3 w-full py-3 text-base">LINEグループに投稿</button>
+    <p id="liff-post-status" role="status" class="mt-2 text-[13px] text-slate-600"></p>
+  <% end %>
+  <details class="mt-3 text-[13px]">
+    <summary class="cursor-pointer font-semibold text-slate-700">投稿文を表示</summary>
+    <pre class="mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 p-3 font-sans leading-relaxed"><%= @line_message %></pre>
+  </details>
+</section>
+
 <div class="flex flex-col gap-2">
-  <button type="button" id="liff-close" class="btn btn-primary w-full py-3 text-base">閉じる</button>
+  <button type="button" id="liff-close" class="btn btn-secondary w-full py-3 text-base">閉じる</button>
   <%= link_to "続けて報告する", new_liff_report_path(work_session_id: work_session), class: "btn btn-secondary w-full py-3 text-base" %>
 </div>
 
 <script>
+  // Posting to the report group as the staff member (free, no push quota): directly when the LIFF was opened
+  // from the group, otherwise through LINE's share target picker. The server is told afterwards so the
+  // delivery shows as sent.
+  (async () => {
+    const button = document.getElementById("liff-post");
+    if (!button) return;
+    const status = document.getElementById("liff-post-status");
+    const text = <%= raw @line_message.to_json %>;
+    try {
+      await window.liffReady;
+    } catch (_error) {
+      return;
+    }
+    const inChat = liff.isInClient() && ["group", "room"].includes(liff.getContext()?.type);
+    if (!inChat && !liff.isApiAvailable("shareTargetPicker")) return;
+    button.hidden = false;
+    if (inChat) button.textContent = "このグループに投稿";
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      status.textContent = "";
+      try {
+        if (inChat) {
+          await liff.sendMessages([{ type: "text", text }]);
+        } else {
+          const result = await liff.shareTargetPicker([{ type: "text", text }], { isMultiple: false });
+          if (!result) { button.disabled = false; return; } // cancelled
+        }
+        await fetch(<%= raw liff_report_line_delivery_path(@report).to_json %>, {
+          method: "POST",
+          headers: { "Accept": "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
+        });
+        button.hidden = true;
+        status.textContent = "LINEに投稿しました。";
+      } catch (error) {
+        button.disabled = false;
+        status.textContent = `投稿できませんでした（${error.message}）。もう一度お試しください。`;
+      }
+    });
+  })();
+
   // Inside the LINE app the LIFF window can be closed; in an ordinary browser go back to the form instead.
   document.getElementById("liff-close").addEventListener("click", async () => {
     try {

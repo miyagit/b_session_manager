@@ -52,7 +52,7 @@ class WorkSession < ApplicationRecord
   def acquired_count = effective_results.sum(&:acquired_count)
   def approach_count = effective_results.sum(&:approach_count)
   def card_count = effective_results.sum { |result| result.card_count.to_i }
-  def target_acquired_count = shifts.sum(&:target_acquired_count)
+  def target_acquired_count = shifts.sum { |shift| shift.target_acquired_count.to_i }
 
   # Percentage, or nil when it can't be calculated (no budget).
   def achievement_rate

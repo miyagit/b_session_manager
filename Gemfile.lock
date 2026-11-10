@@ -118,6 +118,9 @@ GEM
       devise (>= 5.0.0)
       rails-i18n
     dotenv (3.2.0)
+    dotenv-rails (3.2.0)
+      dotenv (= 3.2.0)
+      railties (>= 6.1)
     drb (2.2.3)
     ed25519 (1.4.0)
     erb (6.0.7)
@@ -432,6 +435,7 @@ DEPENDENCIES
   debug
   devise (~> 5.0)
   devise-i18n (~> 1.16)
+  dotenv-rails
   image_processing (~> 1.2)
   jbuilder
   kamal

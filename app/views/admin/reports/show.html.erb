@@ -51,9 +51,9 @@
           <% work_session.shifts.sort_by(&:id).each do |shift| %>
             <tr>
               <th scope="row" class="px-4 py-3 text-left font-semibold"><%= shift.user.name %></th>
-              <td class="px-4 py-3"><%= shift_type_label(shift) %></td>
-              <td class="px-4 py-3 text-right tabular-nums"><%= shift.target_acquired_count %>件</td>
-              <td class="px-4 py-3 text-right tabular-nums"><%= shift.target_approach_count %>件</td>
+              <td class="px-4 py-3 whitespace-nowrap"><%= shift_type_label(shift) %> <span class="text-slate-500 tabular-nums"><%= shift.hours_label %></span></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= shift.target_acquired_count ? "#{shift.target_acquired_count}件" : "未設定" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= shift.target_approach_count ? "#{shift.target_approach_count}件" : "未設定" %></td>
             </tr>
           <% end %>
         <% else %>
@@ -62,14 +62,14 @@
             <tr>
               <th scope="row" class="px-4 py-3 text-left font-semibold"><%= report_result.user.name %></th>
               <td class="px-4 py-3"><%= shift ? shift_type_label(shift) : "—" %></td>
-              <td class="px-4 py-3 text-right tabular-nums"><span class="font-semibold"><%= report_result.acquired_count %>件</span> / <%= shift ? "#{shift.target_acquired_count}件" : "—" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><span class="font-semibold"><%= report_result.acquired_count %>件</span> / <%= shift&.target_acquired_count ? "#{shift.target_acquired_count}件" : "—" %></td>
               <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report_result.acquired_rate) %></td>
-              <td class="px-4 py-3 text-right tabular-nums"><%= report_result.approach_count %>件 / <%= shift ? "#{shift.target_approach_count}件" : "—" %></td>
+              <td class="px-4 py-3 text-right tabular-nums"><%= report_result.approach_count %>件 / <%= shift&.target_approach_count ? "#{shift.target_approach_count}件" : "—" %></td>
               <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report_result.approach_rate) %></td>
               <% if @report.final? %>
                 <td class="px-4 py-3 text-right tabular-nums"><%= report_result.card_count %>件</td>
                 <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(report_result.card_rate) %></td>
-                <td class="px-4 py-3 whitespace-nowrap tabular-nums"><%= format_hours(report_result) %></td>
+                <td class="px-4 py-3 whitespace-nowrap tabular-nums"><%= report_result.hours_label || "—" %></td>
               <% end %>
             </tr>
           <% end %>
@@ -80,15 +80,21 @@
 </div>
 
 <section class="rounded-xl border border-slate-200 bg-white p-5">
+  <% line_message_delivery = @report.line_message_delivery %>
   <div class="flex flex-wrap items-center gap-3">
     <h2 class="text-base font-bold">LINE投稿</h2>
-    <%= delivery_status_badge(@report.line_message_delivery) %>
+    <%= delivery_status_badge(line_message_delivery) %>
+    <% if LineBot.report_group_id && !line_message_delivery&.sent? %>
+      <%= button_to "LINEに投稿する", admin_report_line_delivery_path(@report), class: "btn btn-secondary ml-auto" %>
+    <% end %>
   </div>
-  <% if (line_message_delivery = @report.line_message_delivery) %>
-    <dl class="mt-3 grid gap-x-6 gap-y-1 text-[13px] sm:grid-cols-[auto_1fr]">
-      <dt class="text-slate-500">投稿先グループ</dt><dd class="font-mono text-xs"><%= work_session.work_location.line_group_id.presence || "未設定" %></dd>
-      <% if line_message_delivery.sent_at %><dt class="text-slate-500">送信日時</dt><dd><%= l(line_message_delivery.sent_at, format: "%Y/%m/%d %H:%M") %></dd><% end %>
-      <% if line_message_delivery.error_message.present? %><dt class="text-slate-500">エラー内容</dt><dd class="text-critical-text"><%= line_message_delivery.error_message %></dd><% end %>
-    </dl>
-  <% end %>
+  <dl class="mt-3 grid gap-x-6 gap-y-1 text-[13px] sm:grid-cols-[auto_1fr]">
+    <dt class="text-slate-500">投稿方法</dt><dd><%= LineBot.report_group_id ? "公式アカウントから自動投稿（LINE_REPORT_GROUP_ID 設定済み）" : "スタッフが LIFF の完了画面からグループに投稿" %></dd>
+    <% if line_message_delivery&.sent_at %><dt class="text-slate-500">送信日時</dt><dd><%= l(line_message_delivery.sent_at, format: "%Y/%m/%d %H:%M") %></dd><% end %>
+    <% if line_message_delivery&.error_message.present? %><dt class="text-slate-500">エラー内容</dt><dd class="text-critical-text"><%= line_message_delivery.error_message %></dd><% end %>
+  </dl>
+  <details class="mt-3 text-[13px]">
+    <summary class="cursor-pointer font-semibold text-slate-700">投稿文を表示</summary>
+    <pre class="mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 p-4 font-sans text-[13px] leading-relaxed"><%= LineReportMessage.build(@report) %></pre>
+  </details>
 </section>

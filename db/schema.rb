@@ -40,7 +40,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.integer "acquired_count", null: false
     t.integer "approach_count", null: false
     t.integer "card_count"
-    t.time "started_at"
     t.time "ended_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -71,8 +70,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.bigint "work_session_id", null: false
     t.bigint "user_id", null: false
     t.string "shift_type", null: false
-    t.integer "target_acquired_count", null: false
-    t.integer "target_approach_count", null: false
+    t.integer "target_acquired_count"
+    t.integer "target_approach_count"
+    t.time "started_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_shifts_on_user_id"
@@ -97,7 +97,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.string "name", null: false
     t.string "category", null: false
     t.integer "budget_count"
-    t.string "line_group_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_work_locations_on_name", unique: true

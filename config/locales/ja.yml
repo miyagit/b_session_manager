@@ -29,7 +29,6 @@ ja:
         name: 稼働場所名
         category: 分類
         budget_count: 基本ブース予算
-        line_group_id: LINE投稿先グループID
         work_sessions: 稼働予定
       work_location/category:
         donki: ドンキホーテ
@@ -54,6 +53,7 @@ ja:
         shift_type: シフト区分
         target_acquired_count: 獲得目標
         target_approach_count: アプローチ目標
+        started_at: 開始時刻
       shift/shift_type:
         first_half: 前半
         second_half: 後半
@@ -72,7 +72,6 @@ ja:
         acquired_count: 獲得件数
         approach_count: アプローチ数
         card_count: カード数
-        started_at: 開始時刻
         ended_at: 終了時刻
       report/report_type:
         start: 開始報告
@@ -85,7 +84,6 @@ ja:
         acquired_count: 獲得件数
         approach_count: アプローチ数
         card_count: カード数
-        started_at: 開始時刻
         ended_at: 終了時刻
       line_message_delivery:
         report: 報告

@@ -5,7 +5,7 @@ class Liff::SessionsController < Liff::BaseController
     user = find_user
 
     if user.nil?
-      respond_with_error "LINE公式アカウントを友だち追加してから、もう一度開いてください。", :not_found
+      respond_with_error "スタッフが見つかりません。管理者に連絡してください。", :not_found
     elsif !user.is_active
       respond_with_error "このアカウントは無効になっています。管理者に連絡してください。", :forbidden
     else
@@ -31,7 +31,16 @@ class Liff::SessionsController < Liff::BaseController
       if Rails.env.development? && params[:dev_user_id].present?
         User.find_by(id: params[:dev_user_id])
       else
-        User.find_by(line_uid: LineIdToken.verify(params[:id_token])["sub"])
+        find_or_create_line_user(LineIdToken.verify(params[:id_token]))
+      end
+    end
+
+    # A LINE account opening the LIFF for the first time becomes a staff member right away, so onboarding doesn't
+    # depend on the follow webhook. Until an admin gives them a shift they see "no shifts today".
+    def find_or_create_line_user(claims)
+      User.find_or_create_by!(line_uid: claims["sub"]) do |user|
+        user.name = claims["name"].presence || "LINEユーザー"
+        user.avatar_url = claims["picture"]
       end
     end
 

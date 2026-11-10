@@ -59,7 +59,7 @@ class Admin::WorkSessionsController < Admin::BaseController
 
     def work_session_params
       params.expect(work_session: [ :work_date, :work_location_id, :budget_count,
-                                    shifts_attributes: [ [ :id, :user_id, :shift_type, :target_acquired_count, :target_approach_count, :_destroy ] ] ])
+                                    shifts_attributes: [ [ :id, :user_id, :shift_type, :_destroy ] ] ])
     end
 
     def parse_date(value)

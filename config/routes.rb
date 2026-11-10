@@ -6,7 +6,9 @@ Rails.application.routes.draw do
     resources :users, except: :show
     resources :work_locations, only: %i[ index new create edit update ]
     resources :work_sessions, except: :show
-    resources :reports, only: %i[ index show new create ]
+    resources :reports, only: %i[ index show new create ] do
+      resource :line_delivery, only: :create
+    end
     resource :analytics, only: :show
   end
 
@@ -14,7 +16,9 @@ Rails.application.routes.draw do
   namespace :liff do
     root "entries#show"
     resource :session, only: %i[ create destroy ]
-    resources :reports, only: %i[ new create show ]
+    resources :reports, only: %i[ new create show ] do
+      resource :line_delivery, only: :create
+    end
   end
 
   namespace :api do

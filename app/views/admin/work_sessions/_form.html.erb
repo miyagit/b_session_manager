@@ -37,13 +37,11 @@
   <fieldset>
     <legend class="mb-2 font-semibold">シフト</legend>
     <div class="overflow-x-auto rounded-lg border border-slate-200">
-      <table class="w-full min-w-160 text-[13px]">
+      <table class="w-full min-w-120 text-[13px]">
         <thead class="bg-slate-50">
           <tr class="text-left text-xs text-slate-600">
             <th scope="col" class="px-3 py-2 font-semibold">スタッフ</th>
             <th scope="col" class="px-3 py-2 font-semibold">シフト区分</th>
-            <th scope="col" class="px-3 py-2 font-semibold">獲得目標</th>
-            <th scope="col" class="px-3 py-2 font-semibold">アプローチ目標</th>
             <th scope="col" class="px-3 py-2 font-semibold">外す</th>
           </tr>
         </thead>
@@ -57,14 +55,6 @@
               <td class="px-3 py-2">
                 <%= shift_form.select :shift_type, Shift.shift_types.keys.map { |shift_type| [ Shift.human_attribute_name("shift_type.#{shift_type}"), shift_type ] }, {}, class: "input", aria: { label: "シフト区分" } %>
               </td>
-              <% { target_acquired_count: "獲得目標", target_approach_count: "アプローチ目標" }.each do |attribute, label| %>
-                <td class="px-3 py-2">
-                  <div class="flex items-center gap-2">
-                    <%= shift_form.number_field attribute, min: 0, step: 1, class: "input w-24 text-right tabular-nums", aria: { label: label } %>
-                    <span class="text-slate-600">件</span>
-                  </div>
-                </td>
-              <% end %>
               <td class="px-3 py-2">
                 <% if shift.persisted? %>
                   <%= shift_form.check_box :_destroy, class: "size-4 accent-blue-600", aria: { label: "このスタッフを外す" } %>
@@ -75,7 +65,7 @@
         </tbody>
       </table>
     </div>
-    <p class="mt-1 text-xs text-slate-500">スタッフを選んだ行だけが登録されます。目標は開始報告のときにスタッフ本人が確認・修正できます。人数が足りないときは、保存すると空き行が追加されます。</p>
+    <p class="mt-1 text-xs text-slate-500">スタッフを選んだ行だけが登録されます。個人目標は当日の開始報告でスタッフが入力します。人数が足りないときは、保存すると空き行が追加されます。</p>
   </fieldset>
 
   <div class="flex gap-2 pt-1">

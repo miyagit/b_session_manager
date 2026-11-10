@@ -41,7 +41,7 @@
               <td class="px-4 py-3 whitespace-nowrap"><%= report_badge(report) %></td>
               <td class="px-4 py-3 text-slate-700">
                 <% if report.start? %>
-                  <%= report.work_session.shifts.sort_by(&:id).map { |shift| "#{shift.user.name} 目標#{shift.target_acquired_count}件" }.join("、") %>
+                  <%= report.work_session.shifts.sort_by(&:id).map { |shift| "#{shift.user.name} 目標#{shift.target_acquired_count ? "#{shift.target_acquired_count}件" : "未設定"}" }.join("、") %>
                 <% else %>
                   <%= report.report_results.map { |report_result| "#{report_result.user.name} #{report_result.acquired_count}件" }.join("、") %>
                 <% end %>

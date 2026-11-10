@@ -53,13 +53,6 @@ module ApplicationHelper
     Shift.human_attribute_name("shift_type.#{shift.shift_type}")
   end
 
-  # "10:00〜16:00", or 未入力 when the hours haven't been reported.
-  def format_hours(report_result)
-    return "未入力" if report_result.started_at.nil? || report_result.ended_at.nil?
-
-    "#{report_result.started_at.strftime("%H:%M")}〜#{report_result.ended_at.strftime("%H:%M")}"
-  end
-
   # "97%", or 算出不可 when the denominator is zero.
   def format_rate(value)
     value ? "#{value.round}%" : "算出不可"
