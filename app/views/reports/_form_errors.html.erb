@@ -1,5 +1,7 @@
 <%# locals: (report:, work_session:) %>
-<% messages = report.errors.full_messages + work_session.shifts.flat_map { |shift| shift.errors.full_messages.map { |message| "#{shift.user.name}: #{message}" } } %>
+<% messages = report.errors.full_messages + work_session.shifts.flat_map do |shift|
+     (shift.errors.full_messages + (shift.work_record&.errors&.full_messages || [])).map { |message| "#{shift.user.name}: #{message}" }
+   end %>
 <% if messages.any? %>
   <div class="rounded-lg border border-critical/30 bg-critical-bg px-4 py-3 text-critical-text">
     <p class="font-semibold"><%= messages.size %>件のエラーがあります。</p>

@@ -1,5 +1,5 @@
-# Shared by the admin and LIFF report forms: default report type, per-type parameter handling,
-# target confirmation on the start report, and saving the report together with the shifts.
+# Shared by the admin and LIFF report forms: default report type, per-type parameter handling, target confirmation
+# on the start report, hours actually worked on the final report, and saving everything together.
 module ReportFiling
   extend ActiveSupport::Concern
 
@@ -22,14 +22,15 @@ module ReportFiling
         attributes.except(:report_slot, :report_results_attributes)
       when "interim"
         rows = attributes[:report_results_attributes]
-        attributes[:report_results_attributes] = rows.transform_values { |row| row.except(:card_count, :ended_at) } if rows
+        attributes[:report_results_attributes] = rows.transform_values { |row| row.except(:card_count) } if rows
         attributes
       else
         attributes.except(:report_slot)
       end
     end
 
-    # The start report declares the targets (and a full-day flex start time): the values are applied to the shifts and saved with the report.
+    # The start report declares the targets (and a full-day flex start time): the values are applied to the shifts
+    # and saved with the report.
     def assign_targets(work_session)
       params.fetch(:shifts, {}).each do |shift_id, attributes|
         shift = work_session.shifts.find { |candidate| candidate.id.to_s == shift_id }
@@ -37,14 +38,34 @@ module ReportFiling
       end
     end
 
-    # The start report saves the targets on the shifts, and every staff member on the booth needs both of them.
+    # The final report records the hours actually worked (work_records[<shift id>]) for shifts that aren't fixed.
+    def assign_work_records(work_session)
+      params.fetch(:work_records, {}).each do |shift_id, attributes|
+        shift = work_session.shifts.find { |candidate| candidate.id.to_s == shift_id }
+        next if shift.nil? || !shift.records_hours?
+
+        (shift.work_record || shift.build_work_record).assign_attributes(attributes.permit(:started_at, :ended_at))
+      end
+    end
+
+    # Work records required by a final report: one per reported staff member whose shift records hours.
+    def required_work_records(report, work_session)
+      report.report_results.filter_map { |result| work_session.shift_for(result.user_id) }
+        .select(&:records_hours?).map { |shift| shift.work_record || shift.build_work_record }
+    end
+
+    # The start report saves the targets on the shifts (every staff member on the booth needs both); the final
+    # report saves the hours actually worked.
     def save_report(report, work_session)
       shifts_valid = !report.start? || work_session.shifts.map { |shift| shift.valid?(:start_report) }.all?
-      return false unless report.valid? && shifts_valid
+      work_records = report.final? ? required_work_records(report, work_session) : []
+      records_valid = work_records.map(&:valid?).all?
+      return false unless report.valid? && shifts_valid && records_valid
 
       Report.transaction do
         work_session.shifts.each { |shift| shift.save!(context: :start_report) } if report.start?
         report.save!
+        work_records.each(&:save!)
       end
       LineReportDeliveryJob.perform_later(report) if LineBot.report_group_id
       true
@@ -58,6 +79,6 @@ module ReportFiling
 
     def report_params
       params.expect(report: [ :work_session_id, :report_type, :report_slot, :submitted_by_id,
-                              report_results_attributes: [ [ :user_id, :acquired_count, :approach_count, :card_count, :ended_at ] ] ])
+                              report_results_attributes: [ [ :user_id, :acquired_count, :approach_count, :card_count ] ] ])
     end
 end

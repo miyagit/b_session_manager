@@ -40,7 +40,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.integer "acquired_count", null: false
     t.integer "approach_count", null: false
     t.integer "card_count"
-    t.time "ended_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["report_id", "user_id"], name: "index_report_results_on_report_id_and_user_id", unique: true
@@ -102,10 +101,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.index ["name"], name: "index_work_locations_on_name", unique: true
   end
 
+  create_table "work_records", force: :cascade do |t|
+    t.bigint "shift_id", null: false
+    t.time "started_at", null: false
+    t.time "ended_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shift_id"], name: "index_work_records_on_shift_id", unique: true
+  end
+
   create_table "work_sessions", force: :cascade do |t|
     t.bigint "work_location_id", null: false
     t.date "work_date", null: false
-    t.integer "budget_count", null: false
+    t.integer "budget_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["work_date"], name: "index_work_sessions_on_work_date"
@@ -121,5 +129,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
   add_foreign_key "reports", "work_sessions"
   add_foreign_key "shifts", "users"
   add_foreign_key "shifts", "work_sessions"
+  add_foreign_key "work_records", "shifts"
   add_foreign_key "work_sessions", "work_locations"
 end

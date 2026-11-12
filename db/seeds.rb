@@ -32,7 +32,8 @@ if Rails.env.development? && WorkSession.none?
   User.find_or_create_by!(name: "加藤") { |user| user.assign_attributes(line_uid: format("U%032x", 99), is_active: false) }
 
   work_locations = WorkLocation.order(:id).to_a
-  work_locations.each do |work_location|
+  # Only donki booths carry a budget; cinema booths have none.
+  work_locations.select(&:donki?).each do |work_location|
     work_location.update!(budget_count: work_location.budget_count || 50 + random.rand(7) * 5)
   end
 
@@ -46,7 +47,7 @@ if Rails.env.development? && WorkSession.none?
     day_work_locations.each_with_index do |work_location, booth_index|
       booth_staff = members[booth_index % members.size]
       work_session = WorkSession.create!(
-        work_location: work_location, work_date: date, budget_count: 50 + random.rand(7) * 5,
+        work_location: work_location, work_date: date, budget_count: (50 + random.rand(7) * 5 if work_location.donki?),
         shifts_attributes: booth_staff.each_with_index.map do |user, index|
           target = 20 + random.rand(5) * 5
           shift_type = if work_location.cinema? then "cinema"
@@ -76,10 +77,17 @@ if Rails.env.development? && WorkSession.none?
           report_results_attributes: finals.map do |shift, total|
             acquired = final ? total : (total * slot_progress[slot]).round
             result = { user: shift.user, acquired_count: acquired, approach_count: acquired * 7 + random.rand(30) }
-            result.merge!(card_count: (acquired * (0.3 + random.rand * 0.2)).round, ended_at: (random.rand(4).zero? ? "21:30" : nil)) if final
+            result.merge!(card_count: (acquired * (0.3 + random.rand * 0.2)).round) if final
             result
           end
         )
+
+        if final
+          work_session.shifts.select(&:records_hours?).each do |shift|
+            offset = [ 0, 0, 30, 60, -30 ].sample(random: random)
+            shift.create_work_record!(started_at: shift.starts_at, ended_at: (Shift.clock(shift.ends_at) + offset.minutes).strftime("%H:%M"))
+          end
+        end
 
         if date == today && slot == 16
           report.create_line_message_delivery!(status: :pending)

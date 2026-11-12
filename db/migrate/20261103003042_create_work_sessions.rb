@@ -3,7 +3,7 @@ class CreateWorkSessions < ActiveRecord::Migration[8.1]
     create_table :work_sessions do |t|
       t.references :work_location, null: false, foreign_key: true
       t.date :work_date, null: false
-      t.integer :budget_count, null: false
+      t.integer :budget_count # required for donki booths, optional for cinema
 
       t.timestamps
     end

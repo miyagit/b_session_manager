@@ -10,7 +10,7 @@
 
 <section aria-label="主要指標" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
   <% today_acquired = @work_sessions.sum(&:acquired_count) %>
-  <% today_budget = @work_sessions.sum(&:budget_count) %>
+  <% today_budget = @work_sessions.sum { |work_session| work_session.budget_count.to_i } %>
   <% [
        [ "今日の獲得件数", "#{today_acquired}件", "ブース予算 #{today_budget}件・達成率 #{format_rate(today_budget.positive? ? today_acquired * 100.0 / today_budget : nil)}" ],
        [ "今日の稼働", "#{@work_sessions.size}ブース", "スタッフ #{@work_sessions.sum { |work_session| work_session.shifts.size }}名" ],
@@ -47,7 +47,7 @@
               <% latest_report = work_session.latest_report %>
               <tr>
                 <th scope="row" class="px-5 py-3 text-left font-semibold whitespace-nowrap"><%= work_session.work_location.name %></th>
-                <td class="px-5 py-3 text-right tabular-nums whitespace-nowrap"><%= work_session.acquired_count %> / <%= work_session.budget_count %>件</td>
+                <td class="px-5 py-3 text-right tabular-nums whitespace-nowrap"><%= work_session.acquired_count %> / <%= work_session.budget_count || "—" %>件</td>
                 <td class="px-5 py-3">
                   <div class="flex items-center gap-2">
                     <div aria-hidden="true" class="h-1.5 flex-1 rounded-full bg-chart-track">

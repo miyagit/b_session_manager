@@ -37,8 +37,11 @@ class LineReportMessage
     end
 
     def final_text
-      booth = [ "■ ブース実績", "ブース予算:#{@work_session.budget_count}件", "ブース獲得:#{@report.booth_acquired_count}件",
-                "予算達成率:#{rate(@report.achievement_rate)}" ].join("\n")
+      booth = [ "■ ブース実績" ]
+      booth << "ブース予算:#{@work_session.budget_count}件" if @work_session.budget_count
+      booth << "ブース獲得:#{@report.booth_acquired_count}件"
+      booth << "予算達成率:#{rate(@report.achievement_rate)}" if @work_session.budget_count
+      booth = booth.join("\n")
       blocks = @report.report_results.map do |result|
         shift = result.shift
         [ staff_header(result.user.name, shift, result.hours_label), "■ 個人実績",
@@ -53,7 +56,7 @@ class LineReportMessage
     def header(with_budget: true)
       date = @work_session.work_date
       lines = [ "#{date.month}月#{date.day}日(#{WDAYS[date.wday]})", "現場:#{@work_session.work_location.name}" ]
-      lines << "ブース予算:#{@work_session.budget_count}件" if with_budget
+      lines << "ブース予算:#{@work_session.budget_count}件" if with_budget && @work_session.budget_count
       lines.join("\n")
     end
 

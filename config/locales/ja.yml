@@ -8,6 +8,7 @@ ja:
       shift: シフト
       report: 報告
       report_result: スタッフ別実績
+      work_record: 勤務実績
       line_message_delivery: LINE投稿
     attributes:
       user:
@@ -54,6 +55,11 @@ ja:
         target_acquired_count: 獲得目標
         target_approach_count: アプローチ目標
         started_at: 開始時刻
+        work_record: 勤務実績
+      work_record:
+        shift: シフト
+        started_at: 開始時刻
+        ended_at: 終了時刻
       shift/shift_type:
         first_half: 前半
         second_half: 後半
@@ -73,7 +79,6 @@ ja:
         acquired_count: 獲得件数
         approach_count: アプローチ数
         card_count: カード数
-        ended_at: 終了時刻
       report/report_type:
         start: 開始報告
         interim: 途中報告
@@ -85,7 +90,6 @@ ja:
         acquired_count: 獲得件数
         approach_count: アプローチ数
         card_count: カード数
-        ended_at: 終了時刻
       line_message_delivery:
         report: 報告
         report_id: 報告

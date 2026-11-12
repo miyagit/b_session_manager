@@ -55,10 +55,15 @@
       <table class="w-full min-w-200 text-[13px]">
         <thead>
           <tr class="border-b border-slate-200 text-left text-xs text-slate-600">
+            <% if staff_axis %><th scope="col" class="px-4 py-2.5 text-right font-semibold">順位</th><% end %>
             <th scope="col" class="px-4 py-2.5 font-semibold"><%= ResultSummary::AXES[@axis].delete_suffix("別") %></th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">獲得件数</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= staff_axis ? "目標件数" : "ブース予算" %></th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">達成率</th>
+            <% if staff_axis %>
+              <th scope="col" class="px-4 py-2.5 text-right font-semibold">ドンキ 6時間あたり</th>
+              <th scope="col" class="px-4 py-2.5 text-right font-semibold">シネマ 1日あたり</th>
+            <% end %>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">アプローチ</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">カード</th>
             <th scope="col" class="px-4 py-2.5 text-right font-semibold">カード率</th>
@@ -66,12 +71,17 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <% @rows.each do |row| %>
+          <% @rows.each_with_index do |row, index| %>
             <tr>
+              <% if staff_axis %><td class="px-4 py-3 text-right font-semibold tabular-nums"><%= index + 1 %></td><% end %>
               <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= row.label %></th>
               <td class="px-4 py-3 text-right font-semibold tabular-nums"><%= row.acquired %>件</td>
               <td class="px-4 py-3 text-right tabular-nums"><%= row.target %>件</td>
               <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(row.achievement_rate) %></td>
+              <% if staff_axis %>
+                <td class="px-4 py-3 text-right tabular-nums"><%= row.donki_average ? "#{format("%.1f", row.donki_average)}件" : "—" %><span class="ml-1 text-xs text-slate-500"><%= format("%.1f", row.donki_hours) %>h</span></td>
+                <td class="px-4 py-3 text-right tabular-nums"><%= row.cinema_average ? "#{format("%.1f", row.cinema_average)}件" : "—" %><span class="ml-1 text-xs text-slate-500"><%= format("%.1f", row.cinema_hours) %>h</span></td>
+              <% end %>
               <td class="px-4 py-3 text-right tabular-nums"><%= row.approach %>件</td>
               <td class="px-4 py-3 text-right tabular-nums"><%= row.card %>件</td>
               <td class="px-4 py-3 text-right tabular-nums"><%= format_rate(row.card_rate) %></td>

@@ -1,6 +1,6 @@
 <%# locals: (result_form:, shift:, own: false) %>
 <%# One staff member's card: targets (and a full-day start time) for the start report, counts for interim and final,
-    cards and an optional end time for final. %>
+    cards and the hours actually worked for final. %>
 <% staff_name = shift.user.name %>
 <% input_classes = "input mt-1 text-right text-base tabular-nums" %>
 
@@ -49,9 +49,20 @@
       <span class="text-xs text-slate-600">カード数</span>
       <%= result_form.number_field :card_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}のカード数" } %>
     </label>
-    <label class="block">
-      <span class="text-xs text-slate-600">終了時刻<span class="ml-1 text-slate-400">空欄なら<%= shift.ends_at %></span></span>
-      <%= result_form.time_field :ended_at, include_seconds: false, class: "input mt-1 text-base tabular-nums", aria: { label: "#{staff_name}の終了時刻" } %>
-    </label>
+    <% if shift.records_hours? %>
+      <% work_record = shift.work_record || WorkRecord.new(started_at: Shift.clock(shift.starts_at), ended_at: Shift.clock(shift.ends_at)) %>
+      <%= fields_for "work_records[#{shift.id}]", work_record do |record_form| %>
+        <label class="block">
+          <span class="text-xs text-slate-600">開始時刻<span class="ml-1 text-slate-400">実際の時間</span></span>
+          <%= record_form.time_field :started_at, include_seconds: false, class: "input mt-1 text-base tabular-nums", aria: { label: "#{staff_name}の開始時刻（実績）" } %>
+        </label>
+        <label class="block">
+          <span class="text-xs text-slate-600">終了時刻<span class="ml-1 text-slate-400">実際の時間</span></span>
+          <%= record_form.time_field :ended_at, include_seconds: false, class: "input mt-1 text-base tabular-nums", aria: { label: "#{staff_name}の終了時刻（実績）" } %>
+        </label>
+      <% end %>
+    <% else %>
+      <p class="col-span-1 self-end pb-2 text-xs text-slate-500">勤務時間 <%= shift.hours_label %>（固定）</p>
+    <% end %>
   </div>
 </div>

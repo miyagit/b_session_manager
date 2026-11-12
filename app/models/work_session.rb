@@ -9,7 +9,9 @@ class WorkSession < ApplicationRecord
   accepts_nested_attributes_for :shifts, allow_destroy: true, reject_if: ->(attributes) { attributes[:user_id].blank? }
 
   validates :work_date, presence: true, uniqueness: { scope: :work_location_id, message: "には、この稼働場所の稼働予定がすでにあります" }
-  validates :budget_count, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  # Donki booths have a budget; cinema booths may leave it blank.
+  validates :budget_count, presence: true, if: -> { work_location&.donki? }
+  validates :budget_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
   validate :removed_shifts_have_no_results
 
   # The day's budget starts from the location's base budget and can then be changed per session.

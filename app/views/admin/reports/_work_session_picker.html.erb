@@ -27,7 +27,7 @@
       <% work_sessions.each do |work_session| %>
         <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div class="min-w-0">
-            <p class="font-semibold"><%= work_session.work_location.name %><span class="ml-2 text-xs font-normal text-slate-500">ブース予算 <%= work_session.budget_count %>件</span></p>
+            <p class="font-semibold"><%= work_session.work_location.name %><span class="ml-2 text-xs font-normal text-slate-500">ブース予算 <%= work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" %></span></p>
             <p class="mt-1 text-[13px] text-slate-600">
               <% if work_session.shifts.any? %>
                 <%= work_session.shifts.sort_by(&:id).map { |shift| "#{shift.user.name}（#{shift_type_label(shift)}）" }.join("、") %>

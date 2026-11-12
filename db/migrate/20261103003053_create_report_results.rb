@@ -6,7 +6,6 @@ class CreateReportResults < ActiveRecord::Migration[8.1]
       t.integer :acquired_count, null: false
       t.integer :approach_count, null: false
       t.integer :card_count # final reports only
-      t.time :ended_at      # final reports only, optional: actual end time when it differs from the shift's fixed end
 
       t.timestamps
     end

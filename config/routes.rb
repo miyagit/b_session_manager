@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       resource :line_delivery, only: :create
     end
     resource :analytics, only: :show
+    resources :rankings, only: :index
   end
 
   # LIFF app opened from LINE: staff report their own booth's results.

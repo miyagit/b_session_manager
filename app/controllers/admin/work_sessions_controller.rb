@@ -6,7 +6,7 @@ class Admin::WorkSessionsController < Admin::BaseController
   # GET /admin/work_sessions
   def index
     @date = parse_date(params[:date]) || Date.current
-    @work_sessions = WorkSession.includes(:work_location, shifts: :user, reports: :report_results)
+    @work_sessions = WorkSession.includes(:work_location, shifts: [ :user, :work_record ], reports: :report_results)
       .where(work_date: @date).order(:work_location_id)
   end
 

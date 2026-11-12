@@ -25,6 +25,7 @@ class Liff::ReportsController < Liff::BaseController
     @report = Report.new(report_attributes_for_type(report_params).except(:work_session_id, :submitted_by_id)
       .merge(work_session: @work_session, submitted_by: current_staff))
     assign_targets(@work_session) if @report.start?
+    assign_work_records(@work_session) if @report.final?
 
     if save_report(@report, @work_session)
       redirect_to liff_report_path(@report), notice: "実績を報告しました。"
@@ -36,7 +37,7 @@ class Liff::ReportsController < Liff::BaseController
 
   # GET /liff/reports/1
   def show
-    @report = current_staff.submitted_reports.includes(report_results: :user, work_session: [ :work_location, shifts: :user ]).find(params.expect(:id))
+    @report = current_staff.submitted_reports.includes(report_results: :user, work_session: [ :work_location, shifts: [ :user, :work_record ] ]).find(params.expect(:id))
     @line_message = LineReportMessage.build(@report)
   end
 
@@ -44,6 +45,6 @@ class Liff::ReportsController < Liff::BaseController
     # Booths the staff member has a shift on today, plus yesterday for a final report filed after midnight.
     def set_work_sessions
       @work_sessions = WorkSession.where(id: current_staff.shifts.select(:work_session_id), work_date: Date.yesterday..Date.current)
-        .includes(:work_location, shifts: :user, reports: :report_results).order(work_date: :desc, id: :asc).to_a
+        .includes(:work_location, shifts: [ :user, :work_record ], reports: :report_results).order(work_date: :desc, id: :asc).to_a
     end
 end

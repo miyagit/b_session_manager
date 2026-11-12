@@ -28,7 +28,7 @@
         <div>
           <h3 class="text-base font-bold"><%= work_session.work_location.name %></h3>
           <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
-            <span><%= WorkLocation.human_attribute_name("category.#{work_session.work_location.category}") %>・ブース予算 <%= work_session.budget_count %>件</span>
+            <span><%= WorkLocation.human_attribute_name("category.#{work_session.work_location.category}") %>・ブース予算 <%= work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" %></span>
             <%= result_status_badge(work_session.result_status) %>
             <% if (latest_report = work_session.latest_report) %><span><%= report_badge_label(latest_report) %>まで</span><% end %>
           </p>
@@ -55,7 +55,7 @@
             <% work_session.shifts.sort_by(&:id).each do |shift| %>
               <tr>
                 <th scope="row" class="px-5 py-2.5 text-left font-semibold"><%= shift.user.name %></th>
-                <td class="px-5 py-2.5 whitespace-nowrap"><%= shift_type_label(shift) %> <span class="text-slate-500 tabular-nums"><%= shift.hours_label %></span></td>
+                <td class="px-5 py-2.5 whitespace-nowrap"><%= shift_type_label(shift) %> <span class="text-slate-500 tabular-nums"><%= shift.hours_label %></span><% if shift.work_record %><span class="ml-1 text-xs text-slate-500 tabular-nums">実績 <%= shift.work_record.hours_label %></span><% end %></td>
                 <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_acquired_count ? "#{shift.target_acquired_count}件" : tag.span("未設定", class: "text-slate-400") %></td>
                 <td class="px-5 py-2.5 text-right tabular-nums"><%= shift.target_approach_count ? "#{shift.target_approach_count}件" : tag.span("未設定", class: "text-slate-400") %></td>
               </tr>
