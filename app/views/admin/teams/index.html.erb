@@ -1,0 +1,88 @@
+<% content_for :title, "チーム" %>
+<% month_param = @month.strftime("%Y-%m") %>
+
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold">チーム</h1>
+  <%= link_to "新しいチーム", new_admin_team_path(month: month_param), class: "btn btn-primary" %>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+  <%= link_to "前月", admin_teams_path(month: (@month << 1).strftime("%Y-%m")), class: "btn btn-secondary" %>
+  <%= form_with url: admin_teams_path, method: :get, class: "flex items-center gap-2" do |form| %>
+    <%= form.month_field :month, value: month_param, class: "input w-auto", aria: { label: "対象月" } %>
+    <%= form.submit "表示", name: nil, class: "btn btn-secondary" %>
+  <% end %>
+  <%= link_to "翌月", admin_teams_path(month: (@month >> 1).strftime("%Y-%m")), class: "btn btn-secondary" %>
+  <%= link_to "今月", admin_teams_path, class: "btn btn-secondary" unless @month == Date.current.beginning_of_month %>
+</div>
+
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <h2 class="text-lg font-bold"><%= @month.year %>年<%= @month.month %>月 <span class="ml-1 text-sm font-normal text-slate-500"><%= Team.quarter_label(@quarter_start) %>のチーム</span></h2>
+  <%= form_with model: @monthly_target, url: admin_monthly_target_path(month: month_param), method: :patch, class: "flex items-center gap-2 text-[13px]" do |form| %>
+    <%= form.label :card_rate, "#{@month.month}月の目標カード率（全チーム共通）", class: "font-semibold" %>
+    <%= form.number_field :card_rate, min: 0, max: 100, step: 1, required: true, class: "input w-20 text-right tabular-nums" %>
+    <span class="text-slate-600">%</span>
+    <%= form.submit "保存", class: "btn btn-secondary" %>
+  <% end %>
+</div>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+  <% if @teams.empty? %>
+    <p class="px-4 py-8 text-center text-slate-500"><%= Team.quarter_label(@quarter_start) %>のチームはまだありません。</p>
+  <% else %>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-160 text-[13px]">
+        <thead>
+          <tr class="border-b border-slate-200 text-left text-xs text-slate-600">
+            <th scope="col" class="px-5 py-2.5 font-semibold">チーム</th>
+            <th scope="col" class="px-5 py-2.5 text-right font-semibold">獲得 / 予算</th>
+            <th scope="col" class="w-48 px-5 py-2.5 font-semibold">進捗</th>
+            <th scope="col" class="px-5 py-2.5 font-semibold">目標ペースとの差</th>
+            <th scope="col" class="px-5 py-2.5 text-right font-semibold">稼働（現在 / 予定）</th>
+            <th scope="col" class="px-5 py-2.5"><span class="sr-only">操作</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @teams.zip(@progresses).each do |team, progress| %>
+            <% total = progress.total %>
+            <tr>
+              <th scope="row" class="px-5 py-3 text-left whitespace-nowrap">
+                <%= link_to team.name, admin_team_path(team, month: month_param), class: "font-semibold hover:text-blue-700" %>
+                <span class="ml-1 text-xs font-normal text-slate-500"><%= progress.rows.size %>名</span>
+                <% if total.provisional %><span class="ml-1 text-xs font-normal text-warning-text">暫定を含む</span><% end %>
+                <% if progress.plan_may_be_incomplete? %><span class="ml-1 text-xs font-normal text-warning-text" title="<%= progress.last_planned_on ? "#{progress.last_planned_on.month}月#{progress.last_planned_on.day}日" : "今月" %>より後の稼働予定が未登録です。本日時点の目標が実際より大きく出ます。">稼働予定が途中</span><% end %>
+              </th>
+              <td class="px-5 py-3 text-right tabular-nums whitespace-nowrap"><span class="text-base font-semibold"><%= number_with_delimiter(total.acquired) %></span> / <%= format_pieces(total.budget) %></td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
+                  <%= render "meter", value: total.acquired, total: total.budget, marker: total.pace_target, height: "h-1.5" %>
+                  <span class="w-12 text-right text-xs tabular-nums"><%= format_rate(total.achievement_rate) %></span>
+                </div>
+              </td>
+              <td class="px-5 py-3 whitespace-nowrap">
+                <% if !total.started? %>
+                  <span class="text-slate-400">稼働前</span>
+                <% elsif total.pace_target.nil? %>
+                  <span class="text-slate-400">稼働予定が未登録</span>
+                <% else %>
+                  <span class="inline-flex items-center gap-2 tabular-nums">
+                    <% if total.behind? %><%= status_badge("▼遅れ", :critical) %><% end %>
+                    <span class="<%= "font-semibold text-critical-text" if total.behind? %>"><%= format_signed_count(total.pace_gap) %></span>
+                    <span class="text-xs text-slate-500">（達成率 <%= format_rate_decimal(total.pace_rate) %>）</span>
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-5 py-3 text-right tabular-nums whitespace-nowrap"><%= format("%.1f", total.done_units) %> / <%= format("%.1f", total.planned_units) %>稼働</td>
+              <td class="px-5 py-3 text-right whitespace-nowrap">
+                <%= link_to "詳細", admin_team_path(team, month: month_param), class: "btn btn-secondary" %>
+                <%= link_to "編集", edit_admin_team_path(team), class: "btn btn-secondary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>
+
+<p class="text-xs text-slate-500">バーは予算に対する獲得件数、縦線は本日時点の目標（予算をこれまでの勤務時間の分だけ按分したもの）です。予定稼働数は登録済みの稼働予定（ドンキホーテ・イベント会場）から数えるので、月のシフトをすべて登録してから見てください。シネマの勤務は含みません。</p>

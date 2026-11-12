@@ -1,16 +1,19 @@
-# Shared by the admin and LIFF report forms: default report type, per-type parameter handling, target confirmation
-# on the start report, hours actually worked on the final report, and saving everything together.
+# Shared by the admin and LIFF report forms: default report type, per-type parameter handling, targets on the start
+# report, hours actually worked on the final report, and saving everything together. Reports are per person: the
+# form lists every staff member on the booth, and only the rows that were filled in are saved.
 module ReportFiling
   extend ActiveSupport::Concern
 
   private
-    # start → interim (first free slot) → final, skipping what has already been filed.
-    def assign_default_report_type(report, work_session)
-      if work_session.start_report.nil?
+    # start → interim (first free slot) → final, skipping what has already been filed — by the given staff member,
+    # otherwise by anyone on the booth.
+    def assign_default_report_type(report, work_session, staff: nil)
+      filed = staff ? work_session.reports_for(staff.id) : work_session.reports
+      if filed.none?(&:start?)
         report.report_type = :start
-      elsif (slot = (Report::INTERIM_SLOTS - work_session.registered_slots).first)
+      elsif (slot = (Report::INTERIM_SLOTS - filed.select(&:interim?).map(&:report_slot)).first)
         report.assign_attributes(report_type: :interim, report_slot: slot)
-      elsif work_session.final_report.nil?
+      elsif filed.none?(&:final?)
         report.report_type = :final
       end
     end
@@ -29,13 +32,20 @@ module ReportFiling
       end
     end
 
-    # The start report declares the targets (and a full-day flex start time): the values are applied to the shifts
-    # and saved with the report.
-    def assign_targets(work_session)
+    # The start report declares targets (and a full-day flex start time). The form shows every shift with whatever
+    # was declared before, so the report covers the staff whose values were entered or changed in this submission,
+    # plus the reporter's own shift; rows left blank or untouched keep their earlier declaration.
+    def assign_targets(report, work_session)
+      covered = []
       params.fetch(:shifts, {}).each do |shift_id, attributes|
         shift = work_session.shifts.find { |candidate| candidate.id.to_s == shift_id }
-        shift&.assign_attributes(attributes.permit(:target_acquired_count, :target_approach_count, :started_at))
+        values = attributes.permit(:target_acquired_count, :target_approach_count, :started_at).compact_blank
+        next if shift.nil? || values.empty?
+
+        shift.assign_attributes(values)
+        covered << shift.user_id if shift.changed? || shift.user_id == report.submitted_by_id
       end
+      report.covered_user_ids = covered
     end
 
     # The final report records the hours actually worked (work_records[<shift id>]) for shifts that aren't fixed.
@@ -54,16 +64,15 @@ module ReportFiling
         .select(&:records_hours?).map { |shift| shift.work_record || shift.build_work_record }
     end
 
-    # The start report saves the targets on the shifts (every staff member on the booth needs both); the final
-    # report saves the hours actually worked.
+    # The start report saves the targets it declared on the shifts; the final report saves the hours actually worked.
     def save_report(report, work_session)
-      shifts_valid = !report.start? || work_session.shifts.map { |shift| shift.valid?(:start_report) }.all?
+      shifts = report.start? ? work_session.shifts.select(&:changed?) : []
       work_records = report.final? ? required_work_records(report, work_session) : []
-      records_valid = work_records.map(&:valid?).all?
-      return false unless report.valid? && shifts_valid && records_valid
+      valid = [ report.valid?, *shifts.map(&:valid?), *work_records.map(&:valid?) ].all?
+      return false unless valid
 
       Report.transaction do
-        work_session.shifts.each { |shift| shift.save!(context: :start_report) } if report.start?
+        shifts.each(&:save!)
         report.save!
         work_records.each(&:save!)
       end

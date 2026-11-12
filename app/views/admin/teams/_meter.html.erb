@@ -1,0 +1,11 @@
+<%# locals: (value:, total:, marker: nil, height: "h-2") %>
+<%# Progress toward the budget: the fill is the acquisitions, the tick the pace target (本日時点の目標).
+    Decorative only; the numbers stay in the text next to it. %>
+<% scale = total.to_f %>
+<% fill = scale.positive? ? [ value * 100.0 / scale, 100 ].min : 0 %>
+<div aria-hidden="true" class="relative <%= height %> w-full rounded-full bg-chart-track">
+  <div class="<%= height %> rounded-full bg-chart-1" style="width: <%= format("%.1f", fill) %>%"></div>
+  <% if marker && scale.positive? %>
+    <div class="absolute -inset-y-1 w-0.5 bg-slate-700" style="left: <%= format("%.1f", [ marker * 100.0 / scale, 100 ].min) %>%"></div>
+  <% end %>
+</div>

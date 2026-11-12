@@ -8,12 +8,12 @@ class Liff::ReportsController < Liff::BaseController
   # The booth comes from the staff member's shift: the form opens directly for a single booth, otherwise they pick one.
   def new
     @work_session = @work_sessions.find { |work_session| work_session.id.to_s == params[:work_session_id] }
-    open_work_sessions = @work_sessions.reject(&:all_reports_filed?)
+    open_work_sessions = @work_sessions.reject { |work_session| work_session.all_reports_filed?(current_staff.id) }
     @work_session ||= open_work_sessions.first if open_work_sessions.one?
     return unless @work_session
 
     @report = Report.new(work_session: @work_session, submitted_by: current_staff)
-    assign_default_report_type(@report, @work_session)
+    assign_default_report_type(@report, @work_session, staff: current_staff)
     @result_rows = build_result_rows(@report, @work_session, first_user_id: current_staff.id)
   end
 
@@ -24,7 +24,7 @@ class Liff::ReportsController < Liff::BaseController
 
     @report = Report.new(report_attributes_for_type(report_params).except(:work_session_id, :submitted_by_id)
       .merge(work_session: @work_session, submitted_by: current_staff))
-    assign_targets(@work_session) if @report.start?
+    assign_targets(@report, @work_session) if @report.start?
     assign_work_records(@work_session) if @report.final?
 
     if save_report(@report, @work_session)
@@ -45,6 +45,6 @@ class Liff::ReportsController < Liff::BaseController
     # Booths the staff member has a shift on today, plus yesterday for a final report filed after midnight.
     def set_work_sessions
       @work_sessions = WorkSession.where(id: current_staff.shifts.select(:work_session_id), work_date: Date.yesterday..Date.current)
-        .includes(:work_location, shifts: [ :user, :work_record ], reports: :report_results).order(work_date: :desc, id: :asc).to_a
+        .includes(:work_location, shifts: [ :user, :work_record ], reports: [ :submitted_by, :report_results ]).order(work_date: :desc, id: :asc).to_a
     end
 end

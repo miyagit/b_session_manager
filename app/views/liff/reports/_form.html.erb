@@ -26,7 +26,7 @@
         <%= render "reports/staff_fields", result_form: result_form, shift: work_session.shift_for(result_form.object.user_id), own: result_form.object.user_id == current_staff.id %>
       <% end %>
     </div>
-    <p class="mt-1.5 text-xs text-slate-500">開始報告では目標を確認・修正します。途中・最終報告では獲得件数を入力したスタッフだけが報告され、最終報告はカード数と勤務時間も必要です。シネマの「他社」は件数だけ入力でき、空欄なら報告されません。</p>
+    <p class="mt-1.5 text-xs text-slate-500">自分の分だけ入力すれば報告できます。ほかの人の欄は触らなくて構いません（まとめて入れることもできます）。開始報告は目標を入力・変更した人、途中・最終報告は獲得件数を入力した人が対象になり、最終報告はカード数と勤務時間も必要です。シネマの「他社」は件数だけ入力でき、空欄なら報告されません。</p>
   </fieldset>
 
   <%= form.submit "報告する", class: "btn btn-primary w-full py-3 text-base" %>

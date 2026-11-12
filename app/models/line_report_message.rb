@@ -21,7 +21,7 @@ class LineReportMessage
 
   private
     def start_text
-      blocks = shifts.map do |shift|
+      blocks = @report.covered_shifts.map do |shift|
         [ staff_header(shift.user.name, shift, shift.hours_label), "■ 目標",
           "獲得件数:#{count(shift.target_acquired_count)}", "アプローチ:#{count(shift.target_approach_count)}" ].join("\n")
       end
@@ -68,7 +68,8 @@ class LineReportMessage
       lines.join("\n")
     end
 
-    # Booth budget, acquisitions and achievement. Cinema booths only report it when they have a target.
+    # Booth budget, acquisitions (every staff member's latest numbers as of this report) and achievement. Cinema booths
+    # only report it when they have a target.
     def booth_block
       return if cinema? && @work_session.budget_count.nil?
 
@@ -87,7 +88,6 @@ class LineReportMessage
     end
 
     def cinema? = @work_session.work_location.cinema?
-    def shifts = @work_session.shifts.sort_by(&:id)
     def count(value) = value ? "#{value}件" : "未設定"
     # The fixed 他社 row has no shift and therefore no targets.
     def target_suffix(shift, target) = shift ? "/目標#{count(target)}" : ""

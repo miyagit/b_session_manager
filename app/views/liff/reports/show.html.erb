@@ -27,7 +27,7 @@
 
 <section class="flex flex-col gap-3">
   <% if @report.start? %>
-    <% work_session.shifts.sort_by(&:id).each do |shift| %>
+    <% @report.covered_shifts.each do |shift| %>
       <div class="rounded-xl border border-slate-200 bg-white p-4">
         <div class="flex items-baseline justify-between gap-3">
           <span class="font-semibold"><%= shift.user.name %></span>

@@ -1,6 +1,7 @@
-# A booth's report filed by a staff member from LINE: the start report (confirms the targets), interim reports
-# at 13, 16 and 19 (cumulative counts) and the final report (counts, cards and hours worked; cinema booths also the
-# day's moviegoers in audience_count). created_at is the time of the report.
+# A booth's report filed by a staff member from LINE: the start report (declares targets), interim reports at 13,
+# 16 and 19 (cumulative counts) and the final report (counts, cards and hours worked; cinema booths also the day's
+# moviegoers in audience_count). Reports are per person: each covers the staff whose rows were filled in (usually the
+# reporter alone), so a booth day may have several reports of the same type. created_at is the time of the report.
 class Report < ApplicationRecord
   INTERIM_SLOTS = [ 13, 16, 19 ].freeze
 
@@ -17,17 +18,27 @@ class Report < ApplicationRecord
   before_validation :clear_slot_unless_interim, :clear_audience_unless_cinema_final
 
   validates :report_slot, inclusion: { in: INTERIM_SLOTS, message: "を選んでください" }, if: :interim?
-  validates :report_slot, uniqueness: { scope: :work_session_id }, if: -> { interim? && report_slot.present? }
   validates :report_results, length: { minimum: 1 }, unless: :start?
   # Optional: some theaters don't disclose their attendance.
   validates :audience_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
-  validate :single_start_and_final_report
+  validate :start_report_covers_someone, if: :start?
   validate :report_results_belong_to_work_session
 
-  # Interim counts are cumulative, so the booth total is the sum of this report only (never of earlier slots).
-  def booth_acquired_count
-    report_results.sum(&:acquired_count)
+  # The staff this report is about: the ones whose targets a start report set, otherwise the ones with results.
+  def covers?(user_id)
+    submitted_by_id == user_id || (start? ? covered_user_ids.include?(user_id) : report_results.any? { |result| result.user_id == user_id })
   end
+
+  # The shifts a start report declared targets for (every shift for reports filed before this was recorded).
+  def covered_shifts
+    shifts = work_session.shifts.sort_by(&:id)
+    covered_user_ids.empty? ? shifts : shifts.select { |shift| covered_user_ids.include?(shift.user_id) }
+  end
+
+  # The booth's numbers as of this report: each staff member's latest result from the reports filed up to it, so a
+  # report covering one person still shows the whole booth.
+  def booth_results = work_session.effective_results(as_of: self)
+  def booth_acquired_count = booth_results.sum(&:acquired_count)
 
   # Percentage, or nil when it can't be calculated (no budget).
   def achievement_rate
@@ -58,11 +69,8 @@ class Report < ApplicationRecord
       self.audience_count = nil unless final? && work_session&.work_location&.cinema?
     end
 
-    def single_start_and_final_report
-      return if interim? || report_type.blank? || work_session.nil?
-      return unless work_session.reports.where(report_type: report_type).where.not(id: id).exists?
-
-      errors.add(:base, "#{Report.human_attribute_name("report_type.#{report_type}")}はすでに登録されています")
+    def start_report_covers_someone
+      errors.add(:base, "目標を入力したスタッフがいません") if covered_user_ids.empty?
     end
 
     # Every result belongs to a staff member on the booth; cinema booths may also carry the fixed 他社 row.

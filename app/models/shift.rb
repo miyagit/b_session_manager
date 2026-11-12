@@ -1,5 +1,6 @@
 # A staff member's assignment to a booth for the day. The personal targets (and, for a full-day shift, the flex start
-# time) are declared in the start report; the hours actually worked are recorded with the final report (WorkRecord).
+# time) are declared in the staff member's start report; the hours actually worked are recorded with the final report
+# (WorkRecord).
 class Shift < ApplicationRecord
   # Planned working hours by shift type ("HH:MM" start and end). Donki booths run 前半 / 後半 / 全日, cinema booths
   # the single シネマ shift. 全日 is a FULL_DAY_WORK_HOURS-hour flex shift starting at or after the window start: the
@@ -14,6 +15,8 @@ class Shift < ApplicationRecord
   # Unpaid break inside the shift, excluded from the hours worked (cinema: 9 hours on site = 8 hours worked).
   BREAK_HOURS = { "cinema" => 1.0 }.freeze
   TYPES_BY_CATEGORY = { "donki" => %w[ first_half second_half full_day ], "cinema" => %w[ cinema ] }.freeze
+  # 稼働数 on the team screen: a full day counts 1, a half day 0.5.
+  WORK_UNITS = { "first_half" => 0.5, "second_half" => 0.5, "full_day" => 1.0, "cinema" => 1.0 }.freeze
 
   # A plain clock time, so keep it out of time-zone conversion.
   self.skip_time_zone_conversion_for_attributes = [ :started_at ]
@@ -24,9 +27,8 @@ class Shift < ApplicationRecord
 
   enum :shift_type, { first_half: "first_half", second_half: "second_half", full_day: "full_day", cinema: "cinema" }, validate: true
 
+  # Targets and the flex start are declared in the start report, each staff member for themselves, so none is required.
   validates :target_acquired_count, :target_approach_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
-  validates :target_acquired_count, :target_approach_count, presence: true, on: :start_report
-  validates :started_at, presence: true, on: :start_report, if: :full_day?
   validates :user_id, uniqueness: { scope: :work_session_id }
   validate :shift_type_allowed_for_location
   validate :started_at_not_before_window, if: -> { full_day? && started_at.present? }
@@ -39,6 +41,15 @@ class Shift < ApplicationRecord
 
   def targets_set? = target_acquired_count.present? && target_approach_count.present?
   def break_hours = BREAK_HOURS.fetch(shift_type, 0.0)
+  def work_units = WORK_UNITS.fetch(shift_type)
+
+  # Hours of work the shift is planned for: FULL_DAY_WORK_HOURS for the flex 全日, otherwise the fixed window minus the break.
+  def planned_hours
+    return FULL_DAY_WORK_HOURS.to_f if full_day?
+
+    starts, ends = FIXED_HOURS.fetch(shift_type).map { |hhmm| Shift.clock(hhmm) }
+    (ends - starts) / 3600 - break_hours
+  end
 
   # Cinema hours are fixed, so no actual hours are recorded for them.
   def records_hours? = !cinema?

@@ -11,7 +11,7 @@
 
 <section aria-label="ブース全体" class="grid gap-4 sm:grid-cols-3">
   <% cards = if @report.start?
-       [ [ "ブース予算", work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" ], [ "獲得目標の合計", "#{work_session.target_acquired_count}件" ], [ "スタッフ", "#{work_session.shifts.size}名" ] ]
+       [ [ "ブース予算", work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" ], [ "この報告の獲得目標", "#{@report.covered_shifts.sum { |shift| shift.target_acquired_count.to_i }}件" ], [ "対象スタッフ", "#{@report.covered_shifts.size}名" ] ]
      else
        [ [ "ブース予算", work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" ], [ "ブース獲得件数", "#{@report.booth_acquired_count}件" ], [ "予算達成率", format_rate(@report.achievement_rate) ] ]
      end %>
@@ -49,7 +49,7 @@
       </thead>
       <tbody class="divide-y divide-slate-100">
         <% if @report.start? %>
-          <% work_session.shifts.sort_by(&:id).each do |shift| %>
+          <% @report.covered_shifts.each do |shift| %>
             <tr>
               <th scope="row" class="px-4 py-3 text-left font-semibold"><%= shift.user.name %></th>
               <td class="px-4 py-3 whitespace-nowrap"><%= shift_type_label(shift) %> <span class="text-slate-500 tabular-nums"><%= shift.hours_label %></span></td>

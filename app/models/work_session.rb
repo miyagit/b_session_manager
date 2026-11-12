@@ -18,20 +18,23 @@ class WorkSession < ApplicationRecord
   before_validation :copy_location_budget, on: :create
 
   def display_name = work_location.name
-  def start_report = reports.find(&:start?)
-  def final_report = reports.find(&:final?)
-  def interim_reports = reports.select(&:interim?).sort_by(&:report_slot)
-  def registered_slots = interim_reports.map(&:report_slot)
+  def interim_reports = reports.select(&:interim?).sort_by { |report| [ report.report_slot, report.created_at ] }
+  def registered_slots = interim_reports.map(&:report_slot).uniq
   def shift_for(user_id) = shifts.find { |shift| shift.user_id == user_id }
 
-  # Nothing left to report: start, every interim slot and the final report are in.
-  def all_reports_filed?
-    start_report.present? && final_report.present? && (Report::INTERIM_SLOTS - registered_slots).empty?
+  # The reports that cover a staff member (reports are filed per person).
+  def reports_for(user_id) = reports.select { |report| report.covers?(user_id) }
+
+  # Nothing left to report: a start report, every interim slot and a final report are in — for the booth, or for
+  # one staff member when user_id is given.
+  def all_reports_filed?(user_id = nil)
+    filed = user_id ? reports_for(user_id) : reports
+    filed.any?(&:start?) && filed.any?(&:final?) && (Report::INTERIM_SLOTS - filed.select(&:interim?).map(&:report_slot)).empty?
   end
 
-  # The final report, otherwise the latest interim report, otherwise the start report.
+  # The latest final report, otherwise the latest interim report, otherwise the latest start report.
   def latest_report
-    reports.max_by { |report| [ report.final? ? 2 : (report.interim? ? 1 : 0), report.report_slot.to_i ] }
+    reports.max_by { |report| [ report.final? ? 2 : (report.interim? ? 1 : 0), report.report_slot.to_i, report.created_at || Time.current ] }
   end
 
   # :confirmed once a final report exists, :provisional with interim reports only, :none before any results.
@@ -42,15 +45,21 @@ class WorkSession < ApplicationRecord
     end
   end
 
-  # Each staff member's effective result: from the final report, otherwise from their latest interim report.
-  # Interim counts are cumulative, so earlier slots are never added on top.
-  def effective_results
-    reports.flat_map(&:report_results).group_by(&:user_id).values.map do |results|
-      results.max_by { |result| [ result.report.final? ? 1 : 0, result.report.report_slot.to_i ] }
+  # Each staff member's effective result: from a final report, otherwise from their latest interim report (the most
+  # recent one when the same slot was reported twice). Interim counts are cumulative, so earlier slots are never
+  # added on top. With as_of, only the reports filed up to that report count (its own rows included).
+  def effective_results(as_of: nil)
+    considered = reports.to_a
+    if as_of
+      considered = considered.select { |report| report == as_of || (as_of.created_at && report.created_at && report.created_at <= as_of.created_at) }
+      considered |= [ as_of ]
+    end
+    considered.flat_map(&:report_results).group_by(&:user_id).values.map do |results|
+      results.max_by { |result| [ result.report.final? ? 1 : 0, result.report.report_slot.to_i, result.report.created_at || Time.current ] }
     end
   end
 
-  def effective_result_for(user_id) = effective_results.find { |result| result.user_id == user_id }
+  def effective_result_for(user_id, as_of: nil) = effective_results(as_of: as_of).find { |result| result.user_id == user_id }
   def acquired_count = effective_results.sum(&:acquired_count)
   def approach_count = effective_results.sum(&:approach_count)
   def card_count = effective_results.sum { |result| result.card_count.to_i }

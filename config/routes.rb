@@ -13,6 +13,8 @@ Rails.application.routes.draw do
     end
     resource :analytics, only: :show
     resources :rankings, only: :index
+    resources :teams
+    resource :monthly_target, only: :update
   end
 
   # LIFF app opened from LINE: staff report their own booth's results.

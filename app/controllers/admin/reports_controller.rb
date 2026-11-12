@@ -35,7 +35,7 @@ class Admin::ReportsController < Admin::BaseController
   def create
     @work_session = find_work_session(report_params[:work_session_id])
     @report = Report.new(report_attributes_for_type(report_params).except(:work_session_id).merge(work_session: @work_session))
-    assign_targets(@work_session) if @report.start?
+    assign_targets(@report, @work_session) if @report.start?
     assign_work_records(@work_session) if @report.final?
 
     if save_report(@report, @work_session)
@@ -48,7 +48,7 @@ class Admin::ReportsController < Admin::BaseController
 
   private
     def find_work_session(id)
-      WorkSession.includes(:work_location, shifts: [ :user, :work_record ], reports: :report_results).find(id)
+      WorkSession.includes(:work_location, shifts: [ :user, :work_record ], reports: [ :submitted_by, :report_results ]).find(id)
     end
 
     def parse_date(value)

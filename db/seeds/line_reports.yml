@@ -7,24 +7,24 @@
 #   budget:  ブース予算（シネマはブース目標があったときだけ）、audience: シネマの動員数。
 # 「他社」「他社A」などは他社分の件数で、シネマの「他社」行にまとめて入ります。
 locations: # category は donki / cinema。budget はブース予算の初期値（報告で一番多かった値）、event はイベント会場（ドンキ扱い）
-  溝の口: { category: donki, budget: 70 }
-  後楽園: { category: donki, budget: 70 }
-  大宮東口: { category: donki, budget: 80 }
-  町田駅前: { category: donki, budget: 70 }
-  高田馬場: { category: donki, budget: 80 }
-  吉祥寺: { category: donki, budget: 80 }
+  ドン・キホーテ溝の口: { category: donki, budget: 70 }
+  ドン・キホーテ後楽園: { category: donki, budget: 70 }
+  ドン・キホーテ大宮東口: { category: donki, budget: 80 }
+  ドン・キホーテ町田駅前: { category: donki, budget: 70 }
+  ドン・キホーテ高田馬場: { category: donki, budget: 80 }
+  ドン・キホーテ吉祥寺: { category: donki, budget: 80 }
   UCみなとみらい: { category: cinema }
   UC幕張: { category: cinema }
   109湘南: { category: cinema }
   新宿ピカデリー: { category: cinema }
   UC豊洲: { category: cinema }
   MOVIX橋本: { category: cinema }
-  下北沢: { category: donki, budget: 70 }
-  新宿: { category: donki, budget: 80 }
-  成増: { category: donki, budget: 80 }
-  ピカソ目黒駅前: { category: donki, budget: 80 }
-  MEGA板橋志村: { category: donki, budget: 80 }
-  蒲田: { category: donki, budget: 80 }
+  ドン・キホーテ下北沢: { category: donki, budget: 70 }
+  ドン・キホーテ新宿: { category: donki, budget: 80 }
+  ドン・キホーテ成増: { category: donki, budget: 80 }
+  ドン・キホーテピカソ目黒駅前: { category: donki, budget: 80 }
+  MEGAドン・キホーテ板橋志村: { category: donki, budget: 80 }
+  ドン・キホーテ蒲田: { category: donki, budget: 80 }
   UC浦和: { category: cinema }
   UCとしまえん: { category: cinema }
   MOVIX亀有: { category: cinema }
@@ -93,7 +93,7 @@ sessions:
     16: { at: "16:19", by: 勝呂颯汰, results: { 松尾元勢: [10], 勝呂颯汰: [8] } }
   final: { at: "19:16", by: 勝呂颯汰, results: { 松尾元勢: [15, 92, 10], 勝呂颯汰: [11, 50, 4] } }
 - date: "2026-09-14"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 70
   staff:
     平野湧真: { shift: first_half, target: 20 }
@@ -106,7 +106,7 @@ sessions:
     19: { at: "19:13", by: 岩元大佳, results: { 岩元大佳: [23], 古泉桃子: [11] } }
   final: { at: "22:20", by: 岩元大佳, results: { 平野湧真: [6, 82, 4], 岩元大佳: [40, 107, 11], 古泉桃子: [20, 81, 12] } }
 - date: "2026-09-15"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     中川大晟: { shift: first_half, target: 35 }
@@ -118,7 +118,7 @@ sessions:
     19: { at: "19:15", by: 渡辺了太, results: { 渡辺了太: [39] } }
   final: { at: "22:20", by: 渡辺了太, results: { 中川大晟: [33, 73, 4], 渡辺了太: [60, 122, 22] } }
 - date: "2026-09-15"
-  location: 町田駅前
+  location: ドン・キホーテ町田駅前
   budget: 70
   staff:
     天野りの: { shift: full_day, started_at: "13:00", target: 40 }
@@ -139,7 +139,7 @@ sessions:
     16: { at: "16:06", by: 大林賢世, results: { 大林賢世: [14], 小松崎翔太: [7] } }
   final: { at: "19:36", by: 大林賢世, results: { 大林賢世: [20, 98, 15], 小松崎翔太: [9, 80, 6], 他社: [22, ~, 13] } }
 - date: "2026-09-16"
-  location: 下北沢
+  location: ドン・キホーテ下北沢
   budget: 70
   staff:
     渡辺了太: { shift: first_half, target: 30 }
@@ -152,7 +152,7 @@ sessions:
     19: { at: "19:11", by: 橋本瑠美, results: { 橋本瑠美: [23], 松尾元勢: [15] } }
   final: { at: "22:09", by: 橋本瑠美, results: { 渡辺了太: [27, 65, 9], 橋本瑠美: [32, 75, 9], 松尾元勢: [32, 72, 13] } }
 - date: "2026-09-16"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "13:00", target: 40 }
@@ -173,7 +173,7 @@ sessions:
     16: { at: "16:03", by: 宮嶋勇弥, results: { 永井優陽: [15], 小松崎翔太: [14] } }
   final: { at: "19:35", by: 宮嶋勇弥, results: { 永井優陽: [20, 105, 13], 小松崎翔太: [19, 120, 11] } }
 - date: "2026-09-17"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     橋本瑠美: { shift: first_half, target: 20 }
@@ -185,7 +185,7 @@ sessions:
     19: { at: "19:04", by: 渡辺了太, results: { 渡辺了太: [37] } }
   final: { at: "22:07", by: 渡辺了太, results: { 橋本瑠美: [22, 62, 8], 渡辺了太: [54, 163, 21] } }
 - date: "2026-09-17"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     古泉桃子: { shift: first_half, target: 20 }
@@ -206,7 +206,7 @@ sessions:
     16: { at: "16:17", by: 宮嶋勇弥, results: { 永井優陽: [12] } }
   final: { at: "19:22", by: 宮嶋勇弥, results: { 永井優陽: [15, 135, 10] } }
 - date: "2026-09-18"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     松尾元勢: { shift: full_day, started_at: "13:00", target: 50 }
@@ -216,7 +216,7 @@ sessions:
     19: { at: "19:01", by: 松尾元勢, results: { 松尾元勢: [32] } }
   final: { at: "22:02", by: 松尾元勢, results: { 松尾元勢: [54, 137, 28] } }
 - date: "2026-09-18"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     伊藤勇悟: { shift: full_day, started_at: "13:00", target: 40 }
@@ -277,7 +277,7 @@ sessions:
     16: { at: "16:08", by: 岩元大佳, results: { 矢野新大: [23], 岩元大佳: [21] } }
   final: { at: "21:54", by: 岩元大佳, results: { 矢野新大: [40, 120, 27], 岩元大佳: [49, 132, 32] } }
 - date: "2026-09-19"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "13:00", target: 40 }
@@ -328,7 +328,7 @@ sessions:
     16: { at: "16:03", by: 小松崎翔太, results: { 小松崎翔太: [3] } }
   final: { at: "19:10", by: 小松崎翔太, results: { 小松崎翔太: [4, 100, 1] } }
 - date: "2026-09-20"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "12:30", target: 40 }
@@ -339,7 +339,7 @@ sessions:
     19: { at: "19:08", by: 後藤崇佑, results: { 後藤崇佑: [20], 天野りの: [16] } }
   final: { at: "22:03", by: 後藤崇佑, results: { 後藤崇佑: [22, 134, 14], 天野りの: [22, 110, 9] } }
 - date: "2026-09-20"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     舩田優輝: { shift: full_day, started_at: "13:00", target: 40 }
@@ -361,7 +361,7 @@ sessions:
     16: { at: "16:06", by: 宮嶋勇弥, results: { 宮嶋勇弥: [7], 小松崎翔太: [6], 永井優陽: [9] } }
   final: { at: "20:18", by: 宮嶋勇弥, results: { 宮嶋勇弥: [15, 110, 11], 小松崎翔太: [7, 90, 2], 永井優陽: [15, 105, 11] } }
 - date: "2026-09-21"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     古泉桃子: { shift: first_half, worked: "10:00-14:30", target: 20 }
@@ -374,7 +374,7 @@ sessions:
     19: { at: "19:24", by: 石原圭祐, results: { 石原圭祐: [31], 伊藤勇悟: [12] } }
   final: { at: "22:33", by: 石原圭祐, results: { 古泉桃子: [10, 20, 4], 石原圭祐: [53, 140, 26], 伊藤勇悟: [25, 75, 8] } }
 - date: "2026-09-21"
-  location: 高田馬場
+  location: ドン・キホーテ高田馬場
   budget: 80
   staff:
     中川大晟: { shift: first_half, target: 30 }
@@ -397,7 +397,7 @@ sessions:
     16: { at: "16:06", by: 石原圭祐, results: { 矢野新大: [28], 石原圭祐: [23] } }
   final: { at: "21:09", by: 矢野新大, results: { 矢野新大: [63, 210, 33], 石原圭祐: [55, 204, 23] } }
 - date: "2026-09-22"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "13:00", target: 40 }
@@ -427,7 +427,7 @@ sessions:
     16: { at: "16:00", by: 松尾元勢, results: { 松尾元勢: [21], 天野りの: [11] } }
   final: { at: "21:14", by: 天野りの, results: { 松尾元勢: [40, 120, 24], 天野りの: [17, 110, 2] } }
 - date: "2026-09-23"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     今村天星: { shift: full_day, started_at: "12:30", target: 40 }
@@ -447,7 +447,7 @@ sessions:
     16: { at: "16:03", by: 宮嶋勇弥, results: { 永井優陽: [13] } }
   final: { at: "19:14", by: 宮嶋勇弥, results: { 永井優陽: [20, 115, 13] } }
 - date: "2026-09-24"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     松久保凱也: { shift: full_day, started_at: "12:30", target: 50 }
@@ -458,7 +458,7 @@ sessions:
     19: { at: "19:02", by: 熊澤正輝, results: { 松久保凱也: [30], 熊澤正輝: [24] } }
   final: { at: "22:13", by: 松久保凱也, results: { 松久保凱也: [46, 111, 19], 熊澤正輝: [31, 81, 11] } }
 - date: "2026-09-24"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     舩田優輝: { shift: full_day, started_at: "13:00", target: 40 }
@@ -488,7 +488,7 @@ sessions:
     16: { at: "16:03", by: 松尾元勢, results: { 松尾元勢: [11] } }
   final: { at: "19:18", by: 松尾元勢, results: { 松尾元勢: [16, 97, 14] } }
 - date: "2026-09-25"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     伊藤勇悟: { shift: full_day, started_at: "13:00", target: 40 }
@@ -537,7 +537,7 @@ sessions:
     16: { at: "16:03", by: 栗田康平, results: { 栗田康平: [5] } }
   final: { at: "19:20", by: 栗田康平, results: { 栗田康平: [11, 53, 7] } }
 - date: "2026-09-26"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     大久保大智: { shift: full_day, started_at: "10:00", target: 50 }
@@ -549,7 +549,7 @@ sessions:
     19: { at: "19:03", by: 平野湧真, results: { 大久保大智: [42], 平野湧真: [16] } }
   final: { at: "22:35", by: 大久保大智, results: { 大久保大智: [57, 131, 21], 平野湧真: [23, 109, 4] } }
 - date: "2026-09-26"
-  location: 新宿
+  location: ドン・キホーテ新宿
   budget: 80
   staff:
     後藤崇佑: { shift: first_half, target: 25 }
@@ -562,7 +562,7 @@ sessions:
     19: { at: "19:08", by: 吉田楓, results: { 岩元大佳: [20], 吉田楓: [8] } }
   final: { at: "22:33", by: 岩元大佳, results: { 後藤崇佑: [11, 52, 3], 岩元大佳: [30, 111, 10], 吉田楓: [15, 91, 10] } }
 - date: "2026-09-26"
-  location: ピカソ目黒駅前
+  location: ドン・キホーテピカソ目黒駅前
   budget: 80
   staff:
     橋本瑠美: { shift: full_day, started_at: "13:00", target: 40 }
@@ -573,7 +573,7 @@ sessions:
     19: { at: "19:03", by: 渡辺了太, results: { 橋本瑠美: [15], 渡辺了太: [19] } }
   final: { at: "22:06", by: 渡辺了太, results: { 橋本瑠美: [22, 58, 7], 渡辺了太: [30, 62, 13] } }
 - date: "2026-09-26"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "13:00", target: 40 }
@@ -584,7 +584,7 @@ sessions:
     19: { at: "19:02", by: 今村天星, results: { 今村天星: [17], 松久保凱也: [18] } }
   final: { at: "22:11", by: 松久保凱也, results: { 今村天星: [29, 105, 18], 松久保凱也: [26, 77, 14] } }
 - date: "2026-09-26"
-  location: 吉祥寺
+  location: ドン・キホーテ吉祥寺
   budget: 80
   staff:
     舩田優輝: { shift: full_day, started_at: "13:00", target: 40 }
@@ -626,7 +626,7 @@ sessions:
     16: { at: "16:04", by: 宮嶋勇弥, results: { 宮嶋勇弥: [5], 張: [0] } }
   final: { at: "19:21", by: 張, results: { 宮嶋勇弥: [7, 110, 4], 張: [1, 76, 1] } }
 - date: "2026-09-27"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     大久保大智: { shift: full_day, started_at: "10:00", target: 50 }
@@ -638,7 +638,7 @@ sessions:
     19: { at: "19:34", by: 古泉桃子, results: { 大久保大智: [30], 古泉桃子: [19] } }
   final: { at: "22:17", by: 大久保大智, results: { 大久保大智: [40, 119, 21], 古泉桃子: [32, 50, 16] } }
 - date: "2026-09-27"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "12:00", target: 40 }
@@ -649,7 +649,7 @@ sessions:
     19: { at: "19:04", by: 今村天星, results: { 今村天星: [26], 松久保凱也: [28] } }
   final: { at: "22:10", by: 今村天星, results: { 今村天星: [35, 125, 16], 松久保凱也: [37, 102, 22] } }
 - date: "2026-09-27"
-  location: 成増
+  location: ドン・キホーテ成増
   budget: 80
   staff:
     舩田優輝: { shift: full_day, started_at: "13:00", target: 40 }
@@ -660,7 +660,7 @@ sessions:
     19: { at: "19:17", by: 舩田優輝, results: { 舩田優輝: [18], 平野湧真: [5] } }
   final: { at: "22:13", by: 舩田優輝, results: { 舩田優輝: [25, 104, 9], 平野湧真: [10, 89, 4] } }
 - date: "2026-09-27"
-  location: 吉祥寺
+  location: ドン・キホーテ吉祥寺
   budget: 80
   staff:
     渡辺了太: { shift: full_day, started_at: "13:00", target: 50 }
@@ -671,7 +671,7 @@ sessions:
     19: { at: "19:10", by: 石原圭祐, results: { 渡辺了太: [33], 石原圭祐: [29] } }
   final: { at: "22:10", by: 渡辺了太, results: { 渡辺了太: [55, 180, 19], 石原圭祐: [45, 210, 11] } }
 - date: "2026-09-27"
-  location: ピカソ目黒駅前
+  location: ドン・キホーテピカソ目黒駅前
   budget: 80
   staff:
     後藤崇佑: { shift: full_day, started_at: "13:00", target: 40 }
@@ -691,7 +691,7 @@ sessions:
     13: { at: "13:04", by: 松本三四郎, results: { 永井優陽: [1], 松本三四郎: [2], 他社: [3] } }
   final: { at: "15:12", by: 宮嶋勇弥, results: { 永井優陽: [1, 50, 1], 松本三四郎: [4, 15, 2] } }
 - date: "2026-09-28"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     舩田優輝: { shift: first_half, target: 25 }
@@ -704,7 +704,7 @@ sessions:
     19: { at: "19:07", by: 岩元大佳, results: { 岩元大佳: [24], 古泉桃子: [13] } }
   final: { at: "22:45", by: 岩元大佳, results: { 舩田優輝: [18, 49, 5], 岩元大佳: [40, 116, 17], 古泉桃子: [23, 106, 11] } }
 - date: "2026-09-29"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 70
   staff:
     橋本瑠美: { shift: full_day, started_at: "11:30", target: 40 }
@@ -715,7 +715,7 @@ sessions:
     19: { at: "19:03", by: 橋本瑠美, results: { 橋本瑠美: [34], 今村天星: [27] } }
   final: { at: "22:35", by: 橋本瑠美, results: { 橋本瑠美: [50, 120, 20], 今村天星: [40, 95, 20] } }
 - date: "2026-09-29"
-  location: 町田駅前
+  location: ドン・キホーテ町田駅前
   budget: 70
   staff:
     松久保凱也: { shift: full_day, started_at: "12:30", target: 50 }
@@ -736,7 +736,7 @@ sessions:
     16: { at: "16:13", by: 宮嶋勇弥, results: { 永井優陽: [6], 松本三四郎: [1] } }
   final: { at: "19:12", by: 松本三四郎, results: { 永井優陽: [11, 78, 7], 松本三四郎: [1, 50, 1] } }
 - date: "2026-09-30"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     松久保凱也: { shift: full_day, started_at: "10:00", target: 40 }
@@ -747,7 +747,7 @@ sessions:
     16: { at: "16:11", by: 松久保凱也, results: { 松久保凱也: [7], 岩元大佳: [13] } }
   final: { at: "19:27", by: 松久保凱也, results: { 松久保凱也: [13, 80, 5], 岩元大佳: [27, 95, 11] } }
 - date: "2026-09-30"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     熊澤正輝: { shift: full_day, started_at: "10:00", target: 50 }
@@ -759,7 +759,7 @@ sessions:
     19: { at: "19:31", by: 舩田優輝, results: { 熊澤正輝: [23], 舩田優輝: [21, 74] } }
   final: { at: "22:47", by: 熊澤正輝, results: { 熊澤正輝: [28, 92, 10], 舩田優輝: [21, 74, 14] } }
 - date: "2026-10-01"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     松尾元勢: { shift: first_half, target: 30 }
@@ -789,7 +789,7 @@ sessions:
     16: { at: "16:23", by: 宮嶋勇弥, results: { 永井優陽: [10] } }
   final: { at: "19:21", by: 宮嶋勇弥, results: { 永井優陽: [15, 126, 12] } }
 - date: "2026-10-02"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     松尾元勢: { shift: full_day, started_at: "13:00", target: 55 }
@@ -841,7 +841,7 @@ sessions:
     13: { at: "13:01", by: 渡辺了太, results: { 古泉桃子: [41], 渡辺了太: [40], 橋本瑠美: [31], 今村天星: [31] } }
   final: { at: "18:18", by: 古泉桃子, results: { 古泉桃子: [93, 255, 61], 渡辺了太: [90, 243, 59], 橋本瑠美: [72, 212, 30], 今村天星: [65, 230, 52] } }
 - date: "2026-10-03"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     大久保大智: { shift: full_day, started_at: "10:00", target: 50 }
@@ -852,7 +852,7 @@ sessions:
     19: { at: "19:17", by: 大久保大智, results: { 大久保大智: [41] } }
   final: { at: "22:16", by: 大久保大智, results: { 大久保大智: [50, 129, 19] } }
 - date: "2026-10-03"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "12:30", target: 40 }
@@ -897,7 +897,7 @@ sessions:
     16: { at: "16:14", by: 大林賢世, results: { 大林賢世: [13], 勝呂颯汰: [4] } }
   final: { at: "19:21", by: 勝呂颯汰, results: { 大林賢世: [22, 112, 11], 勝呂颯汰: [6, 80, 4] } }
 - date: "2026-10-04"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     渡辺了太: { shift: full_day, started_at: "11:00", target: 70 }
@@ -909,7 +909,7 @@ sessions:
     19: { at: "19:05", by: 渡辺了太, results: { 渡辺了太: [53], 宮嶋勇弥: [5] } }
   final: { at: "22:16", by: 渡辺了太, results: { 渡辺了太: [74, 211, 21], 宮嶋勇弥: [10, 100, 6] } }
 - date: "2026-10-04"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     岩元大佳: { shift: full_day, started_at: "13:00", target: 40 }
@@ -930,7 +930,7 @@ sessions:
     16: { at: "16:04", by: Sou, results: { 松尾元勢: [6], 工藤: [2] } }
   final: { at: "19:21", by: Sou, results: { 松尾元勢: [6, 43, 5], 工藤: [3, 125, 2] } }
 - date: "2026-10-05"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     岩元大佳: { shift: first_half, target: 20 }
@@ -943,7 +943,7 @@ sessions:
     19: { at: "19:00", by: 天野りの, results: { 矢野新大: [21], 天野りの: [5] } }
   final: { at: "22:11", by: 矢野新大, results: { 岩元大佳: [25, 50, 11], 矢野新大: [40, 90, 13], 天野りの: [8, 40, 1] } }
 - date: "2026-10-06"
-  location: 町田駅前
+  location: ドン・キホーテ町田駅前
   budget: 70
   staff:
     渡辺了太: { shift: full_day, started_at: "11:00", target: 70 }
@@ -955,7 +955,7 @@ sessions:
     19: { at: "19:06", by: 今村天星, results: { 渡辺了太: [47], 今村天星: [23] } }
   final: { at: "22:03", by: 渡辺了太, results: { 渡辺了太: [70, 203, 21], 今村天星: [33, 132, 19] } }
 - date: "2026-10-06"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     松久保凱也: { shift: full_day, started_at: "12:30", target: 50 }
@@ -976,7 +976,7 @@ sessions:
     16: { at: "16:22", by: 菊池優絆, results: { 菊池優絆: [5], 松本三四郎: [4] } }
   final: { at: "19:31", by: 菊池優絆, results: { 菊池優絆: [9, 75, 5], 松本三四郎: [5, 631, 4] } }
 - date: "2026-10-07"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     橋本瑠美: { shift: full_day, started_at: "12:30", target: 40 }
@@ -997,7 +997,7 @@ sessions:
     16: { at: "16:14", by: 松本三四郎, results: { 大林賢世: [8], 松本三四郎: [4], 他社: [2] } }
   final: { at: "20:34", by: 大林賢世, results: { 大林賢世: [15, 65, 7], 松本三四郎: [4, 618, 2], 他社: [4, 25, 2] } }
 - date: "2026-10-08"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     梅村晏生: { shift: full_day, started_at: "12:00", target: 40 }
@@ -1008,7 +1008,7 @@ sessions:
     19: { at: "19:20", by: 古泉桃子, results: { 梅村晏生: [16], 古泉桃子: [24] } }
   final: { at: "22:07", by: はるみ, results: { 梅村晏生: [24, 146, 11], 古泉桃子: [33, 134, 15] } }
 - date: "2026-10-08"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "12:00", target: 40 }
@@ -1028,7 +1028,7 @@ sessions:
     16: { at: "16:02", by: 宮嶋勇弥, results: { 永井優陽: [10] } }
   final: { at: "19:19", by: 宮嶋勇弥, results: { 永井優陽: [17, 105, 12] } }
 - date: "2026-10-09"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     橋本瑠美: { shift: first_half, target: 25 }
@@ -1084,7 +1084,7 @@ sessions:
     16: { at: "16:31", by: 大林賢世, results: { 勝呂颯汰: [5], 大林賢世: [10] } }
   final: { at: "19:56", by: 大林賢世, results: { 勝呂颯汰: [6, 80, 2], 大林賢世: [16, 65, 12] } }
 - date: "2026-10-10"
-  location: ピカソ目黒駅前
+  location: ドン・キホーテピカソ目黒駅前
   budget: 80
   staff:
     大久保大智: { shift: full_day, started_at: "10:00", target: 50 }
@@ -1096,7 +1096,7 @@ sessions:
     19: { at: "19:15", by: 平野湧真, results: { 大久保大智: [35], 平野湧真: [9] } }
   final: { at: "22:30", by: 大久保大智, results: { 大久保大智: [51, 121, 17], 平野湧真: [18, 100, 10] } }
 - date: "2026-10-10"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     松久保凱也: { shift: full_day, started_at: "11:00", target: 55 }
@@ -1108,7 +1108,7 @@ sessions:
     19: { at: "19:16", by: 後藤崇佑, results: { 松久保凱也: [18], 後藤崇佑: [17] } }
   final: { at: "22:08", by: 後藤崇佑, results: { 松久保凱也: [25, 92, 9], 後藤崇佑: [21, 107, 12] } }
 - date: "2026-10-10"
-  location: MEGA板橋志村
+  location: MEGAドン・キホーテ板橋志村
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1119,7 +1119,7 @@ sessions:
     19: { at: "19:16", by: 今村天星, results: { 今村天星: [19], 岩元大佳: [20] } }
   final: { at: "22:31", by: 岩元大佳, results: { 今村天星: [33, 98, 15], 岩元大佳: [40, 89, 19] } }
 - date: "2026-10-10"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     矢野新大: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1163,7 +1163,7 @@ sessions:
     16: { at: "16:04", by: 勝呂颯汰, results: { 勝呂颯汰: [18], 栗田康平: [11] } }
   final: { at: "19:39", by: 栗田康平, results: { 勝呂颯汰: [27, 100, 17], 栗田康平: [16, 90, 10] } }
 - date: "2026-10-11"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     渡辺了太: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1174,7 +1174,7 @@ sessions:
     19: { at: "19:03", by: 渡辺了太, results: { 渡辺了太: [41], 中川大晟: [32, 82] } }
   final: { at: "22:03", by: 渡辺了太, results: { 渡辺了太: [54, 122, 25], 中川大晟: [32, 82, 14] } }
 - date: "2026-10-11"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     岩元大佳: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1185,7 +1185,7 @@ sessions:
     19: { at: "19:02", by: 宮嶋勇弥, results: { 岩元大佳: [22], 宮嶋勇弥: [16] } }
   final: { at: "22:46", by: 岩元大佳, results: { 岩元大佳: [40, 101, 19], 宮嶋勇弥: [30, 110, 12] } }
 - date: "2026-10-11"
-  location: MEGA板橋志村
+  location: MEGAドン・キホーテ板橋志村
   budget: 80
   staff:
     古泉桃子: { shift: full_day, started_at: "13:00", target: 35 }
@@ -1205,7 +1205,7 @@ sessions:
     16: { at: "16:03", by: 栗田康平, results: { 栗田康平: [10] } }
   final: { at: "19:41", by: 栗田康平, results: { 松本三四郎: [1, 40, 1], 栗田康平: [23, 100, 21], 他社: [24, ~, ~] } }
 - date: "2026-10-12"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "11:00", target: 40 }
@@ -1217,7 +1217,7 @@ sessions:
     19: { at: "19:15", by: 今村天星, results: { 今村天星: [40], 渡辺了太: [46] } }
   final: { at: "22:07", by: 今村天星, results: { 今村天星: [50, 145, 22], 渡辺了太: [60, 133, 27] } }
 - date: "2026-10-12"
-  location: 高田馬場
+  location: ドン・キホーテ高田馬場
   budget: 70
   staff:
     岩元大佳: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1227,7 +1227,7 @@ sessions:
     19: { at: "19:12", by: 岩元大佳, results: { 岩元大佳: [20] } }
   final: { at: "22:07", by: 岩元大佳, results: { 岩元大佳: [28, 110, 11] } }
 - date: "2026-10-13"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     松久保凱也: { shift: full_day, started_at: "10:30", target: 50 }
@@ -1248,7 +1248,7 @@ sessions:
     16: { at: "16:11", by: 松本三四郎, results: { 松本三四郎: [2], 菊池優絆: [12] } }
   final: { at: "19:42", by: 菊池優絆, results: { 松本三四郎: [6, 150, 4], 菊池優絆: [20, 102, 16] } }
 - date: "2026-10-14"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     舩田優輝: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1268,7 +1268,7 @@ sessions:
     16: { at: "16:04", by: 松本三四郎, results: { 松本三四郎: [4], 松尾元勢: [15], 他社: [3] } }
   final: { at: "20:06", by: 松本三四郎, results: { 松本三四郎: [9, 500, 7], 松尾元勢: [21, 78, 15], 他社: [8, 239, 5] } }
 - date: "2026-10-15"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "12:00", target: 40 }
@@ -1279,7 +1279,7 @@ sessions:
     19: { at: "19:02", by: 橋本瑠美, results: { 後藤崇佑: [21], 橋本瑠美: [20] } }
   final: { at: "22:46", by: 後藤崇佑, results: { 後藤崇佑: [33, 120, 15], 橋本瑠美: [35, 102, 14] } }
 - date: "2026-10-15"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     矢野新大: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1310,7 +1310,7 @@ sessions:
     16: { at: "16:28", by: 大林賢世, results: { 大林賢世: [12], 他社: [5] } }
   final: { at: "19:49", by: 大林賢世, results: { 大林賢世: [20, 75, 16], 他社: [10, 55, 5] } }
 - date: "2026-10-16"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     岩元大佳: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1366,7 +1366,7 @@ sessions:
     16: { at: "16:03", by: 梅澤和矢, results: { 勝呂颯汰: [13], 梅澤和矢: [0] } }
   final: { at: "19:20", by: 梅澤和矢, results: { 勝呂颯汰: [20, 100, 7], 梅澤和矢: [1, 34, 1] } }
 - date: "2026-10-17"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     後藤崇佑: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1419,7 +1419,7 @@ sessions:
     16: { at: "15:55", by: 古泉桃子, results: { 古泉桃子: [26] } }
   final: { at: "20:07", by: 古泉桃子, results: { 古泉桃子: [49, 230, 22] } }
 - date: "2026-10-18"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     中川大晟: { shift: second_half, target: 40 }
@@ -1438,7 +1438,7 @@ sessions:
     16: { at: "16:02", by: 宮嶋勇弥, results: { 永井優陽: [6], 須坂勇斗: [6] } }
   final: { at: "19:33", by: 須坂勇斗, results: { 永井優陽: [12, 98, 9], 須坂勇斗: [10, 90, 6] } }
 - date: "2026-10-19"
-  location: 高田馬場
+  location: ドン・キホーテ高田馬場
   budget: 70
   staff:
     橋爪元: { shift: first_half, target: 25 }
@@ -1450,7 +1450,7 @@ sessions:
     19: { at: "19:23", by: 松尾元勢, results: { 松尾元勢: [35] } }
   final: { at: "22:06", by: 松尾元勢, results: { 橋爪元: [14, 50, 9], 松尾元勢: [40, 137, 18] } }
 - date: "2026-10-19"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     岩元大佳: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1461,7 +1461,7 @@ sessions:
     19: { at: "19:00", by: 岩元大佳, results: { 岩元大佳: [25], 古泉桃子: [12] } }
   final: { at: "22:22", by: 岩元大佳, results: { 岩元大佳: [50, 110, 22], 古泉桃子: [22, 119, 6] } }
 - date: "2026-10-20"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     松尾元勢: { shift: first_half, target: 30 }
@@ -1473,7 +1473,7 @@ sessions:
     19: { at: "19:11", by: 岩元大佳, results: { 松尾元勢: [40, 89], 岩元大佳: [15] } }
   final: { at: "22:26", by: 岩元大佳, results: { 松尾元勢: [40, 89, 18], 岩元大佳: [36, 76, 8] } }
 - date: "2026-10-20"
-  location: 町田駅前
+  location: ドン・キホーテ町田駅前
   budget: 70
   staff:
     今村天星: { shift: full_day, started_at: "12:30", target: 40 }
@@ -1494,7 +1494,7 @@ sessions:
     16: { at: "16:07", by: 松本三四郎, results: { 松本三四郎: [9], 菊池優絆: [8], 他社: [4] } }
   final: { at: "19:31", by: 松本三四郎, results: { 松本三四郎: [9, 461, 4], 菊池優絆: [10, 60, 9] } }
 - date: "2026-10-21"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     橋本瑠美: { shift: full_day, started_at: "12:30", target: 40 }
@@ -1515,7 +1515,7 @@ sessions:
     16: { at: "16:07", by: 市村志銀, results: { 松本三四郎: [6], 市村志銀: [11] } }
   final: { at: "19:17", by: 市村志銀, results: { 松本三四郎: [16, 391, 14], 市村志銀: [15, 68, 11] } }
 - date: "2026-10-22"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     橋本瑠美: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1526,7 +1526,7 @@ sessions:
     19: { at: "19:06", by: 今村天星, results: { 橋本瑠美: [23], 今村天星: [10] } }
   final: { at: "22:27", by: 橋本瑠美, results: { 橋本瑠美: [40, 121, 18], 今村天星: [25, 82, 14] } }
 - date: "2026-10-22"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1557,7 +1557,7 @@ sessions:
     16: { at: "16:16", by: 大林賢世, results: { 大林賢世: [10], 川岸悠太: [4] } }
   final: { at: "19:48", by: 大林賢世, results: { 大林賢世: [10, 35, 7], 川岸悠太: [5, 90, 4] } }
 - date: "2026-10-23"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     松尾元勢: { shift: full_day, started_at: "12:00", target: 40 }
@@ -1590,7 +1590,7 @@ sessions:
     16: { at: "16:11", by: 梅澤和矢, results: { 梅澤和矢: [6], 三宅康平: [11] } }
   final: { at: "19:32", by: 三宅康平, results: { 梅澤和矢: [15, 85, 9], 三宅康平: [15, 81, 12] } }
 - date: "2026-10-24"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     熊澤正輝: { shift: first_half, target: 30 }
@@ -1612,7 +1612,7 @@ sessions:
     16: { at: "16:00", by: 川岸悠太, results: { 大西珠花: [6], 川岸悠太: [4] } }
   final: { at: "19:18", by: 川岸悠太, results: { 大西珠花: [11, 20, 5], 川岸悠太: [6, 207, 2] } }
 - date: "2026-10-24"
-  location: 新宿
+  location: ドン・キホーテ新宿
   budget: 80
   staff:
     松久保凱也: { shift: full_day, target: 50 }
@@ -1623,7 +1623,7 @@ sessions:
     19: { at: "19:12", by: 松久保凱也, results: { 松久保凱也: [10], 後藤崇佑: [10] } }
   final: { at: "22:10", by: 後藤崇佑, results: { 松久保凱也: [11, 72, 2], 後藤崇佑: [17, 90, 10] } }
 - date: "2026-10-24"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     宮嶋勇弥: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1633,7 +1633,7 @@ sessions:
     19: { at: "19:02", by: 宮嶋勇弥, results: { 宮嶋勇弥: [12] } }
   final: { at: "22:19", by: 宮嶋勇弥, results: { 宮嶋勇弥: [18, 103, 12] } }
 - date: "2026-10-24"
-  location: 蒲田
+  location: ドン・キホーテ蒲田
   budget: 70
   staff:
     中川大晟: { shift: second_half, target: 30 }
@@ -1683,7 +1683,7 @@ sessions:
     16: { at: "16:06", by: 栗田康平, results: { 栗田康平: [11] } }
   final: { at: "19:17", by: 栗田康平, results: { 栗田康平: [16, 215, 14], 他社1: [16, ~, ~], 他社2: [13, ~, ~] } }
 - date: "2026-10-25"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     渡辺了太: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1694,7 +1694,7 @@ sessions:
     19: { at: "19:08", by: 渡辺了太, results: { 渡辺了太: [31], 宮嶋勇弥: [17] } }
   final: { at: "23:01", by: 宮嶋勇弥, results: { 渡辺了太: [46, 155, 18], 宮嶋勇弥: [33, 166, 9] } }
 - date: "2026-10-25"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     平野湧真: { shift: full_day, started_at: "13:00", target: 40 }
@@ -1704,7 +1704,7 @@ sessions:
     19: { at: "19:18", by: 平野湧真, results: { 平野湧真: [10] } }
   final: { at: "23:06", by: 平野湧真, results: { 平野湧真: [17, 145, 2] } }
 - date: "2026-10-25"
-  location: 吉祥寺
+  location: ドン・キホーテ吉祥寺
   budget: 80
   staff:
     中川大晟: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1744,7 +1744,7 @@ sessions:
     16: { at: "16:05", by: 勝呂颯汰, results: { 勝呂颯汰: [12], 他社A: [10], 他社B: [1] } }
   final: { at: "19:17", by: 勝呂颯汰, results: { 勝呂颯汰: [18, 100, 15], 他社A: [15, ~, ~], 他社B: [1, ~, ~] } }
 - date: "2026-10-26"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     岩元大佳: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1754,7 +1754,7 @@ sessions:
     19: { at: "19:11", by: 岩元大佳, results: { 岩元大佳: [20] } }
   final: { at: "22:18", by: 岩元大佳, results: { 岩元大佳: [42, 102, 16] } }
 - date: "2026-10-26"
-  location: 高田馬場
+  location: ドン・キホーテ高田馬場
   budget: 80
   staff:
     渡辺了太: { shift: full_day, started_at: "13:00", target: 50 }
@@ -1765,7 +1765,7 @@ sessions:
     19: { at: "18:57", by: 古泉桃子, results: { 渡辺了太: [27], 古泉桃子: [10] } }
   final: { at: "22:11", by: 渡辺了太, results: { 渡辺了太: [42, 113, 16], 古泉桃子: [25, 61, 14] } }
 - date: "2026-10-27"
-  location: 町田駅前
+  location: ドン・キホーテ町田駅前
   budget: 70
   staff:
     今村天星: { shift: first_half, target: 25 }
@@ -1775,7 +1775,7 @@ sessions:
     13: { at: "13:04", by: 今村天星, results: { 今村天星: [4], 古泉桃子: [6] } }
   final: { at: "16:12", by: 古泉桃子, results: { 今村天星: [14, 98, 6], 古泉桃子: [11, 136, 6] } }
 - date: "2026-10-27"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     橋本瑠美: { shift: first_half, target: 25 }
@@ -1796,7 +1796,7 @@ sessions:
     16: { at: "16:05", by: 松本三四郎, results: { 松本三四郎: [7], 菊池優絆: [9] } }
   final: { at: "20:18", by: 菊池優絆, results: { 松本三四郎: [11, 151, 9], 菊池優絆: [12, 81, 8] } }
 - date: "2026-10-28"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     橋爪元: { shift: first_half, target: 25 }
@@ -1838,7 +1838,7 @@ sessions:
     16: { at: "16:07", by: 松本三四郎, results: { 松本三四郎: [5], 市村志銀: [5], 中島ひな子: [9] } }
   final: { at: "19:16", by: 市村志銀, results: { 松本三四郎: [10, 382, 7], 市村志銀: [15, 100, 10], 中島ひな子: [15, 65, 9] } }
 - date: "2026-10-29"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     橋爪元: { shift: first_half, target: 20 }
@@ -1851,7 +1851,7 @@ sessions:
     19: { at: "19:05", by: 舩田優輝, results: { 熊澤正輝: [41], 舩田優輝: [16] } }
   final: { at: "22:27", by: 舩田優輝, results: { 橋爪元: [17, 50, 11], 熊澤正輝: [50, 113, 29], 舩田優輝: [23, 69, 15] } }
 - date: "2026-10-29"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "12:30", target: 40 }
@@ -1873,7 +1873,7 @@ sessions:
     16: { at: "16:21", by: 宮嶋勇弥, results: { 大林賢世: [13], 永井優陽: [10], 川岸悠太: [7] } }
   final: { at: "20:05", by: 川岸悠太, results: { 大林賢世: [16, 100, 8], 永井優陽: [15, 101, 4], 川岸悠太: [12, 283, 6] } }
 - date: "2026-10-30"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     松久保凱也: { shift: first_half, target: 25 }
@@ -1886,7 +1886,7 @@ sessions:
     19: { at: "19:01", by: 舩田優輝, results: { 渡辺了太: [32], 舩田優輝: [4] } }
   final: { at: "22:25", by: 渡辺了太, results: { 松久保凱也: [10, 60, 3], 渡辺了太: [50, 112, 14], 舩田優輝: [20, 61, 11] } }
 - date: "2026-10-30"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "12:00", target: 40 }
@@ -1918,7 +1918,7 @@ sessions:
     16: { at: "16:04", by: 栗田康平, results: { 栗田康平: [9], 岩元大佳: [12] } }
   final: { at: "19:22", by: 岩元大佳, results: { 栗田康平: [13, 120, 8], 岩元大佳: [18, 75, 11] } }
 - date: "2026-10-31"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     松久保凱也: { shift: first_half, target: 25 }
@@ -1952,7 +1952,7 @@ sessions:
     16: { at: "16:05", by: 勝呂颯汰, results: { 勝呂颯汰: [8], 他社A: [5], 他社B: [7] } }
   final: { at: "19:19", by: 勝呂颯汰, results: { 勝呂颯汰: [17, 100, 10], 他社A: [12, ~, ~], 他社B: [13, ~, ~] } }
 - date: "2026-10-31"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "10:30", target: 50 }
@@ -2006,7 +2006,7 @@ sessions:
     16: { at: "16:27", by: 梅澤和矢, results: { 梅澤和矢: [15], 松本三四郎: [2] } }
   final: { at: "19:25", by: 梅澤和矢, results: { 梅澤和矢: [17, 98, 13], 松本三四郎: [2, 54, 2] } }
 - date: "2026-11-01"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "12:30", target: 40 }
@@ -2017,7 +2017,7 @@ sessions:
     19: { at: "19:03", by: 今村天星, results: { 今村天星: [22], 宮嶋勇弥: [18] } }
   final: { at: "22:18", by: 今村天星, results: { 今村天星: [33, 108, 10], 宮嶋勇弥: [20, 120, 9] } }
 - date: "2026-11-01"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     舩田優輝: { shift: full_day, started_at: "13:00", target: 50 }
@@ -2048,7 +2048,7 @@ sessions:
     16: { at: "16:09", by: ぺこ, results: { 酒巻結: [11] } }
   final: { at: "19:17", by: ぺこ, results: { 酒巻結: [16, 68, 11] } }
 - date: "2026-11-02"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     橋爪元: { shift: full_day, started_at: "10:00", target: 40 }
@@ -2060,7 +2060,7 @@ sessions:
     19: { at: "19:23", by: 岩元大佳, results: { 橋爪元: [19], 岩元大佳: [29] } }
   final: { at: "23:02", by: 岩元大佳, results: { 橋爪元: [22, 78, 9], 岩元大佳: [46, 109, 19] } }
 - date: "2026-11-03"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "11:30", target: 40 }
@@ -2071,7 +2071,7 @@ sessions:
     19: { at: "18:59", by: 今村天星, results: { 今村天星: [38], 宮嶋勇弥: [21] } }
   final: { at: "22:41", by: 宮嶋勇弥, results: { 今村天星: [55, 162, 20], 宮嶋勇弥: [35, 120, 14] } }
 - date: "2026-11-03"
-  location: ピカソ目黒駅前
+  location: ドン・キホーテピカソ目黒駅前
   budget: 70
   staff:
     古泉桃子: { shift: full_day, started_at: "12:30", target: 40 }
@@ -2092,7 +2092,7 @@ sessions:
     16: { at: "16:00", by: 松尾元勢, results: { 菊池優絆: [7], 松尾元勢: [20] } }
   final: { at: "19:36", by: 菊池優絆, results: { 菊池優絆: [8, 42, 7], 松尾元勢: [25, 78, 18] } }
 - date: "2026-11-04"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     中川大晟: { shift: full_day, started_at: "13:00", worked: "13:00-19:00", target: 40 }
@@ -2102,7 +2102,7 @@ sessions:
     19: { at: "19:24", by: 中川大晟, results: { 中川大晟: [20, 58] } }
   final: { at: "19:24", by: 中川大晟, results: { 中川大晟: [20, 58, 6] } }
 - date: "2026-11-04"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     今村天星: { shift: full_day, started_at: "12:30", target: 40 }
@@ -2123,7 +2123,7 @@ sessions:
     16: { at: "16:59", by: 宮嶋勇弥, results: { 永井優陽: [6], 中島ひな子: [7], 他社: [7] } }
   final: { at: "19:28", by: 中島ひな子, results: { 永井優陽: [8, 98, 5], 中島ひな子: [7, 60, 3], 他社: [9, ~, ~] } }
 - date: "2026-11-05"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     橋本瑠美: { shift: full_day, started_at: "12:30", target: 40 }
@@ -2134,7 +2134,7 @@ sessions:
     19: { at: "19:07", by: 橋本瑠美, results: { 橋本瑠美: [18], 矢野新大: [20] } }
   final: { at: "22:14", by: 橋本瑠美, results: { 橋本瑠美: [32, 121, 16], 矢野新大: [31, 97, 14] } }
 - date: "2026-11-05"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     松久保凱也: { shift: full_day, started_at: "13:00", target: 50 }
@@ -2155,7 +2155,7 @@ sessions:
     16: { at: "16:06", by: 川岸悠太, results: { 永井優陽: [7], 三宅康平: [10], 川岸悠太: [4] } }
   final: { at: "19:10", by: 三宅康平, results: { 永井優陽: [16, 105, 9], 三宅康平: [19, 120, 7], 川岸悠太: [7, 200, 2] } }
 - date: "2026-11-06"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     岩元大佳: { shift: full_day, started_at: "13:00", target: 50 }
@@ -2199,7 +2199,7 @@ sessions:
     16: { at: "16:06", by: 秦菜々美, results: { 梅澤和矢: [4], 秦菜々美: [11] } }
   final: { at: "20:09", by: 梅澤和矢, results: { 梅澤和矢: [4, 98, 3], 秦菜々美: [20, 90, 11] } }
 - date: "2026-11-07"
-  location: 蒲田
+  location: ドン・キホーテ蒲田
   budget: 80
   staff:
     大久保大智: { shift: full_day, started_at: "10:00", target: 50 }
@@ -2211,7 +2211,7 @@ sessions:
     19: { at: "19:21", by: 大久保大智, results: { 大久保大智: [36], 中川大晟: [14] } }
   final: { at: "22:27", by: 大久保大智, results: { 大久保大智: [53, 121, 21], 中川大晟: [40, 102, 22] } }
 - date: "2026-11-07"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     今村天星: { shift: full_day, started_at: "11:30", target: 40 }
@@ -2222,7 +2222,7 @@ sessions:
     19: { at: "19:09", by: 岩元大佳, results: { 今村天星: [33], 岩元大佳: [31] } }
   final: { at: "22:29", by: 今村天星, results: { 今村天星: [46, 109, 19], 岩元大佳: [45, 111, 22] } }
 - date: "2026-11-07"
-  location: ピカソ目黒駅前
+  location: ドン・キホーテピカソ目黒駅前
   budget: 80
   staff:
     橋本瑠美: { shift: full_day, started_at: "13:00", target: 45 }
@@ -2232,7 +2232,7 @@ sessions:
     19: { at: "19:15", by: 橋本瑠美, results: { 橋本瑠美: [18] } }
   final: { at: "22:19", by: 橋本瑠美, results: { 橋本瑠美: [26, 96, 13] } }
 - date: "2026-11-07"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     後藤崇佑: { shift: full_day, started_at: "13:00", target: 40 }
@@ -2286,7 +2286,7 @@ sessions:
     16: { at: "16:02", by: 梅澤和矢, results: { 梅澤和矢: [3], 松本三四郎: [4] } }
   final: { at: "19:27", by: 松本三四郎, results: { 梅澤和矢: [6, 103, 3], 松本三四郎: [5, 268, 4] } }
 - date: "2026-11-08"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 80
   staff:
     岩元大佳: { shift: full_day, started_at: "12:00", target: 50 }
@@ -2297,7 +2297,7 @@ sessions:
     19: { at: "19:05", by: 宮嶋勇弥, results: { 岩元大佳: [37], 宮嶋勇弥: [16] } }
   final: { at: "22:47", by: 岩元大佳, results: { 岩元大佳: [54, 116, 26], 宮嶋勇弥: [26, 116, 12] } }
 - date: "2026-11-08"
-  location: ピカソ目黒駅前
+  location: ドン・キホーテピカソ目黒駅前
   budget: 80
   staff:
     舩田優輝: { shift: full_day, started_at: "12:30", target: 50 }
@@ -2308,7 +2308,7 @@ sessions:
     19: { at: "19:03", by: 今村天星, results: { 舩田優輝: [21], 今村天星: [19] } }
   final: { at: "22:51", by: 舩田優輝, results: { 舩田優輝: [30, 74, 11], 今村天星: [30, 77, 9] } }
 - date: "2026-11-08"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 80
   staff:
     橋本瑠美: { shift: full_day, started_at: "12:30", target: 40 }
@@ -2339,7 +2339,7 @@ sessions:
     16: { at: "16:09", by: 松尾元勢, results: { 松尾元勢: [13, 54] } }
   final: { at: "19:20", by: 松尾元勢, results: { 松尾元勢: [26, 78, 14] } }
 - date: "2026-11-09"
-  location: 高田馬場
+  location: ドン・キホーテ高田馬場
   budget: 80
   staff:
     橋爪元: { shift: full_day, started_at: "10:45", worked: "10:45-22:30", target: 40, target_approach: 100 }
@@ -2351,7 +2351,7 @@ sessions:
     19: { at: "19:26", by: 橋爪元, results: { 橋爪元: [15, 50], 岩元大佳: [10, 25] } }
   final: { at: "23:14", by: 岩元大佳, results: { 橋爪元: [20, 90, 9], 岩元大佳: [20, 70, 11] } }
 - date: "2026-11-09"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 80
   staff:
     渡辺了太: { shift: full_day, started_at: "13:00", target: 60, target_approach: 180 }
@@ -2362,7 +2362,7 @@ sessions:
     19: { at: "19:12", by: 矢野新大, results: { 渡辺了太: [34, 96], 矢野新大: [28, 80] } }
   final: { at: "22:24", by: 渡辺了太, results: { 渡辺了太: [50, 144, 14], 矢野新大: [37, 135, 10] } }
 - date: "2026-11-10"
-  location: 大宮東口
+  location: ドン・キホーテ大宮東口
   budget: 70
   staff:
     古泉桃子: { shift: first_half, target: 25, target_approach: 70 }
@@ -2374,7 +2374,7 @@ sessions:
     19: { at: "19:02", by: 舩田優輝, results: { 舩田優輝: [26, 84] } }
   final: { at: "22:23", by: 舩田優輝, results: { 古泉桃子: [20, 87, 11], 舩田優輝: [45, 131, 15] } }
 - date: "2026-11-11"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     松久保凱也: { shift: first_half, target: 25, target_approach: 80 }
@@ -2407,7 +2407,7 @@ sessions:
     13: { at: "12:59", by: 中島ひな子, results: { 永井優陽: [2, 25], 中島ひな子: [0, 15] } }
     16: { at: "16:00", by: 宮嶋勇弥, results: { 永井優陽: [5, 50], 中島ひな子: [1, 45] } }
 - date: "2026-11-12"
-  location: 後楽園
+  location: ドン・キホーテ後楽園
   budget: 70
   staff:
     後藤崇佑: { shift: full_day, started_at: "12:45", target: 40, target_approach: 100 }
@@ -2416,7 +2416,7 @@ sessions:
   interim:
     16: { at: "16:03", by: 後藤崇佑, results: { 後藤崇佑: [20, 36] } }
 - date: "2026-11-12"
-  location: 溝の口
+  location: ドン・キホーテ溝の口
   budget: 70
   staff:
     松久保凱也: { shift: full_day, started_at: "13:00", target: 50, target_approach: 100 }

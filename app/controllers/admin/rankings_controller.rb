@@ -26,11 +26,4 @@ class Admin::RankingsController < Admin::BaseController
     when "cinema_average" then rows.select { |row| row.cinema_hours.positive? }.sort_by { |row| [ -row.cinema_average, row.label ] }
     end
   end
-
-  private
-    def parse_month(value)
-      Date.strptime(value, "%Y-%m") if value.present?
-    rescue Date::Error
-      nil
-    end
 end

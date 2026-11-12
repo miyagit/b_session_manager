@@ -30,6 +30,18 @@ line_reports.fetch("locations").each do |name, attributes|
   end
 end
 
+# The team from the 2026 4Q team sheet, with its November budgets (the other months are still open), and the
+# November target card rate shared by every team.
+team = Team.find_or_create_by!(name: "渡辺チーム", starts_on: Date.new(2026, 10, 1))
+{ "渡辺了太" => 550, "中川大晟" => 320, "古泉桃子" => 320, "後藤崇佑" => 200, "熊澤正輝" => 250, "宮嶋勇弥" => 300 }.each do |name, budget|
+  membership = team.team_memberships.find_or_create_by!(user: User.people.find_by!(name: name))
+  membership.team_targets.find_or_create_by!(month: Date.new(2026, 11, 1)) { |target| target.budget_count = budget }
+end
+MonthlyTarget.find_or_create_by!(month: Date.new(2026, 11, 1)) { |target| target.card_rate = 60 }
+
+# Placeholder booth for shifts whose location isn't decided yet (【調整中】 on the schedule); swap it on the work session once known.
+WorkLocation.find_or_create_by!(name: "調整中") { |work_location| work_location.assign_attributes(category: :donki, budget_count: 0) }
+
 # Admin account for local development. Create production admins from the console instead.
 if Rails.env.development?
   AdminUser.find_or_create_by!(email: "admin@example.com") do |admin_user|
@@ -86,7 +98,7 @@ if WorkSession.none?
       end
 
       if (start = booth_day["start"])
-        file_report.(report_type: :start, submitted_by: reporter.(start["by"]), created_at: time_of.(start["at"]))
+        file_report.(report_type: :start, submitted_by: reporter.(start["by"]), created_at: time_of.(start["at"]), covered_user_ids: staff.map { |user, _| user.id })
       end
       booth_day.fetch("interim", {}).each do |slot, interim|
         rows = result_rows.(interim["results"], final: false)
@@ -107,6 +119,26 @@ if WorkSession.none?
 
         started_at, ended_at = attributes["worked"].split("-")
         work_session.shifts.find { |shift| shift.user_id == user.id }.create_work_record!(started_at: started_at, ended_at: ended_at)
+      end
+    end
+
+    # The monthly shift schedules (db/seeds/shifts_*.yml) on top of the reports: booth days nobody has reported yet
+    # are created, and a planned shift is skipped when the person already has a shift that day (the reports show
+    # where they actually worked).
+    Dir[Rails.root.join("db/seeds/shifts_*.yml")].sort.each do |path|
+      YAML.load_file(path).each do |day|
+        date = Date.parse(day.fetch("date"))
+        day.fetch("booths").each do |location_name, names_by_type|
+          work_session = WorkSession.find_or_create_by!(work_location: work_locations.fetch(location_name), work_date: date)
+          names_by_type.each do |shift_type, names|
+            names.each do |name|
+              user = staff_by_name.fetch(name) { raise "#{File.basename(path)}: 「#{name}」（#{date}）が STAFF にありません" }
+              next if Shift.joins(:work_session).exists?(user_id: user.id, work_sessions: { work_date: date })
+
+              work_session.shifts.create!(user: user, shift_type: shift_type)
+            end
+          end
+        end
       end
     end
   end

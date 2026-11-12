@@ -1,0 +1,177 @@
+<% content_for :title, @team.name %>
+<% month_param = @month.strftime("%Y-%m") %>
+<% rows = @progress.rows %>
+<% total = @progress.total %>
+<% cell = "px-3 py-2.5 text-right tabular-nums whitespace-nowrap" %>
+<% hours_pair = ->(row) { "#{format("%.1f", row.done_hours)} / #{format("%.1f", row.planned_hours)}時間" } %>
+
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold"><%= @team.name %></h1>
+    <p class="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-slate-600">
+      <span><%= @team.quarter_label %>・<%= rows.size %>名</span>
+      <% if total.provisional %><%= status_badge("暫定を含む", :warning) %><% end %>
+    </p>
+  </div>
+  <div class="flex gap-2">
+    <%= link_to "編集", edit_admin_team_path(@team), class: "btn btn-secondary" %>
+    <%= link_to "チーム一覧に戻る", admin_teams_path(month: month_param), class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<nav aria-label="対象月" class="flex flex-wrap gap-2">
+  <% @team.months.each do |month| %>
+    <%= render "admin/shared/filter_tab", label: "#{month.year}年#{month.month}月", path: admin_team_path(@team, month: month.strftime("%Y-%m")), selected: month == @month %>
+  <% end %>
+</nav>
+
+<% if rows.empty? %>
+  <p class="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-slate-500">メンバーがいません。「編集」からスタッフを追加してください。</p>
+<% else %>
+  <% if @progress.plan_may_be_incomplete? %>
+    <div class="rounded-lg border border-warning/60 bg-warning-bg px-4 py-3 text-[13px] text-warning-text">
+      <p class="font-semibold"><%= @progress.last_planned_on ? "#{@progress.last_planned_on.month}月#{@progress.last_planned_on.day}日より後" : "今月" %>の稼働予定が登録されていません。</p>
+      <p class="mt-0.5">予定稼働時間が働いた分だけになるため、本日時点の目標が予算いっぱいまで膨らみ、全員が「▼遅れ」になりやすい状態です。残りのシフトを<%= link_to "稼働予定", admin_work_sessions_path, class: "font-semibold underline" %>に登録すると正しいペースになります。</p>
+    </div>
+  <% end %>
+
+  <section aria-labelledby="team-progress-heading" class="rounded-xl border border-slate-200 bg-white p-5">
+    <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+      <div>
+        <h2 id="team-progress-heading" class="text-[13px] font-semibold text-slate-600"><%= @month.month %>月の獲得件数</h2>
+        <p class="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span class="text-5xl font-semibold leading-none"><%= number_with_delimiter(total.acquired) %><span class="ml-1 text-lg font-normal text-slate-500">件</span></span>
+          <% if rows.any?(&:budget) %>
+            <span class="text-[13px] text-slate-600">予算 <%= format_pieces(total.budget) %>・達成率 <%= format_rate(total.achievement_rate) %></span>
+          <% else %>
+            <span class="text-[13px] text-slate-500">この月の予算件数は未設定です（<%= link_to "編集", edit_admin_team_path(@team), class: "text-blue-700 hover:underline" %>から入力）</span>
+          <% end %>
+        </p>
+      </div>
+      <div class="sm:text-right">
+        <h2 class="text-[13px] font-semibold text-slate-600">目標ペースとの比較</h2>
+        <% if !total.started? %>
+          <p class="mt-1 text-[15px] text-slate-500">まだ稼働がありません</p>
+        <% elsif total.pace_target.nil? %>
+          <p class="mt-1 text-[15px] text-slate-500">稼働予定が登録されていません</p>
+        <% else %>
+          <p class="mt-1 flex flex-wrap items-center gap-2 sm:justify-end">
+            <% if total.behind? %><%= status_badge("▼遅れ", :critical) %><% end %>
+            <span class="text-[22px] font-semibold leading-none <%= "text-critical-text" if total.behind? %>"><%= format_signed_count(total.pace_gap) %></span>
+          </p>
+          <p class="mt-1 text-xs text-slate-500">本日時点の目標 <%= format_count(total.pace_target) %>・ペース達成率 <%= format_rate_decimal(total.pace_rate) %></p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <%= render "meter", value: total.acquired, total: total.budget, marker: total.pace_target, height: "h-2.5" %>
+      <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+        <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="h-2 w-3.5 rounded-full bg-chart-1"></span>獲得件数</span>
+        <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="h-2 w-3.5 rounded-full bg-chart-track"></span>予算</span>
+        <span class="inline-flex items-center gap-1.5"><span aria-hidden="true" class="h-3 w-0.5 bg-slate-700"></span>本日時点の目標（予算をこれまでの勤務時間の分だけ按分）</span>
+      </p>
+    </div>
+
+    <p class="mt-3 text-[13px] text-slate-700">
+      残り <span class="font-semibold"><%= format_pieces(total.remaining_acquired) %></span>を、残りの稼働 <span class="font-semibold"><%= format_units(total.remaining_units) %></span>（<%= format_hours(total.remaining_hours) %>）で。
+      <% if total.required_average %>
+        必要な獲得平均は <span class="font-semibold"><%= format_average(total.required_average) %>件/6時間</span>（生産性 <%= format_productivity(total.required_productivity) %>件/時間）です。
+      <% else %>
+        残りの稼働予定がないため、必要な獲得平均は出せません。
+      <% end %>
+    </p>
+  </section>
+
+  <section aria-label="主要指標" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <% [
+         [ "獲得平均", format_average(total.current_average), "件/6時間", "目標 #{format_average(total.target_average)}・必要 #{format_average(total.required_average)}" ],
+         [ "生産性", format_productivity(total.current_productivity), "件/時間", "目標 #{format_productivity(total.target_productivity)}・必要 #{format_productivity(total.required_productivity)}" ],
+         [ "稼働", "#{format("%.1f", total.done_units)} / #{format("%.1f", total.planned_units)}", "稼働", "#{hours_pair.(total)}・残り #{format_units(total.remaining_units)}" ],
+         [ "カード率", (total.card_rate ? format("%.1f", total.card_rate) : "—"), "%", "目標 #{@monthly_target.card_rate}%・カード #{number_with_delimiter(total.cards)}件" ]
+       ].each do |label, value, unit, note| %>
+      <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 class="text-[13px] font-semibold text-slate-600"><%= label %></h2>
+        <p class="mt-1 text-[28px] font-semibold leading-tight"><%= value %><span class="ml-1 text-sm font-normal text-slate-500"><%= unit %></span></p>
+        <p class="mt-1 text-xs text-slate-500"><%= note %></p>
+      </div>
+    <% end %>
+  </section>
+
+  <section aria-labelledby="members-heading" class="rounded-xl border border-slate-200 bg-white">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-5 py-3.5">
+      <h2 id="members-heading" class="text-base font-bold">メンバー別</h2>
+      <p class="text-xs text-slate-500">バーは予算に対する獲得件数、縦線は本日時点の目標です。</p>
+    </div>
+    <ol class="divide-y divide-slate-100">
+      <% rows.each do |row| %>
+        <li class="px-5 py-3.5">
+          <div class="grid items-center gap-x-4 gap-y-2 sm:grid-cols-[9rem_1fr_9rem_10rem]">
+            <div class="min-w-0">
+              <p class="truncate font-semibold"><%= row.label %></p>
+              <p class="text-xs text-slate-500">全日<%= row.full_days %>・前半<%= row.first_halves %>・後半<%= row.second_halves %></p>
+            </div>
+            <div class="order-last sm:order-none"><%= render "meter", value: row.acquired, total: row.budget, marker: row.pace_target, height: "h-2" %></div>
+            <p class="text-right text-[13px] tabular-nums whitespace-nowrap"><span class="text-base font-semibold"><%= row.acquired %></span> / <%= row.budget ? "#{number_with_delimiter(row.budget)}件" : tag.span("予算未設定", class: "text-slate-400") %></p>
+            <div class="flex items-center gap-2 text-[13px] tabular-nums sm:justify-end">
+              <% if !row.started? %>
+                <span class="text-slate-400">稼働前</span>
+              <% elsif row.pace_target.nil? %>
+                <span class="text-slate-400">—</span>
+              <% else %>
+                <% if row.behind? %><%= status_badge("▼遅れ", :critical) %><% end %>
+                <span class="<%= "font-semibold text-critical-text" if row.behind? %>"><%= format_signed_count(row.pace_gap) %></span>
+              <% end %>
+            </div>
+          </div>
+          <p class="mt-1.5 text-xs text-slate-500 sm:pl-[10rem]">
+            稼働 <%= format("%.1f", row.done_units) %> / <%= format("%.1f", row.planned_units) %>稼働（<%= hours_pair.(row) %>）・獲得平均 <%= format_average(row.current_average) %> → 必要 <%= format_average(row.required_average) %> 件/6時間<% if row.pace_target %>・本日時点の目標 <%= format_count(row.pace_target) %>（<%= format_rate_decimal(row.pace_rate) %>）<% end %>
+          </p>
+        </li>
+      <% end %>
+    </ol>
+  </section>
+
+  <details class="rounded-xl border border-slate-200 bg-white">
+    <summary class="cursor-pointer px-5 py-3.5 text-base font-bold">すべての数字を表で見る</summary>
+    <div class="overflow-x-auto border-t border-slate-200">
+      <table class="w-full min-w-200 text-[13px]">
+        <thead>
+          <tr class="border-b border-slate-200 text-right text-xs text-slate-600">
+            <th scope="col" class="px-3 py-2 text-left font-semibold">メンバー</th>
+            <% [ "予算件数", "獲得件数", "残り", "本日時点の目標", "目標との差", "ペース達成率", "稼働（現在 / 予定）", "勤務時間（現在 / 予定）",
+                 "獲得平均（現在 / 必要 / 目標）", "生産性（現在 / 必要 / 目標）", "全日 / 前半 / 後半" ].each do |label| %>
+              <th scope="col" class="px-3 py-2 font-semibold whitespace-nowrap"><%= label %></th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% (rows + [ total ]).each do |row| %>
+            <% total_row = row.equal?(total) %>
+            <tr class="<%= "bg-slate-50 font-semibold" if total_row %>">
+              <th scope="row" class="px-3 py-2.5 text-left font-semibold whitespace-nowrap"><%= total_row ? "チーム合計" : row.label %></th>
+              <td class="<%= cell %>"><%= row.budget ? "#{number_with_delimiter(row.budget)}件" : "未設定" %></td>
+              <td class="<%= cell %>"><%= number_with_delimiter(row.acquired) %>件</td>
+              <td class="<%= cell %>"><%= number_with_delimiter(row.remaining_acquired) %>件</td>
+              <td class="<%= cell %>"><%= format_count(row.pace_target) %></td>
+              <td class="<%= cell %>"><%= format_signed_count(row.pace_gap) %></td>
+              <td class="<%= cell %>"><%= format_rate_decimal(row.pace_rate) %></td>
+              <td class="<%= cell %>"><%= format("%.1f", row.done_units) %> / <%= format("%.1f", row.planned_units) %></td>
+              <td class="<%= cell %>"><%= format("%.1f", row.done_hours) %> / <%= format("%.1f", row.planned_hours) %></td>
+              <td class="<%= cell %>"><%= format_average(row.current_average) %> / <%= format_average(row.required_average) %> / <%= format_average(row.target_average) %></td>
+              <td class="<%= cell %>"><%= format_productivity(row.current_productivity) %> / <%= format_productivity(row.required_productivity) %> / <%= format_productivity(row.target_productivity) %></td>
+              <td class="<%= cell %>"><%= row.full_days %> / <%= row.first_halves %> / <%= row.second_halves %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <p class="border-t border-slate-100 px-4 py-2.5 text-xs text-slate-500">獲得平均は件/6時間、生産性は件/時間です。</p>
+  </details>
+<% end %>
+
+<p class="text-xs text-slate-500">
+  予定は<%= link_to "稼働予定", admin_work_sessions_path, class: "text-blue-700 hover:underline" %>に登録されたドンキホーテ（イベント会場を含む）のシフトから数えます（全日1.0稼働・9時間、前半・後半0.5稼働・6時間）。シネマの勤務は含みません。
+  現在は報告から集計し、最終報告があれば確定値、ない日は最新の途中報告の値を使います。稼働時間は実際に働いた時間（勤務実績）です。
+  「本日時点の目標」は予算件数 × 現在稼働時間 ÷ 予定稼働時間で、下回っていると「▼遅れ」になります。目標カード率は<%= link_to "チーム一覧", admin_teams_path(month: month_param), class: "text-blue-700 hover:underline" %>で月ごとに設定します。
+</p>

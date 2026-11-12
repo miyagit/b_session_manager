@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -32,6 +32,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["report_id"], name: "index_line_message_deliveries_on_report_id", unique: true
+  end
+
+  create_table "monthly_targets", force: :cascade do |t|
+    t.date "month", null: false
+    t.integer "card_rate", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["month"], name: "index_monthly_targets_on_month", unique: true
+    t.check_constraint "card_rate >= 0 AND card_rate <= 100", name: "monthly_targets_card_rate_percentage"
   end
 
   create_table "report_results", force: :cascade do |t|
@@ -58,9 +67,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.integer "audience_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "covered_user_ids", default: [], null: false, array: true
     t.index ["submitted_by_id"], name: "index_reports_on_submitted_by_id"
-    t.index ["work_session_id", "report_slot"], name: "index_reports_on_work_session_and_interim_slot", unique: true, where: "((report_type)::text = 'interim'::text)"
-    t.index ["work_session_id", "report_type"], name: "index_reports_on_work_session_and_single_type", unique: true, where: "((report_type)::text <> 'interim'::text)"
+    t.index ["work_session_id", "report_type"], name: "index_reports_on_work_session_id_and_report_type"
     t.index ["work_session_id"], name: "index_reports_on_work_session_id"
     t.check_constraint "(report_type::text = 'interim'::text) = (report_slot IS NOT NULL)", name: "reports_report_slot_only_for_interim"
     t.check_constraint "audience_count >= 0", name: "reports_audience_count_non_negative"
@@ -81,6 +90,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.index ["work_session_id"], name: "index_shifts_on_work_session_id"
     t.check_constraint "target_acquired_count >= 0", name: "shifts_target_acquired_count_non_negative"
     t.check_constraint "target_approach_count >= 0", name: "shifts_target_approach_count_non_negative"
+  end
+
+  create_table "team_memberships", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["team_id", "user_id"], name: "index_team_memberships_on_team_id_and_user_id", unique: true
+    t.index ["team_id"], name: "index_team_memberships_on_team_id"
+    t.index ["user_id"], name: "index_team_memberships_on_user_id"
+  end
+
+  create_table "team_targets", force: :cascade do |t|
+    t.bigint "team_membership_id", null: false
+    t.date "month", null: false
+    t.integer "budget_count"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["team_membership_id", "month"], name: "index_team_targets_on_team_membership_id_and_month", unique: true
+    t.index ["team_membership_id"], name: "index_team_targets_on_team_membership_id"
+    t.check_constraint "budget_count >= 0", name: "team_targets_budget_count_non_negative"
+  end
+
+  create_table "teams", force: :cascade do |t|
+    t.string "name", null: false
+    t.date "starts_on", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["starts_on", "name"], name: "index_teams_on_starts_on_and_name", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -132,6 +170,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
   add_foreign_key "reports", "work_sessions"
   add_foreign_key "shifts", "users"
   add_foreign_key "shifts", "work_sessions"
+  add_foreign_key "team_memberships", "teams"
+  add_foreign_key "team_memberships", "users"
+  add_foreign_key "team_targets", "team_memberships"
   add_foreign_key "work_records", "shifts"
   add_foreign_key "work_sessions", "work_locations"
 end

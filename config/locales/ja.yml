@@ -10,6 +10,10 @@ ja:
       report_result: スタッフ別実績
       work_record: 勤務実績
       line_message_delivery: LINE投稿
+      team: チーム
+      team_membership: チームメンバー
+      team_target: 予算件数
+      monthly_target: 月の目標
     attributes:
       user:
         name: 名前
@@ -20,6 +24,7 @@ ja:
         shifts: シフト
         report_results: スタッフ別実績
         submitted_reports: 報告
+        team_memberships: チーム
       user/role:
         staff: スタッフ
         admin: 管理者
@@ -103,6 +108,29 @@ ja:
         pending: 送信待ち
         sent: 送信済み
         failed: 送信失敗
+      team:
+        name: チーム名
+        starts_on: 四半期
+        team_memberships: メンバー
+      team/team_memberships:
+        user: スタッフ
+        user_id: スタッフ
+        team_targets: 予算件数
+      team/team_memberships/team_targets:
+        month: 月
+        budget_count: 予算件数
+      team_membership:
+        team: チーム
+        user: スタッフ
+        user_id: スタッフ
+        team_targets: 予算件数
+      team_target:
+        team_membership: メンバー
+        month: 月
+        budget_count: 予算件数
+      monthly_target:
+        month: 月
+        card_rate: 目標カード率
     errors:
       models:
         report:

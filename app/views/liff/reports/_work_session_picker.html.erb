@@ -19,8 +19,8 @@
             <%= result_status_badge(work_session.result_status) %>
             <% if (latest_report = work_session.latest_report) %><span class="text-xs text-slate-500"><%= report_badge_label(latest_report) %>まで報告済み</span><% end %>
           </span>
-          <% if work_session.all_reports_filed? %>
-            <span class="shrink-0 text-[13px] text-slate-500">すべて報告済み</span>
+          <% if work_session.all_reports_filed?(current_staff.id) %>
+            <span class="shrink-0 text-[13px] text-slate-500">あなたの報告はすべて済んでいます</span>
           <% else %>
             <%= link_to "このブースで報告", new_liff_report_path(work_session_id: work_session), class: "btn btn-primary shrink-0" %>
           <% end %>
