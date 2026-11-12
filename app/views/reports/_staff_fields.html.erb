@@ -25,8 +25,8 @@
         <%= shift_form.number_field :target_approach_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}のアプローチ目標" } %>
       </label>
       <% if shift.full_day? %>
-        <label class="block">
-          <span class="text-xs text-slate-600">開始時刻<span class="ml-1 text-slate-400">終了は<%= shift.ends_at %>固定</span></span>
+        <label class="block col-span-2">
+          <span class="text-xs text-slate-600">開始時刻<span class="ml-1 text-slate-400"><%= Shift::FULL_DAY_WORK_HOURS %>時間勤務・<%= Shift::FIXED_HOURS["full_day"][0] %>以降。終了は開始＋<%= Shift::FULL_DAY_WORK_HOURS %>時間</span></span>
           <%= shift_form.time_field :started_at, include_seconds: false, class: "input mt-1 text-base tabular-nums", aria: { label: "#{staff_name}の開始時刻" } %>
         </label>
       <% end %>

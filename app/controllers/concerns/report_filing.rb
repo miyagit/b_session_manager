@@ -29,7 +29,7 @@ module ReportFiling
       end
     end
 
-    # The start report declares the targets (and a full-day start time): the values are applied to the shifts and saved with the report.
+    # The start report declares the targets (and a full-day flex start time): the values are applied to the shifts and saved with the report.
     def assign_targets(work_session)
       params.fetch(:shifts, {}).each do |shift_id, attributes|
         shift = work_session.shifts.find { |candidate| candidate.id.to_s == shift_id }

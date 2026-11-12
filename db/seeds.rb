@@ -49,9 +49,12 @@ if Rails.env.development? && WorkSession.none?
         work_location: work_location, work_date: date, budget_count: 50 + random.rand(7) * 5,
         shifts_attributes: booth_staff.each_with_index.map do |user, index|
           target = 20 + random.rand(5) * 5
-          shift_type = index.zero? ? "full_day" : %w[ first_half second_half ].sample(random: random)
+          shift_type = if work_location.cinema? then "cinema"
+          elsif index.zero? then "full_day"
+          else %w[ first_half second_half ].sample(random: random)
+          end
           { user_id: user.id, shift_type: shift_type, target_acquired_count: target, target_approach_count: target * 8,
-            started_at: (shift_type == "full_day" ? "10:00" : nil) }
+            started_at: (%w[ 10:00 11:00 12:00 13:00 ].sample(random: random) if shift_type == "full_day") }
         end
       )
       next if date > today

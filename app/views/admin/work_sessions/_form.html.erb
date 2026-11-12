@@ -1,5 +1,9 @@
 <%# locals: (work_session:) %>
 <% staff_options = User.where(is_active: true).or(User.where(id: work_session.shifts.map(&:user_id).compact)).order(:name).to_a %>
+<% work_locations = WorkLocation.order(:id).to_a %>
+<% shift_type_groups = Shift::TYPES_BY_CATEGORY.map do |category, types|
+     [ category, WorkLocation.human_attribute_name("category.#{category}"), types.map { |type| [ Shift.human_attribute_name("shift_type.#{type}"), type ] } ]
+   end %>
 
 <%= form_with model: [ :admin, work_session ], class: "flex flex-col gap-5" do |form| %>
   <% if work_session.errors.any? %>
@@ -21,7 +25,8 @@
 
     <div>
       <%= form.label :work_location_id, class: "mb-1 block font-semibold" %>
-      <%= form.collection_select :work_location_id, WorkLocation.order(:id), :id, :name, { prompt: "選択してください" }, required: true, class: "input" %>
+      <%= form.collection_select :work_location_id, work_locations, :id, :name, { prompt: "選択してください" }, required: true, class: "input",
+            data: { categories: work_locations.to_h { |work_location| [ work_location.id, work_location.category ] }.to_json } %>
     </div>
 
     <div>
@@ -53,7 +58,9 @@
                 <%= shift_form.collection_select :user_id, staff_options, :id, :name, { include_blank: "（選択なし）" }, class: "input min-w-32", aria: { label: "スタッフ" } %>
               </td>
               <td class="px-3 py-2">
-                <%= shift_form.select :shift_type, Shift.shift_types.keys.map { |shift_type| [ Shift.human_attribute_name("shift_type.#{shift_type}"), shift_type ] }, {}, class: "input", aria: { label: "シフト区分" } %>
+                <%= shift_form.select :shift_type,
+                      safe_join(shift_type_groups.map { |category, label, options| tag.optgroup(options_for_select(options, shift.shift_type), label: label, data: { category: category }) }),
+                      {}, class: "input shift-type", aria: { label: "シフト区分" } %>
               </td>
               <td class="px-3 py-2">
                 <% if shift.persisted? %>
@@ -65,8 +72,33 @@
         </tbody>
       </table>
     </div>
-    <p class="mt-1 text-xs text-slate-500">スタッフを選んだ行だけが登録されます。個人目標は当日の開始報告でスタッフが入力します。人数が足りないときは、保存すると空き行が追加されます。</p>
+    <p class="mt-1 text-xs text-slate-500">スタッフを選んだ行だけが登録されます。シフト区分は稼働場所の分類で決まります（ドンキホーテは前半・後半・全日、シネマはシネマのみ）。個人目標は当日の開始報告でスタッフが入力します。人数が足りないときは、保存すると空き行が追加されます。</p>
   </fieldset>
+
+  <script>
+    // Only offer the shift types of the chosen location's category (the server validates this too).
+    (() => {
+      const location = document.getElementById("work_session_work_location_id");
+      const categories = JSON.parse(location.dataset.categories);
+      const sync = () => {
+        const category = categories[location.value];
+        document.querySelectorAll("select.shift-type").forEach((select) => {
+          let selectionAllowed = false;
+          select.querySelectorAll("optgroup").forEach((group) => {
+            const allowed = !category || group.dataset.category === category;
+            group.disabled = !allowed;
+            if (allowed && [...group.querySelectorAll("option")].some((option) => option.selected)) selectionAllowed = true;
+          });
+          if (category && !selectionAllowed) {
+            const first = select.querySelector(`optgroup[data-category="${category}"] option`);
+            if (first) first.selected = true;
+          }
+        });
+      };
+      location.addEventListener("change", sync);
+      sync();
+    })();
+  </script>
 
   <div class="flex gap-2 pt-1">
     <%= form.submit class: "btn btn-primary" %>
