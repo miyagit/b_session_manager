@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.bigint "submitted_by_id", null: false
     t.string "report_type", null: false
     t.integer "report_slot"
+    t.integer "audience_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["submitted_by_id"], name: "index_reports_on_submitted_by_id"
@@ -62,6 +63,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.index ["work_session_id", "report_type"], name: "index_reports_on_work_session_and_single_type", unique: true, where: "((report_type)::text <> 'interim'::text)"
     t.index ["work_session_id"], name: "index_reports_on_work_session_id"
     t.check_constraint "(report_type::text = 'interim'::text) = (report_slot IS NOT NULL)", name: "reports_report_slot_only_for_interim"
+    t.check_constraint "audience_count >= 0", name: "reports_audience_count_non_negative"
     t.check_constraint "report_slot IS NULL OR (report_slot = ANY (ARRAY[13, 16, 19]))", name: "reports_report_slot_fixed_times"
   end
 
@@ -86,6 +88,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_150605) do
     t.string "line_uid"
     t.integer "role", default: 0, null: false
     t.boolean "is_active", default: true, null: false
+    t.boolean "other_company", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "avatar_url"

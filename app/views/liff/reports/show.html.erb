@@ -14,7 +14,9 @@
 
 <% unless @report.start? %>
   <section aria-label="ブース全体" class="grid grid-cols-3 gap-2">
-    <% [ [ "ブース獲得", "#{@report.booth_acquired_count}件" ], [ "ブース予算", work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" ], [ "予算達成率", format_rate(@report.achievement_rate) ] ].each do |label, value| %>
+    <% cards = [ [ "ブース獲得", "#{@report.booth_acquired_count}件" ], [ "ブース予算", work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" ], [ "予算達成率", format_rate(@report.achievement_rate) ] ] %>
+    <% cards = [ cards.first, [ "動員数", @report.audience_count ? "#{@report.audience_count}人" : "未入力" ], [ "ブース予算", work_session.budget_count ? "#{work_session.budget_count}件" : "未設定" ] ] if work_session.work_location.cinema? && @report.final? %>
+    <% cards.each do |label, value| %>
       <div class="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center">
         <h2 class="text-xs font-semibold text-slate-600"><%= label %></h2>
         <p class="mt-1 text-xl font-semibold leading-tight tabular-nums"><%= value %></p>

@@ -1,7 +1,7 @@
 <%# locals: (result_form:, shift:, own: false) %>
 <%# One staff member's card: targets (and a full-day start time) for the start report, counts for interim and final,
-    cards and the hours actually worked for final. %>
-<% staff_name = shift.user.name %>
+    cards and the hours actually worked for final. shift is nil for the fixed 他社 row on cinema booths. %>
+<% staff_name = shift ? shift.user.name : result_form.object.user.name %>
 <% input_classes = "input mt-1 text-right text-base tabular-nums" %>
 
 <div class="rounded-xl border border-slate-200 bg-white p-4">
@@ -9,37 +9,42 @@
     <span class="font-semibold">
       <%= staff_name %>
       <% if own %><span class="ml-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">あなた</span><% end %>
+      <% if shift.nil? %><span class="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">固定の行</span><% end %>
     </span>
-    <span class="text-xs text-slate-500 tabular-nums"><%= shift_type_label(shift) %> <%= shift.hours_label %></span>
+    <% if shift %><span class="text-xs text-slate-500 tabular-nums"><%= shift_type_label(shift) %> <%= shift.hours_label %></span><% end %>
   </div>
   <%= result_form.hidden_field :user_id %>
 
-  <%= fields_for "shifts[#{shift.id}]", shift do |shift_form| %>
-    <div class="start-only mt-3 grid grid-cols-2 gap-2">
-      <label class="block">
-        <span class="text-xs text-slate-600">獲得目標</span>
-        <%= shift_form.number_field :target_acquired_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}の獲得目標" } %>
-      </label>
-      <label class="block">
-        <span class="text-xs text-slate-600">アプローチ目標</span>
-        <%= shift_form.number_field :target_approach_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}のアプローチ目標" } %>
-      </label>
-      <% if shift.full_day? %>
-        <label class="block col-span-2">
-          <span class="text-xs text-slate-600">開始時刻<span class="ml-1 text-slate-400"><%= Shift::FULL_DAY_WORK_HOURS %>時間勤務・<%= Shift::FIXED_HOURS["full_day"][0] %>以降。終了は開始＋<%= Shift::FULL_DAY_WORK_HOURS %>時間</span></span>
-          <%= shift_form.time_field :started_at, include_seconds: false, class: "input mt-1 text-base tabular-nums", aria: { label: "#{staff_name}の開始時刻" } %>
+  <% if shift %>
+    <%= fields_for "shifts[#{shift.id}]", shift do |shift_form| %>
+      <div class="start-only mt-3 grid grid-cols-2 gap-2">
+        <label class="block">
+          <span class="text-xs text-slate-600">獲得目標</span>
+          <%= shift_form.number_field :target_acquired_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}の獲得目標" } %>
         </label>
-      <% end %>
-    </div>
+        <label class="block">
+          <span class="text-xs text-slate-600">アプローチ目標</span>
+          <%= shift_form.number_field :target_approach_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}のアプローチ目標" } %>
+        </label>
+        <% if shift.full_day? %>
+          <label class="block col-span-2">
+            <span class="text-xs text-slate-600">開始時刻<span class="ml-1 text-slate-400"><%= Shift::FULL_DAY_WORK_HOURS %>時間勤務・<%= Shift::FIXED_HOURS["full_day"][0] %>以降。終了は開始＋<%= Shift::FULL_DAY_WORK_HOURS %>時間</span></span>
+            <%= shift_form.time_field :started_at, include_seconds: false, class: "input mt-1 text-base tabular-nums", aria: { label: "#{staff_name}の開始時刻" } %>
+          </label>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <p class="start-only mt-2 text-xs text-slate-500">他社分は目標の入力はありません。途中・最終報告で件数だけ入力します。</p>
   <% end %>
 
   <div class="result-only mt-3 grid grid-cols-2 gap-2">
     <label class="block">
-      <span class="text-xs text-slate-600">獲得件数<% if shift.target_acquired_count %><span class="ml-1 text-slate-400">目標 <%= shift.target_acquired_count %>件</span><% end %></span>
+      <span class="text-xs text-slate-600">獲得件数<% if shift&.target_acquired_count %><span class="ml-1 text-slate-400">目標 <%= shift.target_acquired_count %>件</span><% end %></span>
       <%= result_form.number_field :acquired_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}の獲得件数" } %>
     </label>
     <label class="block">
-      <span class="text-xs text-slate-600">アプローチ<% if shift.target_approach_count %><span class="ml-1 text-slate-400">目標 <%= shift.target_approach_count %>件</span><% end %></span>
+      <span class="text-xs text-slate-600">アプローチ<% if shift&.target_approach_count %><span class="ml-1 text-slate-400">目標 <%= shift.target_approach_count %>件</span><% end %></span>
       <%= result_form.number_field :approach_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}のアプローチ数" } %>
     </label>
   </div>
@@ -49,7 +54,7 @@
       <span class="text-xs text-slate-600">カード数</span>
       <%= result_form.number_field :card_count, min: 0, step: 1, inputmode: "numeric", class: input_classes, aria: { label: "#{staff_name}のカード数" } %>
     </label>
-    <% if shift.records_hours? %>
+    <% if shift&.records_hours? %>
       <% work_record = shift.work_record || WorkRecord.new(started_at: Shift.clock(shift.starts_at), ended_at: Shift.clock(shift.ends_at)) %>
       <%= fields_for "work_records[#{shift.id}]", work_record do |record_form| %>
         <label class="block">
@@ -61,7 +66,7 @@
           <%= record_form.time_field :ended_at, include_seconds: false, class: "input mt-1 text-base tabular-nums", aria: { label: "#{staff_name}の終了時刻（実績）" } %>
         </label>
       <% end %>
-    <% else %>
+    <% elsif shift %>
       <p class="col-span-1 self-end pb-2 text-xs text-slate-500">勤務時間 <%= shift.hours_label %>（固定）</p>
     <% end %>
   </div>

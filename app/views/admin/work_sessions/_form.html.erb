@@ -1,5 +1,5 @@
 <%# locals: (work_session:) %>
-<% staff_options = User.where(is_active: true).or(User.where(id: work_session.shifts.map(&:user_id).compact)).order(:name).to_a %>
+<% staff_options = User.people.where(is_active: true).or(User.where(id: work_session.shifts.map(&:user_id).compact)).order(:name).to_a %>
 <% work_locations = WorkLocation.order(:id).to_a %>
 <% shift_type_groups = Shift::TYPES_BY_CATEGORY.map do |category, types|
      [ category, WorkLocation.human_attribute_name("category.#{category}"), types.map { |type| [ Shift.human_attribute_name("shift_type.#{type}"), type ] } ]

@@ -18,12 +18,13 @@ class Liff::LinksController < Liff::BaseController
     user.update!(line_uid: @line_claims["sub"], avatar_url: user.avatar_url.presence || @line_claims["picture"])
     reset_session
     session[:liff_user_id] = user.id
+    session[:liff_line_uid] = user.line_uid
     redirect_to new_liff_report_path, notice: "#{user.name}さんとして LINE と連携しました。"
   end
 
   private
     def unlinked_staff
-      @unlinked_staff ||= User.where(is_active: true, line_uid: nil).order(:name).to_a
+      @unlinked_staff ||= User.people.where(is_active: true, line_uid: nil).order(:name).to_a
     end
 
     # Only right after the LINE account was verified, and never for someone who is already signed in.

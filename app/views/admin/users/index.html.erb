@@ -21,7 +21,7 @@
         <tbody class="divide-y divide-slate-100">
           <% @users.each do |user| %>
             <tr>
-              <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= user.name %></th>
+              <th scope="row" class="px-4 py-3 text-left font-semibold whitespace-nowrap"><%= user.name %><% if user.other_company? %><span class="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-normal text-slate-600">シネマ報告用の固定行</span><% end %></th>
               <td class="px-4 py-3">
                 <span class="<%= user.admin? ? "bg-blue-50 text-blue-700" : "bg-slate-100 text-slate-700" %> rounded-full px-2.5 py-0.5 text-xs font-semibold"><%= User.human_attribute_name("role.#{user.role}") %></span>
               </td>
@@ -41,8 +41,10 @@
               </td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
                 <%= link_to "編集", edit_admin_user_path(user), class: "btn btn-secondary" %>
-                <%= button_to "削除", admin_user_path(user), method: :delete, class: "btn btn-danger",
-                      form: { class: "ml-2 inline-block", onsubmit: "return confirm('このスタッフを削除しますか？')" } %>
+                <% unless user.other_company? %>
+                  <%= button_to "削除", admin_user_path(user), method: :delete, class: "btn btn-danger",
+                        form: { class: "ml-2 inline-block", onsubmit: "return confirm('このスタッフを削除しますか？')" } %>
+                <% end %>
               </td>
             </tr>
           <% end %>

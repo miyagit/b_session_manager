@@ -16,6 +16,7 @@ ja:
         line_uid: LINE UID
         role: 権限
         is_active: 有効
+        other_company: 他社（固定行）
         shifts: シフト
         report_results: スタッフ別実績
         submitted_reports: 報告
@@ -72,6 +73,7 @@ ja:
         submitted_by_id: 報告者
         report_type: 報告の種類
         report_slot: 報告時刻
+        audience_count: 動員数
         report_results: スタッフ別実績
       report/report_results:
         user: スタッフ

@@ -9,7 +9,11 @@ class Liff::BaseController < ApplicationController
     def current_staff
       return @current_staff if defined?(@current_staff)
 
-      @current_staff = session[:liff_user_id] && User.find_by(id: session[:liff_user_id], is_active: true)
+      user = session[:liff_user_id] && User.find_by(id: session[:liff_user_id], is_active: true)
+      # A session opened through LINE is only valid while the staff member is still linked to that LINE account
+      # (development logins carry no LINE account).
+      user = nil if user && session[:liff_line_uid].present? && user.line_uid != session[:liff_line_uid]
+      @current_staff = user
     end
 
     def require_staff

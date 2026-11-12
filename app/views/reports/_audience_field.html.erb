@@ -1,0 +1,14 @@
+<%# locals: (form:, work_session:) %>
+<%# Cinema booths report the day's moviegoers with the final report. %>
+<% if work_session.work_location.cinema? %>
+  <div class="final-only rounded-xl border border-slate-200 bg-white p-4">
+    <label class="block">
+      <span class="font-semibold"><%= Report.human_attribute_name(:audience_count) %></span>
+      <span class="ml-1.5 text-xs text-slate-500">シネマの最終報告のみ・その日の来場者数（公開されていなければ空欄）</span>
+      <div class="mt-1 flex items-center gap-2">
+        <%= form.number_field :audience_count, min: 0, step: 1, inputmode: "numeric", class: "input text-right text-base tabular-nums" %>
+        <span class="text-slate-600">人</span>
+      </div>
+    </label>
+  </div>
+<% end %>

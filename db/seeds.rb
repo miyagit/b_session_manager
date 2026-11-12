@@ -2,13 +2,31 @@
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
-# Work locations. Booth budgets aren't decided yet, so budget_count stays nil.
-{
-  donki: %w[ 溝の口 後楽園 大宮東口 町田駅前 高田馬場 吉祥寺 ],
-  cinema: %w[ UCみなとみらい UC幕張 109湘南 新宿ピカデリー UC豊洲 MOVIX橋本 ]
-}.each do |category, names|
-  names.each do |name|
-    WorkLocation.find_or_create_by!(name: name) { |work_location| work_location.category = category }
+# Staff, by full name (surname only where the reports give no more). Every name in db/seeds/line_reports.yml
+# must be one of these, apart from the 他社 entries.
+STAFF = %w[
+  松尾元勢 梅村晏生 渡辺了太 古賀桜太郎 田中凌 石原圭祐 平野湧真 舩田優輝 松久保凱也 古泉桃子
+  小澤領 小笹遥仁 伊藤勇悟 橋爪元 岩元大佳 野元陽輝 吉田楓 橋本瑠美 島田晃佑 斉藤侑樹
+  河崎智進 青木隆洋 今村天星 矢野新大 天野りの 後藤崇佑 中川大晟 大久保大智 宮嶋勇弥 永井優陽
+  長沢空知 ベラスコアキラ 橋本佳祐 勝呂颯汰 梅澤和矢 八坂亜希菜 栗田康平 松本三四郎 三宅康平 菊池優絆
+  須坂勇斗 中島ひな子 川岸悠太 見目光凛 迫麻理南 酒巻結 市村志銀 大西珠花 秦菜々美 小林健成
+  永田拓夢 小田凌平 杉浦怜
+  大林賢世 熊澤正輝 小松崎翔太 張 工藤 岩崎
+].freeze
+ADMINS = %w[ 宮嶋勇弥 ].freeze
+
+STAFF.each do |name|
+  User.find_or_create_by!(name: name) { |user| user.role = ADMINS.include?(name) ? :admin : :staff }
+end
+other_company = User.other_company
+
+# Work locations and the report history from the LINE group 「【U-NEXT】営業成績報告」 (2026-09-13 to 2026-11-12),
+# tidied up booth day by booth day in db/seeds/line_reports.yml.
+line_reports = YAML.load_file(Rails.root.join("db/seeds/line_reports.yml"))
+
+line_reports.fetch("locations").each do |name, attributes|
+  WorkLocation.find_or_create_by!(name: name) do |work_location|
+    work_location.assign_attributes(category: attributes.fetch("category"), budget_count: attributes["budget"])
   end
 end
 
@@ -19,83 +37,76 @@ if Rails.env.development?
   end
 end
 
-# Demo data for local development: staff, budgets, work sessions with shifts, reports and LINE deliveries
-# from Oct 1 to tomorrow. Runs only once (skipped when any work session exists); reset with `bin/rails db:seed:replant`.
-if Rails.env.development? && WorkSession.none?
-  random = Random.new(20261103)
-  today = Date.current
+# Work sessions, shifts and reports, loaded once into an empty database (start over with bin/rails db:seed:replant).
+# The 他社 entries (他社, 他社A, 他社さん1, ...) are summed into the 他社 row of the cinema reports. Every report was
+# already shared in the LINE group, so it is marked as posted.
+if WorkSession.none?
+  staff_by_name = User.people.where(name: STAFF).index_by(&:name)
+  work_locations = WorkLocation.all.index_by(&:name)
 
-  staff = %w[ 橋本 後藤 佐藤 鈴木 高橋 田中 伊藤 渡辺 山本 中村 ].each_with_index.map do |name, index|
-    User.find_or_create_by!(name: name) { |user| user.assign_attributes(role: index.zero? ? :admin : :staff, line_uid: format("U%032x", index + 1)) }
-  end
-  User.find_or_create_by!(name: "小林") # Added as a friend but not linked to a LINE account yet
-  User.find_or_create_by!(name: "加藤") { |user| user.assign_attributes(line_uid: format("U%032x", 99), is_active: false) }
+  ActiveRecord::Base.transaction do
+    line_reports.fetch("sessions").each do |booth_day|
+      work_location = work_locations.fetch(booth_day["location"])
+      staff_member = lambda do |name|
+        staff_by_name.fetch(name) { raise "line_reports.yml: 「#{name}」（#{booth_day["date"]} #{booth_day["location"]}）が STAFF にありません" }
+      end
+      staff = booth_day["staff"].map { |name, attributes| [ staff_member.(name), attributes ] }
 
-  work_locations = WorkLocation.order(:id).to_a
-  # Only donki booths carry a budget; cinema booths have none.
-  work_locations.select(&:donki?).each do |work_location|
-    work_location.update!(budget_count: work_location.budget_count || 50 + random.rand(7) * 5)
-  end
-
-  slot_progress = { 13 => 0.3, 16 => 0.55, 19 => 0.8 }
-  failures = [ "対象グループに公式アカウントが参加していません", "LINE APIの月間送信上限に達しました" ]
-
-  (Date.new(2026, 10, 1)..today.tomorrow).each_with_index do |date, day_index|
-    day_work_locations = work_locations.rotate(day_index * 4).first(4)
-    members = staff.rotate(day_index).each_slice(2).to_a
-
-    day_work_locations.each_with_index do |work_location, booth_index|
-      booth_staff = members[booth_index % members.size]
+      date = Date.parse(booth_day["date"])
+      # "HH:MM" on the booth day; reports sent after midnight belong to the day before.
+      time_of = lambda do |hhmm|
+        hour, min = hhmm.split(":").map(&:to_i)
+        date.in_time_zone.change(hour: hour, min: min) + (hour < 5 ? 1.day : 0)
+      end
       work_session = WorkSession.create!(
-        work_location: work_location, work_date: date, budget_count: (50 + random.rand(7) * 5 if work_location.donki?),
-        shifts_attributes: booth_staff.each_with_index.map do |user, index|
-          target = 20 + random.rand(5) * 5
-          shift_type = if work_location.cinema? then "cinema"
-          elsif index.zero? then "full_day"
-          else %w[ first_half second_half ].sample(random: random)
-          end
-          { user_id: user.id, shift_type: shift_type, target_acquired_count: target, target_approach_count: target * 8,
-            started_at: (%w[ 10:00 11:00 12:00 13:00 ].sample(random: random) if shift_type == "full_day") }
+        work_location: work_location, work_date: date, budget_count: booth_day["budget"],
+        shifts_attributes: staff.map do |user, attributes|
+          { user_id: user.id, shift_type: attributes.fetch("shift", "cinema"), started_at: attributes["started_at"],
+            target_acquired_count: attributes["target"], target_approach_count: attributes["target_approach"] }
         end
       )
-      next if date > today
+      reporter = ->(name) { staff_by_name[name] || staff.first.first }
 
-      finals = work_session.shifts.to_h { |shift| [ shift, (shift.target_acquired_count * (0.7 + random.rand * 0.5)).round ] }
-      slots = if date == today then [ 13, 16 ]
-      elsif random.rand(12).zero? then [ 13, 16, 19 ] # Final report not submitted yet: counted as provisional
-      else [ 13, 16, 19, :final ]
+      # { "名前" => [獲得, アプローチ, カード] } as result rows. Approaches missing from the early free-form reports
+      # count as 0, and so do the 他社 row's unreported approaches and cards.
+      result_rows = lambda do |results, final:|
+        rows = {}
+        results.each do |name, (acquired, approach, cards)|
+          user = name.start_with?("他社") ? other_company : staff_member.(name)
+          row = rows[user.id] ||= { user_id: user.id, acquired_count: 0, approach_count: 0, card_count: (0 if final) }
+          row[:acquired_count] += acquired
+          row[:approach_count] += approach.to_i
+          row[:card_count] += cards.to_i if final
+        end
+        rows.values
       end
-      reporter = booth_staff.first
+      file_report = lambda do |attributes|
+        report = work_session.reports.create!(attributes)
+        report.create_line_message_delivery!(status: :sent, sent_at: report.created_at)
+      end
 
-      work_session.reports.create!(submitted_by: reporter, report_type: :start, created_at: date.in_time_zone.change(hour: 9, min: 30 + random.rand(25)))
+      if (start = booth_day["start"])
+        file_report.(report_type: :start, submitted_by: reporter.(start["by"]), created_at: time_of.(start["at"]))
+      end
+      booth_day.fetch("interim", {}).each do |slot, interim|
+        rows = result_rows.(interim["results"], final: false)
+        next if rows.empty?
 
-      slots.each do |slot|
-        final = slot == :final
-        report = work_session.reports.create!(
-          submitted_by: reporter, report_type: final ? :final : :interim, report_slot: (slot unless final),
-          created_at: date.in_time_zone.change(hour: final ? 22 : slot, min: random.rand(1..15)),
-          report_results_attributes: finals.map do |shift, total|
-            acquired = final ? total : (total * slot_progress[slot]).round
-            result = { user: shift.user, acquired_count: acquired, approach_count: acquired * 7 + random.rand(30) }
-            result.merge!(card_count: (acquired * (0.3 + random.rand * 0.2)).round) if final
-            result
-          end
-        )
+        file_report.(report_type: :interim, report_slot: slot, submitted_by: reporter.(interim["by"]),
+                     created_at: time_of.(interim["at"]), report_results_attributes: rows)
+      end
+      final = booth_day["final"]
+      rows = final ? result_rows.(final["results"], final: true) : []
+      next if rows.empty?
 
-        if final
-          work_session.shifts.select(&:records_hours?).each do |shift|
-            offset = [ 0, 0, 30, 60, -30 ].sample(random: random)
-            shift.create_work_record!(started_at: shift.starts_at, ended_at: (Shift.clock(shift.ends_at) + offset.minutes).strftime("%H:%M"))
-          end
-        end
+      file_report.(report_type: :final, submitted_by: reporter.(final["by"]), created_at: time_of.(final["at"]),
+                   audience_count: booth_day["audience"], report_results_attributes: rows)
+      # Hours actually worked, where the reports tell (early leaves); other shifts keep their planned hours.
+      staff.each do |user, attributes|
+        next unless attributes["worked"]
 
-        if date == today && slot == 16
-          report.create_line_message_delivery!(status: :pending)
-        elsif random.rand(25).zero?
-          report.create_line_message_delivery!(status: :failed, error_message: failures.sample(random: random))
-        else
-          report.create_line_message_delivery!(status: :sent, sent_at: report.created_at + 5.seconds, message_id: format("%018d", report.id))
-        end
+        started_at, ended_at = attributes["worked"].split("-")
+        work_session.shifts.find { |shift| shift.user_id == user.id }.create_work_record!(started_at: started_at, ended_at: ended_at)
       end
     end
   end

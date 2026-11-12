@@ -19,11 +19,11 @@ module ReportFiling
     def report_attributes_for_type(attributes)
       case attributes[:report_type]
       when "start"
-        attributes.except(:report_slot, :report_results_attributes)
+        attributes.except(:report_slot, :report_results_attributes, :audience_count)
       when "interim"
         rows = attributes[:report_results_attributes]
         attributes[:report_results_attributes] = rows.transform_values { |row| row.except(:card_count) } if rows
-        attributes
+        attributes.except(:audience_count)
       else
         attributes.except(:report_slot)
       end
@@ -71,14 +71,16 @@ module ReportFiling
       true
     end
 
-    # One row per staff member on the booth, with first_user_id (the reporter) on top.
+    # One row per staff member on the booth, with first_user_id (the reporter) on top; cinema booths get the fixed 他社 row last.
     def build_result_rows(report, work_session, first_user_id: nil)
       shifts = work_session.shifts.sort_by { |shift| [ shift.user_id == first_user_id ? 0 : 1, shift.id ] }
-      report.result_rows_for(shifts.map(&:user))
+      users = shifts.map(&:user)
+      users << User.other_company if work_session.work_location.cinema?
+      report.result_rows_for(users)
     end
 
     def report_params
-      params.expect(report: [ :work_session_id, :report_type, :report_slot, :submitted_by_id,
+      params.expect(report: [ :work_session_id, :report_type, :report_slot, :submitted_by_id, :audience_count,
                               report_results_attributes: [ [ :user_id, :acquired_count, :approach_count, :card_count ] ] ])
     end
 end

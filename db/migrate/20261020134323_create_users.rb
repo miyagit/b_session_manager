@@ -5,6 +5,7 @@ class CreateUsers < ActiveRecord::Migration[8.1]
       t.string :line_uid
       t.integer :role, null: false, default: 0
       t.boolean :is_active, null: false, default: true
+      t.boolean :other_company, null: false, default: false # the fixed "他社" row available on cinema reports
 
       t.timestamps
     end

@@ -1,6 +1,6 @@
 <%# locals: (report:, work_session:, result_rows:) %>
 <% assigned_users = work_session.shifts.sort_by(&:id).map(&:user) %>
-<% other_users = User.where(is_active: true).where.not(id: assigned_users.map(&:id)).order(:name) %>
+<% other_users = User.people.where(is_active: true).where.not(id: assigned_users.map(&:id)).order(:name) %>
 <% reporter_groups = [ [ "この稼働予定のスタッフ", assigned_users.map { |user| [ user.name, user.id ] } ],
                        [ "その他のスタッフ", other_users.map { |user| [ user.name, user.id ] } ] ].reject { |_, options| options.empty? } %>
 
@@ -27,6 +27,7 @@
     </div>
 
     <%= render "reports/choice_fields", form: form, work_session: work_session, slot_hint: "同じ稼働予定に同じ時刻の途中報告は1件だけ登録できます。" %>
+    <%= render "reports/audience_field", form: form, work_session: work_session %>
 
     <fieldset>
       <legend class="mb-2 font-semibold">スタッフ別</legend>
@@ -35,7 +36,7 @@
           <%= render "reports/staff_fields", result_form: result_form, shift: work_session.shift_for(result_form.object.user_id) %>
         <% end %>
       </div>
-      <p class="mt-1.5 text-xs text-slate-500">開始報告では目標を確認・修正します。途中・最終報告では獲得件数を入力したスタッフだけが登録され、最終報告はカード数と勤務時間も必要です。</p>
+      <p class="mt-1.5 text-xs text-slate-500">開始報告では目標を確認・修正します。途中・最終報告では獲得件数を入力したスタッフだけが登録され、最終報告はカード数と勤務時間も必要です。シネマの「他社」は件数だけ入力でき、空欄なら登録されません。</p>
     </fieldset>
 
     <div class="flex flex-col gap-2 pt-1">

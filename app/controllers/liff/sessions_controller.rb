@@ -9,7 +9,7 @@ class Liff::SessionsController < Liff::BaseController
     else
       claims = development_claims || LineIdToken.verify(params[:id_token]).slice("sub", "name", "picture")
       user = User.find_by(line_uid: claims["sub"])
-      user ? sign_in(user) : start_linking(claims)
+      user ? sign_in(user, line_uid: claims["sub"]) : start_linking(claims)
     end
   rescue LineIdToken::Error => e
     respond_with_error "LINEの認証に失敗しました（#{e.message}）。LIFFを開き直してください。", :unauthorized
@@ -22,7 +22,7 @@ class Liff::SessionsController < Liff::BaseController
   end
 
   private
-    def sign_in(user)
+    def sign_in(user, line_uid: nil)
       if user.nil?
         respond_with_error "スタッフが見つかりません。管理者に連絡してください。", :not_found
       elsif !user.is_active
@@ -30,6 +30,7 @@ class Liff::SessionsController < Liff::BaseController
       else
         reset_session
         session[:liff_user_id] = user.id
+        session[:liff_line_uid] = line_uid if line_uid
         respond_with_redirect new_liff_report_path
       end
     end
