@@ -8,11 +8,13 @@ class ResultSummary
   CINEMA_UNIT_HOURS = 8
 
   # target is the booth budget for booth rows and the sum of personal targets for staff rows.
-  # user_id and the per-category acquisitions/hours actually worked are filled for staff rows only.
+  # user_id and the per-category acquisitions, personal targets and hours actually worked are filled for staff rows only.
   Row = Struct.new(:label, :sort_key, :user_id, :acquired, :target, :approach, :card, :provisional,
-                   :donki_acquired, :donki_hours, :cinema_acquired, :cinema_hours, keyword_init: true) do
+                   :donki_acquired, :donki_target, :donki_hours, :cinema_acquired, :cinema_target, :cinema_hours, keyword_init: true) do
     # Percentages, or nil when they can't be calculated.
-    def achievement_rate = target.positive? ? acquired * 100.0 / target : nil
+    def achievement_rate = rate(acquired, target)
+    def donki_achievement_rate = rate(donki_acquired, donki_target)
+    def cinema_achievement_rate = rate(cinema_acquired, cinema_target)
     def card_rate = acquired.positive? ? card * 100.0 / acquired : nil
 
     # Acquisitions per DONKI_UNIT_HOURS worked at donki booths, or nil without any donki hours.
@@ -20,6 +22,9 @@ class ResultSummary
 
     # Acquisitions per CINEMA_UNIT_HOURS worked at cinema booths (one day), or nil without any cinema hours.
     def cinema_average = cinema_hours.positive? ? cinema_acquired * CINEMA_UNIT_HOURS.to_f / cinema_hours : nil
+
+    private
+      def rate(value, total) = total.positive? ? value * 100.0 / total : nil
   end
 
   # work_sessions must have work_location, shifts (with user) and reports (with report_results) preloaded.
@@ -30,11 +35,12 @@ class ResultSummary
       if axis == "staff"
         work_session.shifts.each do |shift|
           result = work_session.effective_result_for(shift.user_id)
-          category_hours = { "#{shift.cinema? ? "cinema" : "donki"}_acquired": result&.acquired_count.to_i,
-                             "#{shift.cinema? ? "cinema" : "donki"}_hours": result&.worked_hours.to_f }
+          category = shift.cinema? ? "cinema" : "donki"
+          by_category = { "#{category}_acquired": result&.acquired_count.to_i, "#{category}_target": shift.target_acquired_count.to_i,
+                          "#{category}_hours": result&.worked_hours.to_f }
           add(rows, [ shift.user_id ], label: shift.user.name, sort_key: shift.user.name, user_id: shift.user_id, acquired: result&.acquired_count.to_i,
               target: shift.target_acquired_count.to_i, approach: result&.approach_count.to_i, card: result&.card_count.to_i,
-              provisional: provisional, **category_hours)
+              provisional: provisional, **by_category)
         end
       else
         key, label, sort_key = work_session_key(work_session, axis)
@@ -56,16 +62,18 @@ class ResultSummary
   end
 
   def self.add(rows, key, label:, sort_key:, acquired:, target:, approach:, card:, provisional:, user_id: nil,
-               donki_acquired: 0, donki_hours: 0.0, cinema_acquired: 0, cinema_hours: 0.0)
+               donki_acquired: 0, donki_target: 0, donki_hours: 0.0, cinema_acquired: 0, cinema_target: 0, cinema_hours: 0.0)
     row = rows[key] ||= Row.new(label: label, sort_key: sort_key, user_id: user_id, acquired: 0, target: 0, approach: 0, card: 0, provisional: false,
-                                donki_acquired: 0, donki_hours: 0.0, cinema_acquired: 0, cinema_hours: 0.0)
+                                donki_acquired: 0, donki_target: 0, donki_hours: 0.0, cinema_acquired: 0, cinema_target: 0, cinema_hours: 0.0)
     row.acquired += acquired
     row.target += target
     row.approach += approach
     row.card += card
     row.donki_acquired += donki_acquired
+    row.donki_target += donki_target
     row.donki_hours += donki_hours
     row.cinema_acquired += cinema_acquired
+    row.cinema_target += cinema_target
     row.cinema_hours += cinema_hours
     row.provisional ||= provisional
   end

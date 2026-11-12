@@ -22,12 +22,16 @@
   <%= render "admin/shared/filter_tab", label: "上位#{Admin::RankingsController::TOP_COUNT}名のみ", path: admin_rankings_path(month: month_param, metric: @metric, top: 1), selected: @top_only %>
 </nav>
 
+<% cinema = @metric.start_with?("cinema") %>
+<% average = @metric.end_with?("average") %>
+
 <p class="text-[13px] text-slate-600">
   <%= @month.year %>年<%= @month.month %>月の集計です。
   <% case @metric
-     when "donki" %>ドンキホーテでの獲得件数を勤務6時間あたりに換算した平均です（ドンキの勤務がある人だけ）。最終報告があれば実際の勤務時間、途中報告のみの日はシフトの時間で計算します。
-  <% when "cinema" %>シネマでの獲得件数を1日（勤務8時間、休憩1時間を除く）あたりに換算した平均です（シネマの勤務がある人だけ）。最終報告があれば実際の勤務時間、途中報告のみの日はシフトの時間で計算します。
-  <% else %>総獲得件数は、最終報告があれば確定値、ない日は最新の途中報告の件数を合計したものです。
+     when "donki_total" %>ドンキホーテ（イベント会場を含む）での獲得件数の合計です（ドンキの勤務がある人だけ）。最終報告があれば確定値、ない日は最新の途中報告の件数を使います。
+  <% when "donki_average" %>ドンキホーテ（イベント会場を含む）での獲得件数を勤務6時間あたりに換算した平均です（ドンキの勤務がある人だけ）。最終報告があれば実際の勤務時間、途中報告のみの日はシフトの時間で計算します。
+  <% when "cinema_total" %>シネマでの獲得件数の合計です（シネマの勤務がある人だけ）。最終報告があれば確定値、ない日は最新の途中報告の件数を使います。
+  <% when "cinema_average" %>シネマでの獲得件数を1日（勤務8時間、休憩1時間を除く）あたりに換算した平均です（シネマの勤務がある人だけ）。最終報告があれば実際の勤務時間、途中報告のみの日はシフトの時間で計算します。
   <% end %>
   <%= @top_only ? "名前は上位#{Admin::RankingsController::TOP_COUNT}名だけ表示し、#{Admin::RankingsController::TOP_COUNT + 1}位以降は「ー」にしています。" : "全員の順位を名前つきで表示しています。" %>
 </p>
@@ -42,30 +46,27 @@
           <th scope="col" class="w-16 px-4 py-2.5 text-right font-semibold">順位</th>
           <th scope="col" class="px-4 py-2.5 font-semibold">スタッフ</th>
           <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= Admin::RankingsController::METRICS.fetch(@metric) %></th>
-          <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= @metric == "total" ? "目標・達成率" : "獲得件数・勤務時間" %></th>
+          <th scope="col" class="px-4 py-2.5 text-right font-semibold"><%= average ? "獲得件数・勤務時間" : "目標・達成率" %></th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         <% @rows.each_with_index do |row, index| %>
+          <% acquired, target, hours = cinema ? [ row.cinema_acquired, row.cinema_target, row.cinema_hours ] : [ row.donki_acquired, row.donki_target, row.donki_hours ] %>
           <tr>
             <td class="px-4 py-3 text-right text-base font-bold tabular-nums <%= index < 3 ? "text-blue-700" : "text-slate-500" %>"><%= index + 1 %></td>
             <th scope="row" class="px-4 py-3 text-left font-semibold"><%= !@top_only || index < Admin::RankingsController::TOP_COUNT ? row.label : "ー" %></th>
             <td class="px-4 py-3 text-right text-base font-bold tabular-nums">
-              <% if @metric == "donki" %>
-                <%= format("%.1f", row.donki_average) %><span class="ml-0.5 text-xs font-normal text-slate-500">件/6h</span>
-              <% elsif @metric == "cinema" %>
-                <%= format("%.1f", row.cinema_average) %><span class="ml-0.5 text-xs font-normal text-slate-500">件/日</span>
+              <% if average %>
+                <%= format("%.1f", cinema ? row.cinema_average : row.donki_average) %><span class="ml-0.5 text-xs font-normal text-slate-500"><%= cinema ? "件/日" : "件/6h" %></span>
               <% else %>
-                <%= row.acquired %><span class="ml-0.5 text-xs font-normal text-slate-500">件</span>
+                <%= acquired %><span class="ml-0.5 text-xs font-normal text-slate-500">件</span>
               <% end %>
             </td>
             <td class="px-4 py-3 text-right text-slate-600 tabular-nums">
-              <% if @metric == "donki" %>
-                <%= row.donki_acquired %>件・<%= format("%.1f", row.donki_hours) %>時間
-              <% elsif @metric == "cinema" %>
-                <%= row.cinema_acquired %>件・<%= format("%.1f", row.cinema_hours) %>時間
-              <% elsif row.target.positive? %>
-                目標 <%= row.target %>件・<%= format_rate(row.achievement_rate) %>
+              <% if average %>
+                <%= acquired %>件・<%= format("%.1f", hours) %>時間
+              <% elsif target.positive? %>
+                目標 <%= target %>件・<%= format_rate(cinema ? row.cinema_achievement_rate : row.donki_achievement_rate) %>
               <% else %>
                 —
               <% end %>
