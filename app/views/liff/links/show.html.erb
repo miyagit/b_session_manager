@@ -1,0 +1,32 @@
+<% content_for :title, "LINE連携" %>
+
+<% if @candidate %>
+  <section class="rounded-xl border border-slate-200 bg-white p-5">
+    <h1 class="text-lg font-bold">この名前で連携しますか？</h1>
+    <p class="mt-2 text-[13px] text-slate-600">LINE の表示名「<%= @line_claims["name"] %>」のアカウントを、スタッフ「<%= @candidate.name %>」として登録します。間違えた場合は管理者に解除してもらえます。</p>
+    <p class="mt-5 text-center text-2xl font-bold"><%= @candidate.name %></p>
+    <%= button_to "#{@candidate.name}として連携する", liff_link_path, params: { user_id: @candidate.id }, class: "btn btn-primary mt-5 w-full py-3 text-base" %>
+    <%= link_to "選び直す", liff_link_path, class: "btn btn-secondary mt-2 w-full py-3 text-base" %>
+  </section>
+<% else %>
+  <div>
+    <h1 class="text-lg font-bold">あなたの名前を選んでください</h1>
+    <p class="mt-1 text-[13px] text-slate-600">初回のみ、LINE アカウント（表示名「<%= @line_claims["name"] %>」）と登録済みのスタッフ名を結びつけます。次回からはこの画面は出ません。</p>
+  </div>
+
+  <% if @candidates.empty? %>
+    <section class="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center">
+      <p class="font-semibold">選べる名前がありません。</p>
+      <p class="mt-1 text-xs text-slate-500">スタッフの登録は管理者が行います。管理者に連絡してください。</p>
+    </section>
+  <% else %>
+    <ul class="flex flex-col gap-2">
+      <% @candidates.each do |user| %>
+        <li>
+          <%= link_to user.name, liff_link_path(user_id: user), class: "block rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-center text-base font-semibold hover:bg-slate-50" %>
+        </li>
+      <% end %>
+    </ul>
+    <p class="text-xs text-slate-500">自分の名前が無い場合は管理者に連絡してください。</p>
+  <% end %>
+<% end %>

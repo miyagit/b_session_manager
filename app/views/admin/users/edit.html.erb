@@ -5,3 +5,17 @@
 <div class="max-w-2xl rounded-xl border border-slate-200 bg-white p-6">
   <%= render "form", user: @user %>
 </div>
+
+<section class="max-w-2xl rounded-xl border border-slate-200 bg-white p-6">
+  <div class="flex flex-wrap items-center gap-3">
+    <h2 class="text-base font-bold">LINE連携</h2>
+    <%= status_badge(@user.line_uid? ? "連携済み" : "未連携", @user.line_uid? ? :good : :neutral) %>
+  </div>
+  <% if @user.line_uid? %>
+    <p class="mt-2 text-[13px] text-slate-600">解除すると、このスタッフは次に LIFF を開いたときに名前を選び直します。別の人の LINE アカウントに紐づいてしまったときに使ってください。</p>
+    <%= button_to "LINE連携を解除", admin_user_line_link_path(@user), method: :delete, class: "btn btn-danger mt-3",
+          form: { onsubmit: "return confirm('LINE連携を解除しますか？')" } %>
+  <% else %>
+    <p class="mt-2 text-[13px] text-slate-600">スタッフが LIFF を初めて開いて自分の名前を選ぶと連携されます。</p>
+  <% end %>
+</section>

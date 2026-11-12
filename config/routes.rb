@@ -3,7 +3,9 @@ Rails.application.routes.draw do
 
   namespace :admin do
     root "dashboards#show"
-    resources :users, except: :show
+    resources :users, except: :show do
+      resource :line_link, only: :destroy
+    end
     resources :work_locations, only: %i[ index new create edit update ]
     resources :work_sessions, except: :show
     resources :reports, only: %i[ index show new create ] do
@@ -16,6 +18,7 @@ Rails.application.routes.draw do
   namespace :liff do
     root "entries#show"
     resource :session, only: %i[ create destroy ]
+    resource :link, only: %i[ show create ]
     resources :reports, only: %i[ new create show ] do
       resource :line_delivery, only: :create
     end

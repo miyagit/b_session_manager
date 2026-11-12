@@ -74,7 +74,7 @@
   <% if @report.line_message_delivery&.sent? %>
     <p class="mt-2 text-[13px] text-slate-600">この報告はすでに投稿済みです。</p>
   <% else %>
-    <p class="mt-2 text-[13px] text-slate-600">下のボタンで LINE の送信先選択が開くので、実績報告グループを選んで送信してください。あなたの発言として投稿されます。</p>
+    <p class="mt-2 text-[13px] text-slate-600">グループのノートから開いた場合は、このまま自動でグループに投稿されます。それ以外から開いた場合は、下のボタンで送信先を選んで投稿してください。どちらもあなたの発言として投稿されます。</p>
     <button type="button" id="liff-post" hidden class="btn btn-primary mt-3 w-full py-3 text-base">LINEグループに投稿</button>
     <p id="liff-post-status" role="status" class="mt-2 text-[13px] text-slate-600"></p>
   <% end %>
@@ -90,43 +90,62 @@
 </div>
 
 <script>
-  // Posting to the report group as the staff member (free, no push quota): directly when the LIFF was opened
-  // from the group, otherwise through LINE's share target picker. The server is told afterwards so the
-  // delivery shows as sent.
+  // Posting to the report group as the staff member (free, no push quota). Opened from the group itself, the
+  // report is sent there automatically as soon as this page loads; otherwise a button opens LINE's share target
+  // picker. The server is told afterwards so the delivery shows as sent.
   (async () => {
     const button = document.getElementById("liff-post");
     if (!button) return;
     const status = document.getElementById("liff-post-status");
     const text = <%= raw @line_message.to_json %>;
+    const markUrl = <%= raw liff_report_line_delivery_path(@report).to_json %>;
+    const postedKey = "liffPosted:" + <%= @report.id %>;
+    const alreadyPosted = () => { try { return sessionStorage.getItem(postedKey) === "1"; } catch (_error) { return false; } };
+    const rememberPosted = () => { try { sessionStorage.setItem(postedKey, "1"); } catch (_error) {} };
+
     try {
       await window.liffReady;
     } catch (_error) {
       return;
     }
     const inChat = liff.isInClient() && ["group", "room"].includes(liff.getContext()?.type);
-    if (!inChat && !liff.isApiAvailable("shareTargetPicker")) return;
-    button.hidden = false;
-    if (inChat) button.textContent = "このグループに投稿";
+
+    const markPosted = () => fetch(markUrl, {
+      method: "POST",
+      headers: { "Accept": "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
+    });
+    const done = () => { rememberPosted(); button.hidden = true; status.textContent = "LINEに投稿しました。"; };
+    const fail = (error) => {
+      button.hidden = false;
+      button.disabled = false;
+      status.textContent = `投稿できませんでした（${error.message}）。ボタンからもう一度お試しください。`;
+    };
+    const sendToChat = async () => { await liff.sendMessages([{ type: "text", text }]); await markPosted(); done(); };
+    const sendViaPicker = async () => {
+      const result = await liff.shareTargetPicker([{ type: "text", text }], { isMultiple: false });
+      if (!result) { button.disabled = false; return; } // cancelled
+      await markPosted();
+      done();
+    };
+
+    if (inChat) {
+      button.textContent = "このグループに投稿";
+      if (alreadyPosted()) { status.textContent = "LINEに投稿済みです。"; return; }
+      status.textContent = "グループに投稿しています…";
+      try { await sendToChat(); } catch (error) { fail(error); }
+    } else if (liff.isApiAvailable("shareTargetPicker")) {
+      button.hidden = false;
+    } else {
+      return;
+    }
 
     button.addEventListener("click", async () => {
       button.disabled = true;
       status.textContent = "";
       try {
-        if (inChat) {
-          await liff.sendMessages([{ type: "text", text }]);
-        } else {
-          const result = await liff.shareTargetPicker([{ type: "text", text }], { isMultiple: false });
-          if (!result) { button.disabled = false; return; } // cancelled
-        }
-        await fetch(<%= raw liff_report_line_delivery_path(@report).to_json %>, {
-          method: "POST",
-          headers: { "Accept": "application/json", "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content }
-        });
-        button.hidden = true;
-        status.textContent = "LINEに投稿しました。";
+        if (inChat) { await sendToChat(); } else { await sendViaPicker(); }
       } catch (error) {
-        button.disabled = false;
-        status.textContent = `投稿できませんでした（${error.message}）。もう一度お試しください。`;
+        fail(error);
       }
     });
   })();

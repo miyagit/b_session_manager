@@ -32,12 +32,13 @@ Things you may want to cover:
 
 ### LINE Developers の設定
 
-1. Messaging API チャネルと**同じプロバイダー**に LINE ログインチャネルを作成する（ユーザーIDを一致させるため）。
+1. Messaging API チャネルと**同じプロバイダー**に LINE ミニアプリチャネル（または LINE ログインチャネル）を作成する（ユーザーIDを一致させるため）。ミニアプリの場合、LIFF の設定は「ウェブアプリ設定」タブにまとまっており、開発用・審査用・本番用で LIFF ID が異なります。
 2. そのチャネルに LIFF アプリを追加する。
    - エンドポイントURL: `https://<公開ホスト>/liff`（開発中は ngrok などのトンネルURL）
    - スコープ: `openid` と `profile`
    - サイズ: Tall または Full
-3. LIFF ID と LINE ログインチャネルのチャネルIDを環境変数で渡す（下記）。
+3. LIFF ID（ミニアプリなら使う環境のもの。開発中は開発用、公開後は本番用）とチャネルIDを環境変数で渡す（下記）。
+4. グループに貼る・リッチメニューに登録する URL は `https://miniapp.line.me/<LIFF ID>`（LINE ログインチャネルの LIFF なら `https://liff.line.me/<LIFF ID>`）。
 
 ### 環境変数
 
@@ -48,13 +49,20 @@ Things you may want to cover:
 | `LINE_CHANNEL_SECRET` | Messaging API チャネルのチャネルシークレット（Webhook 署名の検証） |
 | `LINE_CHANNEL_TOKEN` | Messaging API チャネルのチャネルアクセストークン |
 | `LIFF_ID` | LIFF アプリの LIFF ID |
-| `LINE_LOGIN_CHANNEL_ID` | LIFF を作った LINE ログインチャネルのチャネルID |
+| `LINE_LOGIN_CHANNEL_ID` | LIFF を作ったチャネル（ミニアプリチャネル／LINE ログインチャネル）のチャネルID。IDトークンの検証に使う |
 | `LINE_REPORT_GROUP_ID` | 実績報告を投稿する LINE グループのID（下記） |
 | `SECRET_KEY_BASE` | 本番のみ必須。開発・テストでは Rails が `tmp/local_secret.txt` に自動生成します |
 | `B_SESSION_MANAGER_DATABASE_PASSWORD` | 本番DBのパスワード（`config/database.yml` 参照） |
 
 スタッフの特定は、LIFF の IDトークンを LINE の verify API で検証し、その `sub`（LINEユーザーID）を `users.line_uid` と突き合わせて行います。
-`line_uid` は公式アカウントの友だち追加（follow イベント）で登録されるため、スタッフは先に友だち追加が必要です。
+
+### スタッフの登録と LINE 連携
+
+1. 管理者が「スタッフ」画面で名前を登録する（この時点では LINE 未連携）。稼働予定とシフトはこの名前で先に組めます。
+2. スタッフが LIFF を初めて開くと、同意画面のあとに「あなたの名前を選んでください」が出るので、自分の名前を選んで確認する。これで LINE アカウントとスタッフが結びつき、次回からはこの画面は出ません。報告はしなくて構いません。
+3. 間違えて選んだときは、管理者がスタッフ編集画面の「LINE連携を解除」で解除すると、次回開いたときに選び直せます。
+
+友だち追加（follow イベント）や LIFF の初回ログインでスタッフが自動作成されることはありません。公式アカウントの友だち追加も必須ではありません。
 
 ### 実績報告の LINE グループ投稿
 

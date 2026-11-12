@@ -1,20 +1,15 @@
 class Liff::SessionsController < Liff::BaseController
   # POST /liff/session
-  # The entry page posts the LIFF ID token as JSON. In development a staff member can be picked directly (dev_user_id).
+  # The entry page posts the LIFF ID token as JSON. A LINE account no staff member is linked to yet is sent to the
+  # linking screen (Liff::LinksController) instead of being registered automatically.
+  # In development a staff member, or an unlinked fake LINE account, can be picked directly.
   def create
-    user = find_user
-
-    if user.nil?
-      respond_with_error "スタッフが見つかりません。管理者に連絡してください。", :not_found
-    elsif !user.is_active
-      respond_with_error "このアカウントは無効になっています。管理者に連絡してください。", :forbidden
+    if Rails.env.development? && params[:dev_user_id].present?
+      sign_in(User.find_by(id: params[:dev_user_id]))
     else
-      reset_session
-      session[:liff_user_id] = user.id
-      respond_to do |format|
-        format.html { redirect_to new_liff_report_path }
-        format.json { render json: { redirect_to: new_liff_report_path } }
-      end
+      claims = development_claims || LineIdToken.verify(params[:id_token]).slice("sub", "name", "picture")
+      user = User.find_by(line_uid: claims["sub"])
+      user ? sign_in(user) : start_linking(claims)
     end
   rescue LineIdToken::Error => e
     respond_with_error "LINEの認証に失敗しました（#{e.message}）。LIFFを開き直してください。", :unauthorized
@@ -27,20 +22,36 @@ class Liff::SessionsController < Liff::BaseController
   end
 
   private
-    def find_user
-      if Rails.env.development? && params[:dev_user_id].present?
-        User.find_by(id: params[:dev_user_id])
+    def sign_in(user)
+      if user.nil?
+        respond_with_error "スタッフが見つかりません。管理者に連絡してください。", :not_found
+      elsif !user.is_active
+        respond_with_error "このアカウントは無効になっています。管理者に連絡してください。", :forbidden
       else
-        find_or_create_line_user(LineIdToken.verify(params[:id_token]))
+        reset_session
+        session[:liff_user_id] = user.id
+        respond_with_redirect new_liff_report_path
       end
     end
 
-    # A LINE account opening the LIFF for the first time becomes a staff member right away, so onboarding doesn't
-    # depend on the follow webhook. Until an admin gives them a shift they see "no shifts today".
-    def find_or_create_line_user(claims)
-      User.find_or_create_by!(line_uid: claims["sub"]) do |user|
-        user.name = claims["name"].presence || "LINEユーザー"
-        user.avatar_url = claims["picture"]
+    # The verified LINE claims stay in the session (briefly) until the staff member picks their name.
+    def start_linking(claims)
+      reset_session
+      session[:liff_line_claims] = claims.merge("verified_at" => Time.current.to_i)
+      respond_with_redirect liff_link_path
+    end
+
+    # development only: pretend to be a LINE account that isn't linked to any staff member yet
+    def development_claims
+      return unless Rails.env.development? && params[:dev_line_sub].present?
+
+      { "sub" => params[:dev_line_sub], "name" => "開発用LINEユーザー", "picture" => nil }
+    end
+
+    def respond_with_redirect(path)
+      respond_to do |format|
+        format.html { redirect_to path }
+        format.json { render json: { redirect_to: path } }
       end
     end
 

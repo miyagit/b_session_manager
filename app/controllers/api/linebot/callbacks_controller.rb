@@ -1,3 +1,5 @@
+# Messaging API webhook. Staff are linked to LINE from the LIFF (Liff::LinksController), so follow events are only
+# logged; the join event is used to tell a group its ID for the optional official-account posting.
 class Api::Linebot::CallbacksController < ActionController::API
   def create
     events = parser.parse(body: request.raw_post, signature: request.headers["X-Line-Signature"].to_s)
@@ -5,12 +7,7 @@ class Api::Linebot::CallbacksController < ActionController::API
     events.each do |event|
       Rails.logger.info("[LINE] #{event.class.name.demodulize}: #{event.source&.user_id}")
 
-      case event
-      when Line::Bot::V2::Webhook::FollowEvent
-        create_user(event.source.user_id)
-      when Line::Bot::V2::Webhook::JoinEvent
-        announce_group_id(event)
-      end
+      announce_group_id(event) if event.is_a?(Line::Bot::V2::Webhook::JoinEvent)
     end
 
     head :ok
@@ -22,20 +19,6 @@ class Api::Linebot::CallbacksController < ActionController::API
 
   def parser
     Line::Bot::V2::WebhookParser.new(channel_secret: ENV.fetch("LINE_CHANNEL_SECRET"))
-  end
-
-  # Re-following after a block sends another follow event, so only create the user once
-  def create_user(line_uid)
-    User.find_or_create_by!(line_uid: line_uid) do |user|
-      profile = LineBot.client.get_profile(user_id: line_uid)
-
-      if profile.is_a?(Line::Bot::V2::MessagingApi::UserProfileResponse)
-        user.name = profile.display_name
-        user.avatar_url = profile.picture_url
-      else
-        user.name = "LINEユーザー"
-      end
-    end
   end
 
   # When the official account is invited to a group, tell the group its ID so it can be set as the report group.

@@ -13,6 +13,10 @@
       <%= form.collection_select :dev_user_id, User.where(is_active: true).order(:name), :id, :name, { prompt: "スタッフを選択" }, required: true, class: "input", aria: { label: "スタッフ" } %>
       <%= form.submit "開く", class: "btn btn-primary shrink-0" %>
     <% end %>
+    <%= form_with url: liff_session_path, class: "mt-2" do |form| %>
+      <%= form.hidden_field :dev_line_sub, value: "Udev#{SecureRandom.hex(14)}" %>
+      <%= form.submit "未連携のLINEアカウントとして開く（名前選択の確認用）", class: "btn btn-secondary w-full" %>
+    <% end %>
   </section>
 <% end %>
 
